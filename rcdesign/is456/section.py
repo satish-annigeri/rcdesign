@@ -29,17 +29,20 @@ class Section(ABC):
         self.clear_cover = clear_cover
 
     @abstractmethod
-    def design(self):
+    def C(self, xu: float, ecmax: float):
         pass
+    # @abstractmethod
+    # def design(self):
+    #     pass
 
-    @abstractmethod
-    def analyse(self, ecu: float):
-        pass
+    # @abstractmethod
+    # def analyse(self, ecu: float):
+    #     pass
 
 # RectSection class to repersent a rectangular section
 
 class RectBeamSection(Section):
-    def __init__(self, b, D, conc: Concrete, t_steel: RebarGroup, c_steel: RebarGroup, sec_steel: Rebar, clear_cover: float):
+    def __init__(self, b: float, D: float, conc: Concrete, t_steel: RebarGroup, c_steel: RebarGroup, sec_steel: Rebar, clear_cover: float):
         super().__init__(DesignForceType.BEAM, clear_cover)
         self.b = b
         self.D = D
@@ -155,6 +158,67 @@ class RectBeamSection(Section):
         return self.D - self.eff_cover()
     
 
+"""Class to repersent flanged section"""
+@dataclass
+class FlangedBeamSection(Section):
+#     def __init__(self, bw: float, D: float, bf: float, Df: float, conc: Concrete, t_steel: RebarGroup, c_steel: RebarGroup, sec_steel: Rebar, clear_cover: float):
+    bw: float
+    D: float
+    bf: float
+    Df: float
+    conc: Concrete
+    t_steel: RebarGroup
+    c_steel: RebarGroup
+    sec_steel: Rebar
+    clear_cover: float
+
+    @property
+    def b(self):
+        return self.bw
+
+    def C(self, xu: float, ecu: float):
+        # Compression force and moment due to concrete of web
+        C1 = self.conc._area(0, 1, self.conc.fd) * xu * self.bw
+        M1 = self.conc._moment(0, 1, self.conc.fd) * xu**2 * self.bw
+#         print('Flanged Section\n', C1, M1)
+        # Compression force and moment due to compression reinforcement bars
+        if self.c_steel:
+            C2, M2 = self.c_steel.force_compression(xu, self.conc, ecu)
+        else:
+            print('No compression steel')
+            C2 = 0.0
+            M2 = 0.0
+#         print(C2, M2)
+        # Compression force and moment due to concrete of flange
+        df = xu if xu <= self.Df else self.Df
+        x1 = xu - df
+        C3 = self.conc._area(x1/xu, 1, self.conc.fd) * df * (self.bf - self.bw)
+        M3 = self.conc._moment(x1/xu, 1, self.conc.fd) * df**2 * (self.bf - self.bw)
+        C = C1 + C2 + C3
+        M = M1 + M2 + M3
+        print(C1, C2, C3, C)
+        return C, M
+
+    def T(self, xu: float, ecu: float):
+        _T, _M = self.t_steel.force_tension(xu, self.D - xu, ecu)
+        return _T, _M
+
+    def __repr__(self):
+        s = f'Flanged Beam Section {self.bw}x{self.D} {self.bf}x{self.Df}\n'
+        s += self.conc.__repr__() + '\n'
+        s += f"{self.c_steel.layers[0]}\n"
+        return s
+
+    def analyse(self, xu: float, ecmax: float):
+        pass
+
+    def analyse(self, xu, ecu):
+        pass
+
+    def design(self):
+        pass
+
+
 if __name__ == '__main__':
     m20 = Concrete('M20', 20, ConcreteStressBlock('IS456:2000 LSM', 0.002, 0.0035))
     # print(m20.fd, m20._area(0, 1))
@@ -174,15 +238,20 @@ if __name__ == '__main__':
     t_st = RebarGroup(fe415, [t1, t2])
     c_st = RebarGroup(fe415, [c1])
 
-    c_st = RebarGroup(fe415, [c1])
-    sec1 = RectBeamSection(230, 450, m20, t_st, c_st, fe415, 25)
+    # sec1 = RectBeamSection(230, 450, m20, t_st, c_st, fe415, 25)
     # print(sec1)
-    xu = 136.210193097794
-    print('Compression:', sec1.C(xu, 0.0035))
-    print('    Tension:', sec1.T(xu, 0.0035))
-    print(sec1.C_T(xu, 0.0035))
-    x1, x2 = rootsearch(sec1.C_T, 50, 400, 10, sec1.conc.ecu)
-    print(x1, x2)
-    xu = brentq(sec1.C_T, x1, x2, args=(sec1.conc.ecu,), xtol=1e-4)
-    print(xu, sec1.C_T(xu, sec1.conc.ecu))
-    sec1.report(xu, sec1.conc.ecu)
+    # xu = 136.210193097794
+    # print('Compression:', sec1.C(xu, 0.0035))
+    # print('    Tension:', sec1.T(xu, 0.0035))
+    # print(sec1.C_T(xu, 0.0035))
+    # x1, x2 = rootsearch(sec1.C_T, 50, 400, 10, sec1.conc.ecu)
+    # print(x1, x2)
+    # xu = brentq(sec1.C_T, x1, x2, args=(sec1.conc.ecu,), xtol=1e-4)
+    # print(xu, sec1.C_T(xu, sec1.conc.ecu))
+    # sec1.report(xu, sec1.conc.ecu)
+    bw = 230
+    D = 450
+    bf = 1000
+    Df = 150
+    tsec = FlangedBeamSection(bw, D, bf, Df, m20, t_st, c_st, fe415, 25)
+    print(tsec.C(160, 0.0035))
