@@ -37,9 +37,16 @@ c_st = RebarGroup(fe415, [c1])
 # print(xu, sec1.C_T(xu, sec1.conc.ecu))
 # sec1.report(xu, sec1.conc.ecu)
 
-bw = 230
-D = 450
-bf = 1000
-Df = 150
-tsec = FlangedBeamSection(bw, D, bf, Df, m20, t_st, c_st, fe415, 25)
-print(tsec.C(160, 0.0035))
+concsb = ConcreteStressBlock('IS456 LSM', 0.002, 0.0035)
+print(concsb.ecy)
+conc = Concrete('M20', 20, concsb)
+t1 = RebarLayer(35, [16, 16, 16])
+t2 = RebarLayer(70, [16, 16])
+t_st = RebarGroup(RebarHYSD('Fe 415', 415), [t1, t2])
+c_st = RebarGroup(RebarHYSD('Fe 415', 415), [c1])
+sec_st = RebarHYSD('Fe415', 415)
+tsec = FlangedBeamSection(230, 450, 1000, 150, conc, t_st, None, sec_st, 25)
+print(tsec.c_steel)
+xu = 43.5
+print(tsec.C(xu, 0.0035))
+print(tsec.T(xu, 0.0035))

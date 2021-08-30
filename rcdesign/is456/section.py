@@ -105,7 +105,15 @@ class RectBeamSection(Section):
         T, Mt = self.T(xu, ecu)
         print(C, T, C - T)
         return xu, Mc + Mt
-    
+
+    def pt(self):
+        d = self.eff_d()
+        ast = self.t_steel.area()
+        return ast / (self.b * d) * 100
+
+    def tauc(self):
+        return self.conc.tauc(self.pt())
+
     def __repr__(self):
         return f"Size: {self.b} x {self.D}\nTension Steel: {self.t_steel}\nCompression Steel: {self.c_steel}"
 
@@ -160,21 +168,17 @@ class RectBeamSection(Section):
 
 """Class to repersent flanged section"""
 @dataclass
-class FlangedBeamSection(Section):
-#     def __init__(self, bw: float, D: float, bf: float, Df: float, conc: Concrete, t_steel: RebarGroup, c_steel: RebarGroup, sec_steel: Rebar, clear_cover: float):
-    bw: float
-    D: float
-    bf: float
-    Df: float
-    conc: Concrete
-    t_steel: RebarGroup
-    c_steel: RebarGroup
-    sec_steel: Rebar
-    clear_cover: float
+class FlangedBeamSection(RectBeamSection):
+    def __init__(self, bw: float, D: float, bf: float, Df: float, conc: Concrete, t_steel: RebarGroup, c_steel: RebarGroup, sec_steel: Rebar, clear_cover: float):
+        super().__init__(bw, D, conc, t_steel, c_steel, sec_steel, clear_cover)
+        bw: float
+        # D: float
+        self.bf = bf
+        self.Df = Df
 
     @property
-    def b(self):
-        return self.bw
+    def bw(self):
+        return self.b
 
     def C(self, xu: float, ecu: float):
         # Compression force and moment due to concrete of web

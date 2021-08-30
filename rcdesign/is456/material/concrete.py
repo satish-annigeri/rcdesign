@@ -146,6 +146,29 @@ class Concrete:
         moment = self.fc_moment(xu, x1, x2)
         return xu - (moment / area)
 
+    def tauc_max(self):
+        tauc = np.array([[15, 20, 25, 30, 35, 40], [2.5, 2.8, 3.1, 3.5, 3.7, 4.0]])
+        if self.fck < 15:
+            return 0.0
+        elif self.fck >= tauc[0, -1]:
+            return tauc[1, -1]
+        else:
+            for i in range(1, len(tauc)):
+                if self.fck <= tauc[0, i]:
+                    x1 = tauc[0, i-1]
+                    y1 = tauc[1, i-1]
+                    x2 = tauc[0, i]
+                    y2 = tauc[1, i]
+                    return y1 + (y2 - y1) / (x2 - x1) * (self.fck - x1)
+
+    def tauc(self, pt):
+        if pt < 0.15:
+            pt = 0.15
+        if pt > 3:
+            pt = 3.0
+        beta = max(1.0, (0.8 * self.fck) / (6.89 * pt))
+        return 0.85 * np.sqrt(0.8 * self.fck) * (np.sqrt(1 + 5 * beta) - 1) / (6 * beta)
+
     def __repr__(self):
         return f"Stress Block {self.stress_block.label} - {self.label}: {self.fck} {self.fd:.2f} {self.density}"
 
@@ -159,8 +182,9 @@ if __name__ == '__main__':
     print(m20._moment(0, 1, m20.fd))
     print(1 - m20._centroid(0, 1))
 
-    is456_lsm2 = ConcreteStressBlock('IS456:2000 LSM', 0.002, 0.0035)
-    is456_lsm2.set_ecmax(0.0015)
-    conc = Concrete('M20', 20, is456_lsm2)
-    print(is456_lsm2.k)
-    print(conc._area(0, 3/4))
+    print(m20.tauc_max())
+    pt = np.arange(0, 3.1, 0.25)
+    pt[0] = 0.15
+    print(pt)
+    tauc = np.array([m20.tauc(xx) for xx in pt])
+    print(tauc)
