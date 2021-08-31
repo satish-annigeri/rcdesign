@@ -6,7 +6,9 @@ from rcdesign.is456.material.concrete import ConcreteStressBlock, Concrete
 from rcdesign.is456.material.rebar import RebarMS, RebarHYSD, RebarLayer, RebarGroup
 from rcdesign.is456.section import RectBeamSection, FlangedBeamSection
 from rcdesign.utils import rootsearch
+from rcdesign import __version__
 
+print(__version__)
 m20 = Concrete('M20', 20, ConcreteStressBlock('IS456:2000 LSM', 0.002, 0.0035))
 # print(m20.fd, m20._area(0, 1))
 

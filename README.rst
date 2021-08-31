@@ -17,4 +17,6 @@ Code has been completed to carry out analysis of a rectangular section with give
 
 The concrete stress block definition is associated with concrete material and is inherited from an abstract class to represent a general stress block. Therefore, replacing the stress block definition with any other is possible by sub-classing the abstract stress block class while keeping all the rest of the procedures unchanged.
 
-In the same way, the rectangular beam section class is inherited from an abstract section class and it should be possible to compose beams, columns as a collection of sections and a structure as a collection of beams and columns.
+The rectangular beam section class is inherited from rectangular beam section class. Similarly, it should be possible to compose beams, columns as a collection of sections and a structure as a collection of beams and columns.
+
+The package is in early development and is yet to undergo systematic testing.

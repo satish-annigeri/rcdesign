@@ -198,6 +198,51 @@ class RebarGroup:
             _m += __m
         return _f, _m
 
+
+class ShearReinforcement(ABC):
+    @abstractmethod
+    def Asv(self):
+        pass
+
+    @abstractmethod
+    def sv(self):
+        pass
+
+
+"""Vertical or inclined stirrups as shear reinforcement"""
+@dataclass
+class Stirrups(ShearReinforcement):
+    rebar: Rebar
+    nlegs: int
+    bar_dia: int
+    alpha_deg: float = 90
+
+    @property
+    def Asv(self):
+        return self.nlegs * np.pi * self.bar_dia**2 / 4
+
+    def sv(self, Vus: float, d: float):
+        if (self.alpha_deg < 45) or (self.alpha_deg > 90):
+            return
+        alpha_rad = self.alpha_deg * np.pi / 180
+        return self.rebar.fd * self.Asv() * d * np.sin(alpha_rad)
+
+
+"""Bent up bars as shear reinforcement"""
+class BentupBars(Stirrups):
+    def __init__(self, rebar: Rebar, bars: List[int], alpha_deg: float):
+        super().__init__(rebar, 0, 0, alpha_deg)
+        self.bars = bars
+
+    @property
+    def Asv(self):
+        area = 0.0
+        for bar_dia in self.bars:
+            area += bar_dia**2
+        return self.nbars * np.pi * area / 4
+
+
+
 if __name__ == '__main__':
     # Test RebarMS and RebarHYSD
 
