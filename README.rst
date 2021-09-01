@@ -5,7 +5,7 @@ This is a Python package for analysis and design of reinforced concrete sections
 
 Tthe intention is to progress to design and detailing of beams and columns subsequent to the completion of analysis and design of sections. Object oriented programming is particularly well suited from problems such as this as inheritance and composition are natural in the representation of structures, their components and material and their behaviours.
 
-At present limit state analysis of rectangular sections for flexure is complete. The following have been implemented:
+At present limit state analysis of rectangular sections for flexure is underway. The following have been implemented:
 
 1. Class to represent the stress distribution in concrete as per IS 456:2000
 2. Class to rerpresent concrete and reinforcement bars
