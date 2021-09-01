@@ -72,8 +72,8 @@ class RectBeamSection(Section):
             c = Mu / (self.conc.fck * self.b * self.eff_d()**2)
 
     def C(self, xu: float, ecu: float):
-        C1 = self.conc._area(0, 1, self.conc.fd) * xu * self.b
-        M1 = self.conc._moment(0, 1, self.conc.fd) * xu**2 * self.b
+        C1 = self.conc.area(0, 1, self.conc.fd) * xu * self.b
+        M1 = self.conc.moment(0, 1, self.conc.fd) * xu**2 * self.b
 
         if self.c_steel:
             C2, M2 = self.c_steel.force_compression(xu, self.conc, ecu)
@@ -121,7 +121,7 @@ class RectBeamSection(Section):
         print(f"Rectangular Beam Section {self.b}x{self.D}")
         print(f"")
         C = self.conc._area(0, 1, self.conc.fd) * xu * self.b
-        Mc = self.conc._moment(0, 1, self.conc.fd) * xu**2 * self.b
+        Mc = self.conc.moment(0, 1, self.conc.fd) * xu**2 * self.b
         print(f"{' ':54}{'C':>8} {'M':>8}")
         print(f"{'Concrete in Compression':54}{C/1e3:8.2f} {Mc/1e6:8.2f}")
         print(f"Compression Reinforcement")
@@ -182,8 +182,8 @@ class FlangedBeamSection(RectBeamSection):
 
     def C(self, xu: float, ecu: float):
         # Compression force and moment due to concrete of web
-        C1 = self.conc._area(0, 1, self.conc.fd) * xu * self.bw
-        M1 = self.conc._moment(0, 1, self.conc.fd) * xu**2 * self.bw
+        C1 = self.conc.area(0, 1, self.conc.fd) * xu * self.bw
+        M1 = self.conc.moment(0, 1, self.conc.fd) * xu**2 * self.bw
 #         print('Flanged Section\n', C1, M1)
         # Compression force and moment due to compression reinforcement bars
         if self.c_steel:
@@ -196,8 +196,8 @@ class FlangedBeamSection(RectBeamSection):
         # Compression force and moment due to concrete of flange
         df = xu if xu <= self.Df else self.Df
         x1 = xu - df
-        C3 = self.conc._area(x1/xu, 1, self.conc.fd) * df * (self.bf - self.bw)
-        M3 = self.conc._moment(x1/xu, 1, self.conc.fd) * df**2 * (self.bf - self.bw)
+        C3 = self.conc.area(x1/xu, 1, self.conc.fd) * df * (self.bf - self.bw)
+        M3 = self.conc.moment(x1/xu, 1, self.conc.fd) * df**2 * (self.bf - self.bw)
         C = C1 + C2 + C3
         M = M1 + M2 + M3
         print(C1, C2, C3, C)

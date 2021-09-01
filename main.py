@@ -8,9 +8,8 @@ from rcdesign.is456.section import RectBeamSection, FlangedBeamSection
 from rcdesign.utils import rootsearch
 from rcdesign import __version__
 
-print(__version__)
 m20 = Concrete('M20', 20, ConcreteStressBlock('IS456:2000 LSM', 0.002, 0.0035))
-# print(m20.fd, m20._area(0, 1))
+print(m20.fd, m20.fc(1), m20.area(0, 1))
 
 # ms = RebarMS('MS 250', 250)
 # print(ms)

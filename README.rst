@@ -19,4 +19,4 @@ The concrete stress block definition is associated with concrete material and is
 
 The rectangular beam section class is inherited from rectangular beam section class. Similarly, it should be possible to compose beams, columns as a collection of sections and a structure as a collection of beams and columns.
 
-The package is in early development and is yet to undergo systematic testing.
+The package is in early development and is yet to undergo systematic testing. There is no documentation at the current time.

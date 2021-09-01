@@ -271,7 +271,7 @@ if __name__ == '__main__':
     m20 = Concrete('M20', 20, is456_lsm)
     D = 450
     xu = 131.8722
-    print('   Concrete:', m20._area(0, 1, m20.fd)*xu*230)
+    print('   Concrete:', m20.area(0, 1, m20.fd)*xu*230)
     print('Compression:', c1.force_compression(xu, m20, fe415, 0.0035))
     print('    Tension:', t1.force_tension(xu, D - xu, fe415, 0.0035))
     print('    Tension:', t2.force_tension(xu, D - xu, fe415, 0.0035))

@@ -117,19 +117,24 @@ class Concrete:
     def fd(self):
         return 0.67 * self.fck / self.gamma_m
 
-    def _fc(self, x_xu: float, fd:float=1.0):
-        return self.stress_block.stress(x_xu) * fd
+    def fc(self, x_xu: float, fd:float=1.0):
+        if (0 <= x_xu <= 1):
+            __fc = self.stress_block.stress(x_xu)
+            print('***', __fc)
+            return __fc * fd
+        else:
+            raise ValueError('x/xu = %.4f. It must be between 0 and 1' % (x_xu))
 
-    def _area(self, x1_xu: float, x2_xu: float, fd:float=1.0) -> float:
+    def area(self, x1_xu: float, x2_xu: float, fd:float=1.0) -> float:
         return self.stress_block.area(x1_xu, x2_xu) * fd
 
-    def _moment(self, x1_xu: float, x2_xu: float, fd: float=1.0) -> float:
+    def moment(self, x1_xu: float, x2_xu: float, fd: float=1.0) -> float:
         return self.stress_block.moment(x1_xu, x2_xu) * fd
 
-    def _centroid(self, x1_xu: float, x2_xu: float, fd: float=1.0) -> float:
-        return self._moment(x1_xu, x2_xu) / self._area(x1_xu, x2_xu)
+    def centroid(self, x1_xu: float, x2_xu: float, fd: float=1.0) -> float:
+        return self.moment(x1_xu, x2_xu) / self.area(x1_xu, x2_xu)
 
-    def fc(self, ec: float):
+    def _fc(self, ec: float):
         z = symbols('z')
         _fc_expr = 2*z - z**2
         if 0 <= ec <= self.ecu:
@@ -177,10 +182,10 @@ if __name__ == '__main__':
     m20 = Concrete('M20', 20, is456_lsm)
     print(m20, m20.Ec)
     print(m20.ecy / m20.ecu)
-    print(m20._fc(1, m20.fd))
+    print(m20.fc(1, m20.fd))
     print(m20._area(0, 1, m20.fd))
-    print(m20._moment(0, 1, m20.fd))
-    print(1 - m20._centroid(0, 1))
+    print(m20.moment(0, 1, m20.fd))
+    print(1 - m20.centroid(0, 1))
 
     print(m20.tauc_max())
     pt = np.arange(0, 3.1, 0.25)
