@@ -3,13 +3,13 @@ import numpy as np
 from scipy.optimize import brentq
 
 from rcdesign.is456.material.concrete import ConcreteStressBlock, Concrete
-from rcdesign.is456.material.rebar import RebarMS, RebarHYSD, RebarLayer, RebarGroup
+from rcdesign.is456.material.rebar import RebarMS, RebarHYSD, RebarLayer, RebarGroup, Stirrups
 from rcdesign.is456.section import RectBeamSection, FlangedBeamSection
 from rcdesign.utils import rootsearch
 from rcdesign import __version__
 
 m20 = Concrete('M20', 20, ConcreteStressBlock('IS456:2000 LSM', 0.002, 0.0035))
-print(m20.fd, m20.fc(1), m20.area(0, 1))
+# print(m20.fd, m20.fc(1), m20.area(0, 1))
 
 # ms = RebarMS('MS 250', 250)
 # print(ms)
@@ -39,25 +39,40 @@ c_st = RebarGroup(fe415, [c1])
 # sec1.report(xu, sec1.conc.ecu)
 
 concsb = ConcreteStressBlock('IS456 LSM', 0.002, 0.0035)
-print(concsb.ecy)
+# print(concsb.ecy)
 conc = Concrete('M20', 20, concsb)
 t1 = RebarLayer(35, [16, 16, 16])
 t2 = RebarLayer(70, [16, 16])
 t_st = RebarGroup(RebarHYSD('Fe 415', 415), [t1, t2])
 c_st = RebarGroup(RebarHYSD('Fe 415', 415), [c1])
 sec_st = RebarHYSD('Fe415', 415)
-tsec = FlangedBeamSection(230, 450, 1000, 150, conc, t_st, None, sec_st, 25)
-print(tsec.c_steel)
+shear_steel = Stirrups(RebarHYSD('Fe 415', 415), 2, 8, 90, 125)
+# print(shear_steel.nlegs, shear_steel.bar_dia, shear_steel.Asv)
+# shear_steel.nlegs = 4
+# print(shear_steel.nlegs, shear_steel.bar_dia, shear_steel.Asv)
+# shear_steel.bar_dia = 10
+# print(shear_steel.nlegs, shear_steel.bar_dia, shear_steel.Asv)
+
+tsec = FlangedBeamSection(230, 450, 1000, 150, conc, t_st, None, shear_steel, 25)
+
 # xu = 50.16570748
-xu = 150
-print(f"xu = {xu} C = {tsec.C(xu, 0.0035)}")
-print(f"xu = {xu} T = {tsec.T(xu, 0.0035)}")
+# xu = 150
+# print(f"xu = {xu} C = {tsec.C(xu, 0.0035)}")
+# print(f"xu = {xu} T = {tsec.T(xu, 0.0035)}")
 
-xumax = tsec.xumax(tsec.eff_d())
-xumax = 190
-print('xumax =', xumax)
-print(f"xu = {xumax} C = {tsec.C(xumax, 0.0035)}")
-print(f"xu = {xumax} Mr = {tsec.Mr(xumax, 0.0035)}")
+# xumax = tsec.xumax(tsec.eff_d())
+# xumax = 190
+# print('xumax =', xumax)
+# print(f"xu = {xumax} C = {tsec.C(xumax, 0.0035)} Mr = {tsec.Mr(xumax, 0.0035)}")
 
-if xumax > tsec.Df:
-    print(f"xu = {xumax} Mr = {tsec.Mr(xumax, 0.0035)}")
+# if xumax > tsec.Df:
+#     print(f"xu = {xumax} Mr = {tsec.Mr(xumax, 0.0035)}")
+
+# x = np.linspace(5, xumax, 5)
+# for xx in x:
+#     print(f"xu = {xx:8.2f} Mr = {tsec.Mr(xx, 0.0035)/1e6:8.2f}")
+Vu = tsec.Vu()
+print(f"Vu = {Vu/1e3:.2f}")
+Vu = 190e3
+sv = tsec.sv(Vu, 2, 8)
+print(f"Vu = {Vu/1e3:.2f} sv = {sv:.2f}")

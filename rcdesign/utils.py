@@ -2,6 +2,7 @@ import numpy as np
 from numpy import sign
 from scipy.optimize import fsolve, brentq
 from typing import Callable
+import math
 
 def func(x: float, *args) -> float:
     # return a*x**2 + c*x - 4
@@ -24,6 +25,18 @@ def rootsearch(func: Callable, xstart: float, xstop: float, numint: int, *args):
             x1, y1 = x2, y2
     return (None, None)
 
+def ceiling(x: float, multipleof: float=1.0):
+    i = x // multipleof
+    if (x - i * multipleof) > 0:
+        i += 1
+    return i * multipleof
+
+def floor(x: float, multipleof: float=1.0):
+    i = x // multipleof
+    if not (x - i * multipleof) > 0:
+        i -= 1
+    return i * multipleof
+
 
 if __name__ == '__main__':
     x1, x2 = rootsearch(func, 0, 3, 6, 1, -10, 0, 5)
@@ -33,4 +46,7 @@ if __name__ == '__main__':
         print('fsolve()', x[0])
         x = brentq(func, x1, x2, args=(1, -10, 0, 5))
         print('brentq()', x)
+
+    print(ceiling(120.051, 0.05), floor(12.051, 0.05))
+    print(ceiling(124.2, 5), floor(124.2, 5))
 

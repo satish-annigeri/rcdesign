@@ -10,7 +10,8 @@ import numpy as np
 from numpy import pi
 
 from .material.concrete import ConcreteStressBlock, Concrete
-from .material.rebar import Rebar, RebarMS, RebarHYSD, RebarLayer, RebarGroup
+from .material.rebar import Rebar, RebarMS, RebarHYSD, RebarLayer, RebarGroup, ShearReinforcement, Stirrups, BentupBars
+from rcdesign.utils import ceiling, floor
 
 from ..utils import rootsearch
 
@@ -42,14 +43,14 @@ class Section(ABC):
 # RectSection class to repersent a rectangular section
 
 class RectBeamSection(Section):
-    def __init__(self, b: float, D: float, conc: Concrete, t_steel: RebarGroup, c_steel: RebarGroup, sec_steel: Rebar, clear_cover: float):
+    def __init__(self, b: float, D: float, conc: Concrete, t_steel: RebarGroup, c_steel: RebarGroup, shear_steel: ShearReinforcement, clear_cover: float):
         super().__init__(DesignForceType.BEAM, clear_cover)
         self.b = b
         self.D = D
         self.conc = conc
         self.t_steel = t_steel
         self.c_steel = c_steel
-        self.sec_steel = sec_steel
+        self.shear_steel = shear_steel
 
     def xumax(self, d: float=1):
         es_min = self.t_steel.rebar.es_min()
@@ -169,8 +170,8 @@ class RectBeamSection(Section):
 """Class to repersent flanged section"""
 @dataclass
 class FlangedBeamSection(RectBeamSection):
-    def __init__(self, bw: float, D: float, bf: float, Df: float, conc: Concrete, t_steel: RebarGroup, c_steel: RebarGroup, sec_steel: Rebar, clear_cover: float):
-        super().__init__(bw, D, conc, t_steel, c_steel, sec_steel, clear_cover)
+    def __init__(self, bw: float, D: float, bf: float, Df: float, conc: Concrete, t_steel: RebarGroup, c_steel: RebarGroup, shear_steel: Rebar, clear_cover: float):
+        super().__init__(bw, D, conc, t_steel, c_steel, shear_steel, clear_cover)
         bw: float
         # D: float
         self.bf = bf
@@ -201,7 +202,7 @@ class FlangedBeamSection(RectBeamSection):
         # print('Flanged - Flange', C3, M3)
         C = C1 + C2 + C3
         M = M1 + M2 + M3
-        print(C1, C2, C3, C)
+        # print(C1, C2, C3, C)
         return C, M
 
     def T(self, xu: float, ecu: float):
@@ -212,6 +213,31 @@ class FlangedBeamSection(RectBeamSection):
         # Assuming tension steel to produce an equal tension force as C
         C, M = self.C(xu, ecu)
         return M + C * (self.eff_d() - xu)
+
+    def Vu(self, sv: float=0):
+        if sv != 0:
+            self.shear_steel._sv = sv
+        pt = self.t_steel.area() * 100 / (self.bw * self.eff_d())
+        tauc = self.conc.tauc(pt)
+        Asv = self.shear_steel.Asv
+        Vuc = tauc * self.bw * self.eff_d()
+        Vus = self.shear_steel.rebar.fd * self.shear_steel._Asv * self.eff_d() / self.shear_steel._sv
+        # print(f"pst = {pt} tau_c = {tauc} Asv = {Asv}, d = {self.eff_d()}, Spacing = {self.shear_steel.sv()}")
+        return Vuc + Vus
+
+    def sv(self, Vu: float, nlegs: int, bar_dia: int, mof: float=25):
+        self.shear_steel.nlegs = nlegs
+        self.shear_steel.bar_dia = bar_dia
+        Asv = self.shear_steel.Asv
+
+        pt = self.t_steel.area() * 100 / (self.bw * self.eff_d())
+        tauc = self.conc.tauc(pt)
+        Vuc = tauc * self.bw * self.eff_d()
+
+        Vus = Vu - Vuc
+        self._sv = self.shear_steel.rebar.fd * self.shear_steel._Asv * self.eff_d() / Vus
+        self._sv = floor(self._sv, mof)
+        return self._sv
 
     def __repr__(self):
         s = f'Flanged Beam Section {self.bw}x{self.D} {self.bf}x{self.Df}\n'

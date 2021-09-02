@@ -213,19 +213,46 @@ class ShearReinforcement(ABC):
 @dataclass
 class Stirrups(ShearReinforcement):
     rebar: Rebar
-    nlegs: int
-    bar_dia: int
-    alpha_deg: float = 90
+    _nlegs: int
+    _bar_dia: int
+    _alpha_deg: float = 90
+    _sv: float = 0.0
+    _Asv: float = 0.0
 
     @property
     def Asv(self):
-        return self.nlegs * np.pi * self.bar_dia**2 / 4
+        self._Asv = self.nlegs * pi * self.bar_dia**2 / 4
+        return self._Asv
+
+    @property
+    def nlegs(self):
+        return self._nlegs
+
+    @nlegs.setter
+    def nlegs(self, n):
+        self._nlegs = n
+        self._Asv = self.nlegs * pi * self.bar_dia**2 / 4
+
+    @property
+    def bar_dia(self):
+        return self._bar_dia
+
+    @bar_dia.setter
+    def bar_dia(self, dia):
+        self._bar_dia = dia
+        self._Asv = self.nlegs * pi * self.bar_dia**2 / 4
+
+    @property
+    def Asv(self):
+        self._Asv = self.nlegs * pi * self.bar_dia**2 / 4
+        return self._Asv
 
     def sv(self, Vus: float, d: float):
         if (self.alpha_deg < 45) or (self.alpha_deg > 90):
             return
-        alpha_rad = self.alpha_deg * np.pi / 180
-        return self.rebar.fd * self.Asv() * d * np.sin(alpha_rad)
+        alpha_rad = self.alpha_deg * pi / 180
+        self._sv = self.rebar.fd * self.Asv * d * np.sin(alpha_rad) / Vus
+        return self._sv
 
 
 """Bent up bars as shear reinforcement"""
