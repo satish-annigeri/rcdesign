@@ -1,6 +1,6 @@
-========================================================================================
-Python package for analysis and design of reinforced concrete section as per IS 456:2000
-========================================================================================
+=========================================================================================
+Python package for analysis and design of reinforced concrete sections as per IS 456:2000
+=========================================================================================
 This is a Python package for analysis and design of reinforced concrete sections as per IS 456:2000, the Indian Standard code of practice for plain and reinforced concrete. All units are Netwon and millimeter. The intention is to devlop packages to represent materials, stress blocks, rebars, sections, and other components essential to analyse and design reinforced concrete sections. It is initally planned to carry out analysis of sections before taking up design of sections. Initially, analysis of beam sections, specifically rectangular and flanged sections will be taken up for flexure and shear. Analysis of rectangular column sections will be taken up next.
 
 The intention is to progress to design and detailing of beams and columns subsequent to the completion of analysis and design of sections. Object oriented programming is particularly well suited from problems such as this as inheritance and composition are natural in the representation of structures, their components and material and their behaviours.
