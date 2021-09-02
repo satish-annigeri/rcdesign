@@ -48,6 +48,16 @@ c_st = RebarGroup(RebarHYSD('Fe 415', 415), [c1])
 sec_st = RebarHYSD('Fe415', 415)
 tsec = FlangedBeamSection(230, 450, 1000, 150, conc, t_st, None, sec_st, 25)
 print(tsec.c_steel)
-xu = 43.5
-print(tsec.C(xu, 0.0035))
-print(tsec.T(xu, 0.0035))
+# xu = 50.16570748
+xu = 150
+print(f"xu = {xu} C = {tsec.C(xu, 0.0035)}")
+print(f"xu = {xu} T = {tsec.T(xu, 0.0035)}")
+
+xumax = tsec.xumax(tsec.eff_d())
+xumax = 190
+print('xumax =', xumax)
+print(f"xu = {xumax} C = {tsec.C(xumax, 0.0035)}")
+print(f"xu = {xumax} Mr = {tsec.Mr(xumax, 0.0035)}")
+
+if xumax > tsec.Df:
+    print(f"xu = {xumax} Mr = {tsec.Mr(xumax, 0.0035)}")

@@ -135,3 +135,8 @@ class TestConcrete:
         m20 = Concrete('M20', 20, csb)
         z = 0.5 / (0.002 / 0.0035)
         assert isclose(m20.fc(0.5), (2*z - z**2))
+
+    def test_conc06(self):
+        csb = ConcreteStressBlock('IS456 LSM', 0.002, 0.0035)
+        m20 = Concrete('M20', 20, csb)
+        assert m20.tauc_max() == 2.8

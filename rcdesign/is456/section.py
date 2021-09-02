@@ -53,7 +53,7 @@ class RectBeamSection(Section):
 
     def xumax(self, d: float=1):
         es_min = self.t_steel.rebar.es_min()
-        return 0.0035 / (es_min + 0.0035)
+        return 0.0035 / (es_min + 0.0035) * d
 
     def mulim(self, fck: float=1, b: float=1, d: float=1):
         xumax = self.xumax()
@@ -163,7 +163,7 @@ class RectBeamSection(Section):
             print(f'Singly reinforced section (Mu,lim = {mulim / 1e6})')
     
     def eff_d(self):
-        return self.D - self.eff_cover()
+        return self.D - self.t_steel._dc()
     
 
 """Class to repersent flanged section"""
@@ -184,20 +184,21 @@ class FlangedBeamSection(RectBeamSection):
         # Compression force and moment due to concrete of web
         C1 = self.conc.area(0, 1, self.conc.fd) * xu * self.bw
         M1 = self.conc.moment(0, 1, self.conc.fd) * xu**2 * self.bw
-#         print('Flanged Section\n', C1, M1)
+        # print('Flanged - Web:', C1, M1)
         # Compression force and moment due to compression reinforcement bars
         if self.c_steel:
             C2, M2 = self.c_steel.force_compression(xu, self.conc, ecu)
         else:
-            print('No compression steel')
+            # print('No compression steel')
             C2 = 0.0
             M2 = 0.0
-#         print(C2, M2)
+        # print('Flanged - Compression steel:', C2, M2)
         # Compression force and moment due to concrete of flange
         df = xu if xu <= self.Df else self.Df
         x1 = xu - df
-        C3 = self.conc.area(x1/xu, 1, self.conc.fd) * df * (self.bf - self.bw)
+        C3 = self.conc.area(x1/xu, 1, self.conc.fd) * xu * (self.bf - self.bw)
         M3 = self.conc.moment(x1/xu, 1, self.conc.fd) * df**2 * (self.bf - self.bw)
+        # print('Flanged - Flange', C3, M3)
         C = C1 + C2 + C3
         M = M1 + M2 + M3
         print(C1, C2, C3, C)
@@ -206,6 +207,11 @@ class FlangedBeamSection(RectBeamSection):
     def T(self, xu: float, ecu: float):
         _T, _M = self.t_steel.force_tension(xu, self.D - xu, ecu)
         return _T, _M
+
+    def Mr(self, xu: float, ecu: float):
+        # Assuming tension steel to produce an equal tension force as C
+        C, M = self.C(xu, ecu)
+        return M + C * (self.eff_d() - xu)
 
     def __repr__(self):
         s = f'Flanged Beam Section {self.bw}x{self.D} {self.bf}x{self.Df}\n'
