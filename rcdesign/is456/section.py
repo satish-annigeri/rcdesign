@@ -165,6 +165,35 @@ class RectBeamSection(Section):
     
     def eff_d(self):
         return self.D - self.t_steel._dc()
+
+    def Vu(self, nlegs: int=0, bar_dia: int=0, sv: float=0):
+        if nlegs > 0:
+            self.nlegs = nlegs
+        if bar_dia > 0:
+            self.bar_dia = bar_dia
+        if sv > 0:
+            self.shear_steel._sv = sv
+        pt = self.t_steel.area() * 100 / (self.bw * self.eff_d())
+        tauc = self.conc.tauc(pt)
+        Asv = self.shear_steel.Asv
+        Vuc = tauc * self.bw * self.eff_d()
+        Vus = self.shear_steel.rebar.fd * self.shear_steel._Asv * self.eff_d() / self.shear_steel._sv
+        # print(f"pst = {pt} tau_c = {tauc} Asv = {Asv}, d = {self.eff_d()}, Spacing = {self.shear_steel.sv()}")
+        return Vuc + Vus
+
+    def sv(self, Vu: float, nlegs: int, bar_dia: int, mof: float=25):
+        self.shear_steel.nlegs = nlegs
+        self.shear_steel.bar_dia = bar_dia
+        Asv = self.shear_steel.Asv
+
+        pt = self.t_steel.area() * 100 / (self.bw * self.eff_d())
+        tauc = self.conc.tauc(pt)
+        Vuc = tauc * self.bw * self.eff_d()
+
+        Vus = Vu - Vuc
+        self._sv = self.shear_steel.rebar.fd * self.shear_steel._Asv * self.eff_d() / Vus
+        self._sv = floor(self._sv, mof)
+        return self._sv
     
 
 """Class to repersent flanged section"""
@@ -213,31 +242,6 @@ class FlangedBeamSection(RectBeamSection):
         # Assuming tension steel to produce an equal tension force as C
         C, M = self.C(xu, ecu)
         return M + C * (self.eff_d() - xu)
-
-    def Vu(self, sv: float=0):
-        if sv != 0:
-            self.shear_steel._sv = sv
-        pt = self.t_steel.area() * 100 / (self.bw * self.eff_d())
-        tauc = self.conc.tauc(pt)
-        Asv = self.shear_steel.Asv
-        Vuc = tauc * self.bw * self.eff_d()
-        Vus = self.shear_steel.rebar.fd * self.shear_steel._Asv * self.eff_d() / self.shear_steel._sv
-        # print(f"pst = {pt} tau_c = {tauc} Asv = {Asv}, d = {self.eff_d()}, Spacing = {self.shear_steel.sv()}")
-        return Vuc + Vus
-
-    def sv(self, Vu: float, nlegs: int, bar_dia: int, mof: float=25):
-        self.shear_steel.nlegs = nlegs
-        self.shear_steel.bar_dia = bar_dia
-        Asv = self.shear_steel.Asv
-
-        pt = self.t_steel.area() * 100 / (self.bw * self.eff_d())
-        tauc = self.conc.tauc(pt)
-        Vuc = tauc * self.bw * self.eff_d()
-
-        Vus = Vu - Vuc
-        self._sv = self.shear_steel.rebar.fd * self.shear_steel._Asv * self.eff_d() / Vus
-        self._sv = floor(self._sv, mof)
-        return self._sv
 
     def __repr__(self):
         s = f'Flanged Beam Section {self.bw}x{self.D} {self.bf}x{self.Df}\n'

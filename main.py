@@ -76,3 +76,4 @@ print(f"Vu = {Vu/1e3:.2f}")
 Vu = 190e3
 sv = tsec.sv(Vu, 2, 8)
 print(f"Vu = {Vu/1e3:.2f} sv = {sv:.2f}")
+print(f"Vu = {tsec.Vu(2, 10, 300)/1e3:.2f}")
