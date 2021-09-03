@@ -1,10 +1,9 @@
-=========================================================================================
-Python package for analysis and design of reinforced concrete sections as per IS 456:2000
-=========================================================================================
+# Python package for analysis and design of reinforced concrete sections as per IS 456:2000
+
 This is a Python package for analysis and design of reinforced concrete sections as per IS 456:2000, the Indian Standard code of practice for plain and reinforced concrete. All units are Netwon and millimeter.
 
-Objective
-=========
+## Objective
+
 The objective is to devlop a package to represent materials, stress blocks, rebars, sections, and other components essential to analyse and design reinforced concrete sections. It is initally planned to carry out analysis of sections before taking up design of sections as per the limit state method of IS 456:2000.
 
 Object oriented programming is particularly well suited from problems this nature as inheritance and composition are natural in the representation of structures, their components, and materials as well as their behaviours. Further, speed of execution is not a primary concern, as it is in the analysis of structures.
@@ -13,8 +12,8 @@ In the beginning, analysis of beam sections - rectangular and flanged sections, 
 
 The package will consist of a hierarchy of classes along with their methods to implement analysis, design and detailing at the section level.
 
-Current Status
-==============
+## Current Status
+
 The package is in early development and has undergone limited testing. No documentation is available at the current time.
 
 The following classes have been implemented:
@@ -29,23 +28,22 @@ The following classes have been implemented:
 
 Following funcationality has been implemented for the different classes:
 
-1. **ConcreteStressBlock**: Calculation of design stress, stress at a specified distance $x$ from neutral axis, area of stress block between two locations $x_1$ and $x_2$ from neutral axis and moment of stress block between the two locations with respect to the neutral axis.
+1. **ConcreteStressBlock**: Calculation of design stress, stress at a specified distance $x$ from neutral axis, area of stress block between two locations $x_1$ and $x_2$ from neutral axis and moment of stress block between the two locations with respect to depth $x_u$ of the neutral axis.
 2. **RebarMS** and **RebarHYSD**: Stress for a specified value of strain and design stress.
 3. **RebarLayer**: Area of bars in a layer.
 4. **RebarGroup**: Calculation of the sum of the following values aggregated after calculating the values individually for each layer:
-    a. Area of reinforcing bars,
-    b. Force in reinforcing bars, in tension and in compression bars,
-    c. Moment of force in reinforcing bars about the neutral axis, in tension and in compression bars,
+    * Area of reinforcing bars in the group,
+    * Force in reinforcing bars in the group, in tension and in compression,
+    * Moment of force in reinforcing bars in the group about the neutral axis, in tension and in compression
 5. **RectBeamSection** and **FlangedBeamSection**: Calculation of:
-    a. Total compression force and the corresponding moment about the neutral axis for a specified neutral axis location $x_u$, considering concrete in compression and compression reinforcement bars, if present,
-    b. Total tension force and the corresponding moment about the neutral axis due to a group of tension reinforcement bars,
-    c. Iteratively calculate the position of the neutral axis to satisfy equilibrium, namely compression force equal to tension force in the section,
-    d. Calculate shear force capacity of a section for a given shear reinforcement in the form of vertical or inclined stirrups,
-    e. Calculate spacing of vertical or inclined stirrups for a given design shear force
+    * Total compression force and the corresponding moment about the neutral axis for a specified neutral axis location $x_u$, considering concrete in compression and compression reinforcement bars, if present,
+    * Total tension force and the corresponding moment about the neutral axis due to a group of tension reinforcement bars,
+    * Position of the neutral axis $x_u$, calculated iteratively to satisfy equilibrium,
+    * Shear force capacity of a section for a given shear reinforcement in the form of vertical or inclined stirrups,
+    * Spacing of vertical or inclined stirrups for a given design shear force
 
+## Future Plans
 
-Future Plans
-============
 Immediate plans include the analysis and design at the *section* level:
 
 1. Analysis of rectangular *section* subjected to axial compression and bending about one axis.
