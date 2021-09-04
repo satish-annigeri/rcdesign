@@ -56,9 +56,9 @@ class RectBeamSection(Section):
         es_min = self.t_steel.rebar.es_min()
         return 0.0035 / (es_min + 0.0035) * d
 
-    def mulim(self, fck: float=1, b: float=1, d: float=1):
-        xumax = self.xumax()
-        return (68/189) * xumax * (1 - (99/238*xumax))
+    def mulim(self, d: float):
+        xumax = self.xumax() * d
+        return (17/21) * self.conc.fd * self.b * xumax * (d - (99/238)*xumax)
 
     def C(self, xu: float, ecu: float):
         C1 = self.conc.area(0, 1, self.conc.fd) * xu * self.b
@@ -145,7 +145,8 @@ class RectBeamSection(Section):
         print(f"{' '*54}{(C - T)/1e3:8.4f} {M/1e6:8.2f}")
 
     def design(self, Mu: float, Vu: float=0, Tu: float=0):
-        mulim = self.mulim() * self.conc.fck * self.b * self.eff_d()**2
+        d = self.D - self.clear_cover - 25.0
+        mulim = self.mulim(d) * self.conc.fck * self.b * d**2
         if abs(Mu) > mulim:
             print(f'Doubly reinforced section (Mu,lim = {mulim / 1e6}')
         else:
