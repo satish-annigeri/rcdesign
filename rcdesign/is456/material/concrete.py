@@ -120,7 +120,6 @@ class Concrete:
     def fc(self, x_xu: float, fd:float=1.0):
         if (0 <= x_xu <= 1):
             __fc = self.stress_block.stress(x_xu)
-            print('***', __fc)
             return __fc * fd
         else:
             raise ValueError('x/xu = %.4f. It must be between 0 and 1' % (x_xu))
@@ -133,23 +132,6 @@ class Concrete:
 
     def centroid(self, x1_xu: float, x2_xu: float, fd: float=1.0) -> float:
         return self.moment(x1_xu, x2_xu) / self.area(x1_xu, x2_xu)
-
-    def _fc(self, ec: float):
-        z = symbols('z')
-        _fc_expr = 2*z - z**2
-        if 0 <= ec <= self.ecu:
-            if ec <= self.ecy:
-                r = _fc_expr.evalf(subs={'z': ec / self.ecy})
-            elif ec <= self.ecu:
-                r = 1
-            return self.fd * r
-        else:
-            return None
-
-    def fc_cg(self, xu: float, x1: float, x2: float):
-        area = self.area(xu, x1, x2)
-        moment = self.moment(xu, x1, x2)
-        return xu - (moment / area)
 
     def tauc_max(self):
         tauc = np.array([[15, 20, 25, 30, 35, 40], [2.5, 2.8, 3.1, 3.5, 3.7, 4.0]])

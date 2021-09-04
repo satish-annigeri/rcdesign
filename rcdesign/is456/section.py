@@ -144,9 +144,9 @@ class RectBeamSection(Section):
         print('-'*71)
         print(f"{' '*54}{(C - T)/1e3:8.4f} {M/1e6:8.2f}")
 
-    def design(self, Mu: float, Vu: float=0, Tu: float=0, kN: float=1e3, kNm: float=1e6):
+    def design(self, Mu: float, Vu: float=0, Tu: float=0):
         mulim = self.mulim() * self.conc.fck * self.b * self.eff_d()**2
-        if abs(Mu) * kNm > mulim:
+        if abs(Mu) > mulim:
             print(f'Doubly reinforced section (Mu,lim = {mulim / 1e6}')
         else:
             print(f'Singly reinforced section (Mu,lim = {mulim / 1e6})')
