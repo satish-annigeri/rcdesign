@@ -143,8 +143,9 @@ class RebarLayer:
     def force_compression(self, xu: float, conc: Concrete, rebar: Rebar, ecu: float):
         x = xu - self._dc
         esc = ecu / xu * x
-        fsc = rebar._fs(esc)     # Stress in compression steel
-        fcc = conc.fc(esc)       # Stress in concrete
+        fsc = rebar._fs(esc)           # Stress in compression steel
+        fcc = conc.fc(x / xu, conc.fd) # Stress in concrete
+        print('===', esc, fsc, fcc)
         _f = self.area() * (fsc - fcc)
         _m = _f * x
         return _f, _m
@@ -242,11 +243,6 @@ class Stirrups(ShearReinforcement):
         self._bar_dia = dia
         self._Asv = self.nlegs * pi * self.bar_dia**2 / 4
 
-    # @property
-    # def Asv(self):
-    #     self._Asv = self.nlegs * pi * self.bar_dia**2 / 4
-    #     return self._Asv
-
     def sv(self, Vus: float, d: float):
         if (self._alpha_deg < 45) or (self._alpha_deg > 90):
             return
@@ -267,7 +263,6 @@ class BentupBars(Stirrups):
         for bar_dia in self.bars:
             area += bar_dia**2
         return np.pi * area / 4
-
 
 
 if __name__ == '__main__':

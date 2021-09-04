@@ -50,7 +50,7 @@ def tauc(fck: float, pt: float):
     tc = 0.85 * sqrt(0.8 * fck) * (sqrt(1 + 5 * b) - 1) / (6 * b)
     return tc
 
-class TestCSB():
+class TestCSB:
     # Verify stress
     def test_csb_01(self):
         sb = ConcreteStressBlock('IS456_LSFlexure', 0.002, 0.0035)
