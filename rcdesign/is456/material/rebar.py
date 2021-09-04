@@ -242,15 +242,15 @@ class Stirrups(ShearReinforcement):
         self._bar_dia = dia
         self._Asv = self.nlegs * pi * self.bar_dia**2 / 4
 
-    @property
-    def Asv(self):
-        self._Asv = self.nlegs * pi * self.bar_dia**2 / 4
-        return self._Asv
+    # @property
+    # def Asv(self):
+    #     self._Asv = self.nlegs * pi * self.bar_dia**2 / 4
+    #     return self._Asv
 
     def sv(self, Vus: float, d: float):
-        if (self.alpha_deg < 45) or (self.alpha_deg > 90):
+        if (self._alpha_deg < 45) or (self._alpha_deg > 90):
             return
-        alpha_rad = self.alpha_deg * pi / 180
+        alpha_rad = self._alpha_deg * pi / 180
         self._sv = self.rebar.fd * self.Asv * d * np.sin(alpha_rad) / Vus
         return self._sv
 
@@ -266,7 +266,7 @@ class BentupBars(Stirrups):
         area = 0.0
         for bar_dia in self.bars:
             area += bar_dia**2
-        return self.nbars * np.pi * area / 4
+        return np.pi * area / 4
 
 
 

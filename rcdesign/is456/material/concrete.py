@@ -12,15 +12,15 @@ class StressBlock(ABC):
         self.label = label
 
     @abstractmethod
-    def stress(x: float):
+    def stress(self, x: float):
         pass
 
     @abstractmethod
-    def area(x1: float, x2: float):
+    def area(self, x1: float, x2: float):
         pass
 
     @abstractmethod
-    def moment(x1: float, x2: float):
+    def moment(self, x1: float, x2: float):
         pass
 
 # Concrete Stress Block for flexure as per IS456:2000 Limit State Method
@@ -147,8 +147,8 @@ class Concrete:
             return None
 
     def fc_cg(self, xu: float, x1: float, x2: float):
-        area = self.fc_area(xu, x1, x2)
-        moment = self.fc_moment(xu, x1, x2)
+        area = self.area(xu, x1, x2)
+        moment = self.moment(xu, x1, x2)
         return xu - (moment / area)
 
     def tauc_max(self):
@@ -183,7 +183,7 @@ if __name__ == '__main__':
     print(m20, m20.Ec)
     print(m20.ecy / m20.ecu)
     print(m20.fc(1, m20.fd))
-    print(m20._area(0, 1, m20.fd))
+    print(m20.area(0, 1, m20.fd))
     print(m20.moment(0, 1, m20.fd))
     print(1 - m20.centroid(0, 1))
 

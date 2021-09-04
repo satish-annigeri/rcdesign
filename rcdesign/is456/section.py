@@ -60,18 +60,6 @@ class RectBeamSection(Section):
         xumax = self.xumax()
         return (68/189) * xumax * (1 - (99/238*xumax))
 
-    def reqd_d(self, Mu: float, kNm: float=1e6):
-        Mu = Mu * kNm
-        fck = self.conc.fck
-        d = self.eff_d()
-        xumax = self.xumax()
-        Mulim = self.mulim() * fck * self.b * d**2
-        if Mu > Mulim:
-            xu = xumax
-        else:
-            a = 1
-            c = Mu / (self.conc.fck * self.b * self.eff_d()**2)
-
     def C(self, xu: float, ecu: float):
         C1 = self.conc.area(0, 1, self.conc.fd) * xu * self.b
         M1 = self.conc.moment(0, 1, self.conc.fd) * xu**2 * self.b
@@ -121,7 +109,7 @@ class RectBeamSection(Section):
     def report(self, xu: float, ecu: float):
         print(f"Rectangular Beam Section {self.b}x{self.D}")
         print(f"")
-        C = self.conc._area(0, 1, self.conc.fd) * xu * self.b
+        C = self.conc.area(0, 1, self.conc.fd) * xu * self.b
         Mc = self.conc.moment(0, 1, self.conc.fd) * xu**2 * self.b
         print(f"{' ':54}{'C':>8} {'M':>8}")
         print(f"{'Concrete in Compression':54}{C/1e3:8.2f} {Mc/1e6:8.2f}")
@@ -173,22 +161,19 @@ class RectBeamSection(Section):
             self.bar_dia = bar_dia
         if sv > 0:
             self.shear_steel._sv = sv
-        pt = self.t_steel.area() * 100 / (self.bw * self.eff_d())
+        pt = self.t_steel.area() * 100 / (self.b * self.eff_d())
         tauc = self.conc.tauc(pt)
-        Asv = self.shear_steel.Asv
-        Vuc = tauc * self.bw * self.eff_d()
+        Vuc = tauc * self.b * self.eff_d()
         Vus = self.shear_steel.rebar.fd * self.shear_steel._Asv * self.eff_d() / self.shear_steel._sv
-        # print(f"pst = {pt} tau_c = {tauc} Asv = {Asv}, d = {self.eff_d()}, Spacing = {self.shear_steel.sv()}")
         return Vuc + Vus
 
     def sv(self, Vu: float, nlegs: int, bar_dia: int, mof: float=25):
         self.shear_steel.nlegs = nlegs
         self.shear_steel.bar_dia = bar_dia
-        Asv = self.shear_steel.Asv
 
-        pt = self.t_steel.area() * 100 / (self.bw * self.eff_d())
+        pt = self.t_steel.area() * 100 / (self.b * self.eff_d())
         tauc = self.conc.tauc(pt)
-        Vuc = tauc * self.bw * self.eff_d()
+        Vuc = tauc * self.b * self.eff_d()
 
         Vus = Vu - Vuc
         self._sv = self.shear_steel.rebar.fd * self.shear_steel._Asv * self.eff_d() / Vus
@@ -250,9 +235,6 @@ class FlangedBeamSection(RectBeamSection):
         return s
 
     def analyse(self, xu: float, ecmax: float):
-        pass
-
-    def analyse(self, xu, ecu):
         pass
 
     def design(self):
