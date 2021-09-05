@@ -12,7 +12,7 @@ t2 = RebarLayer(70, [16, 16])
 t_st = RebarGroup(fe415, [t1, t2])
 c1 = RebarLayer(35, [16, 16])
 c_st = RebarGroup(fe415, [c1])
-sh_st = Stirrups(fe415, 2, 8)
+sh_st = Stirrups(fe415, 2, 8, 150)
 
 
 class TestRectBeamSection:
@@ -131,5 +131,37 @@ class TestRectBeamSection:
     def test_rectbeam11(self):
         rsec = RectBeamSection(230, 450, m20, t_st, c_st, sh_st, 25)
         xu, Mu = rsec.analyse(0.0035)
-        assert isclose(xu, 136.21019, rel_tol=1e-3) and isclose(Mu, 127872548.021942, rel_tol=1e-4)
+        assert isclose(xu, 136.21019, rel_tol=1e-3) and isclose(Mu, 127872548.021942)
 
+    def test_rectbeam12(self):
+        rsec = RectBeamSection(230, 450, m20, t_st, c_st, sh_st, 25)
+        Asv = 2 * pi * 8**2 / 4
+        fd = 415 / 1.15
+        d = rsec.eff_d()
+        sv = 150
+        Vus = fd * Asv * d / sv
+
+        pt = 5 * pi * 16**2 / 4 * 100 / (230 * d)
+        tauc = rsec.conc.tauc(pt)
+        Vuc = tauc * 230 * d
+        print(Vus)
+        assert isclose(rsec.Vu(), Vus+Vuc)
+
+    def test_rectbeam13(self):
+        rsec = RectBeamSection(230, 450, m20, t_st, c_st, sh_st, 25)
+        d = rsec.eff_d()
+        # Modify stirrup details
+        nlegs = 4
+        bar_dia = 10
+        sv = 125
+        # Manual calculation for shear reinforcement
+        Asv = nlegs * pi * bar_dia**2 / 4
+        fd = 415 / 1.15
+        Vus = fd * Asv * d / sv
+        # Manual calculation for concrete
+        pt = 5 * pi * 16**2 / 4 * 100 / (230 * d)
+        tauc = rsec.conc.tauc(pt)
+        Vuc = tauc * 230 * d
+        V = Vus + Vuc
+        print(Vus, Vuc, V)
+        assert isclose(rsec.Vu(nlegs, bar_dia, sv), V)

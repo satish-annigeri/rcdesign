@@ -94,7 +94,6 @@ class RectBeamSection(Section):
     def analyse(self, ecu: float):
         xu = self.xu(ecu)
         Mu = self.Mu(xu, ecu)
-        print('***', xu, Mu)
         return xu, Mu
 
     def pt(self):
@@ -109,7 +108,7 @@ class RectBeamSection(Section):
         return f"Size: {self.b} x {self.D}\nTension Steel: {self.t_steel}\nCompression Steel: {self.c_steel}"
 
     def report(self, xu: float, ecu: float): # pragma: no cover
-        print(f"Rectangular Beam Section {self.b}x{self.D}")
+        print(f"Rectangular Beam Section {self.b}x{self.D} (xu = {xu})")
         print()
         C = self.conc.area(0, 1, self.conc.fd) * xu * self.b
         Mc = self.conc.moment(0, 1, self.conc.fd) * xu**2 * self.b
@@ -121,7 +120,7 @@ class RectBeamSection(Section):
             x = xu - layer.dc
             esc = ecu / xu * x
             fsc = self.c_steel.rebar.fs(esc)
-            fcc = self.conc.fc(esc)
+            fcc = self.conc.fc(x / xu, self.conc.fd)
             Fsc = layer.area() * (fsc - fcc)
             C += Fsc
             Msc = Fsc * x
@@ -159,15 +158,17 @@ class RectBeamSection(Section):
 
     def Vu(self, nlegs: int=0, bar_dia: int=0, sv: float=0):
         if nlegs > 0:
-            self.nlegs = nlegs
+            self.shear_steel.nlegs = nlegs
         if bar_dia > 0:
-            self.bar_dia = bar_dia
+            self.shear_steel.bar_dia = bar_dia
         if sv > 0:
-            self.shear_steel._sv = sv
+            self.shear_steel.sv = sv
         pt = self.t_steel.area() * 100 / (self.b * self.eff_d())
         tauc = self.conc.tauc(pt)
         Vuc = tauc * self.b * self.eff_d()
         Vus = self.shear_steel.rebar.fd * self.shear_steel.Asv * self.eff_d() / self.shear_steel._sv
+        print(self.shear_steel._nlegs, self.shear_steel._bar_dia, self.shear_steel._sv)
+        print(Vus, Vuc, Vus+Vuc)
         return Vuc + Vus
 
     def sv(self, Vu: float, nlegs: int, bar_dia: int, mof: float=25):

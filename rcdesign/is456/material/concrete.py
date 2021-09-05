@@ -120,7 +120,6 @@ class Concrete:
 
     def area(self, x1_xu: float, x2_xu: float, fd:float=1.0) -> float:
         factor = self.stress_block.area(x1_xu, x2_xu)
-        print('**', factor)
         if factor:
             return factor * fd
         else:

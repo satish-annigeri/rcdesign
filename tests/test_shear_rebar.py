@@ -23,8 +23,8 @@ class TestStirrup:
 
     def test_shearrebar04(self):
         fe415 = RebarHYSD('Fe 415', 415)
-        st = Stirrups(fe415, 2, 8, 40)
-        assert st.sv(80e3, 400) == None
+        st = Stirrups(fe415, 2, 8, 150, 40)
+        assert st.calc_sv(80e3, 400) == None
 
     def test_shearrebar05(self):
         fe415 = RebarHYSD('Fe 415', 415)
@@ -32,15 +32,15 @@ class TestStirrup:
         Vus = 80e3
         d = 400
         sv = fe415.fd * (2 * pi * 8**2 / 4) * d * sin(pi/2) / Vus
-        assert st.sv(Vus, d) == sv
+        assert st.calc_sv(Vus, d) == sv
 
     def test_shearrebar06(self):
         fe415 = RebarHYSD('Fe 415', 415)
-        st = Stirrups(fe415, 2, 8, 45)
+        st = Stirrups(fe415, 2, 8, 150, 45)
         Vus = 80e3
         d = 400
         sv = st.rebar.fd * (2 * pi * 8**2 / 4) * d * sin(pi/2) * sin(45 * pi / 180) / Vus
-        assert st.sv(Vus, d) == sv
+        assert st.calc_sv(Vus, d) == sv
 
 class TestBentupBars:
     def test_bentupbars01(self):
@@ -54,5 +54,5 @@ class TestBentupBars:
         Vus = 80e3
         d = 400
         sv = bup.rebar.fd * (2 * pi * 16**2 / 4) * d * sin(45 * pi / 180) / Vus
-        assert bup.sv(Vus, d) == sv
+        assert bup.calc_sv(Vus, d) == sv
 

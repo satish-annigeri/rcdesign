@@ -144,7 +144,6 @@ class RebarLayer:
         esc = ecu / xu * x
         fsc = rebar._fs(esc)           # Stress in compression steel
         fcc = conc.fc(x / xu, conc.fd) # Stress in concrete
-        print('===', esc, fsc, fcc)
         _f = self.area() * (fsc - fcc)
         _m = _f * x
         return _f, _m
@@ -209,14 +208,10 @@ class ShearReinforcement(ABC): # pragma: no cover
     def Asv(self):
         pass
 
-    @abstractmethod
-    def sv(self):
-        pass
-
 
 """Vertical or inclined stirrups as shear reinforcement"""
 class Stirrups(ShearReinforcement):
-    def __init__(self, rebar: Rebar, _nlegs: int, _bar_dia: int, _alpha_deg: float=90, _sv: float=0.0):
+    def __init__(self, rebar: Rebar, _nlegs: int, _bar_dia: int, _sv: float=0.0, _alpha_deg: float=90):
         self.rebar = rebar
         self._nlegs = _nlegs
         self._bar_dia = _bar_dia
@@ -247,7 +242,16 @@ class Stirrups(ShearReinforcement):
         self._bar_dia = dia
         self._Asv = self.nlegs * pi * self.bar_dia**2 / 4
 
-    def sv(self, Vus: float, d: float):
+    @property
+    def sv(self):
+        return self._sv
+
+    @sv.setter
+    def sv(self, _sv: float):
+        self._sv = _sv
+        self._Asv = self.nlegs * pi * self.bar_dia**2 / 4
+
+    def calc_sv(self, Vus: float, d: float):
         if (self._alpha_deg < 45) or (self._alpha_deg > 90):
             return
         alpha_rad = self._alpha_deg * pi / 180
