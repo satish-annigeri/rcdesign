@@ -7,7 +7,7 @@ from sympy import symbols, integrate, nsimplify
 
 
 # Generalized Stress Block
-class StressBlock(ABC): # pragma: no cover
+class StressBlock(ABC):  # pragma: no cover
     def __init__(self, label: str):
         self.label = label
 
@@ -23,6 +23,7 @@ class StressBlock(ABC): # pragma: no cover
     def moment(self, x1: float, x2: float):
         pass
 
+
 # Concrete Stress Block for flexure as per IS456:2000 Limit State Method
 @dataclass
 class ConcreteStressBlock(StressBlock):
@@ -34,12 +35,12 @@ class ConcreteStressBlock(StressBlock):
         self.ecy = ecy
         self.ecu = ecu
 
-    def invalidx(self, x1: float, x2: float=1):
+    def invalidx(self, x1: float, x2: float = 1):
         if x1 > x2:
             x1, x2 = x2, x1
         return not ((0 <= x1 <= 1) and (0 <= x2 <= 1))
 
-    def stress(self, x: float, ecmax: float=0.0035):
+    def stress(self, x: float, ecmax: float = 0.0035):
         k = self.ecy / ecmax
 
         if x <= k:
@@ -48,7 +49,7 @@ class ConcreteStressBlock(StressBlock):
             r = 1.0
         return r
 
-    def area(self, x1: float, x2: float, ecmax: float=0.0035):
+    def area(self, x1: float, x2: float, ecmax: float = 0.0035):
         if self.invalidx(x1, x2):
             return None
         if x1 > x2:
@@ -66,7 +67,7 @@ class ConcreteStressBlock(StressBlock):
             a2 = integrate(1, (self.z, k, x2))
         return a1 + a2
 
-    def moment(self, x1: float, x2: float, ecmax: float=0.0035):
+    def moment(self, x1: float, x2: float, ecmax: float = 0.0035):
         if self.invalidx(x1, x2):
             return
         if x1 > x2:
@@ -84,9 +85,11 @@ class ConcreteStressBlock(StressBlock):
             m2 = integrate(self.z, (self.z, k, x2))
         return m1 + m2
 
-# Concrete class
 
+# Concrete class
 """Concrete class with stress-strain properties as defined in IS456:2000"""
+
+
 @dataclass
 class Concrete:
     label: str
@@ -111,32 +114,34 @@ class Concrete:
     def fd(self):
         return 0.67 * self.fck / self.gamma_m
 
-    def fc(self, x_xu: float, fd:float=1.0):
+    def fc(self, x_xu: float, fd: float = 1.0):
         if (0 <= x_xu <= 1):
             __fc = self.stress_block.stress(x_xu)
             return __fc * fd
         else:
-            raise ValueError('x/xu = %.4f. It must be between 0 and 1' % (x_xu))
+            raise ValueError('x/xu = %.4f. Must be between 0 and 1' % (x_xu))
 
-    def area(self, x1_xu: float, x2_xu: float, fd:float=1.0) -> float:
+    def area(self, x1_xu: float, x2_xu: float, fd: float = 1.0) -> float:
         factor = self.stress_block.area(x1_xu, x2_xu)
         if factor:
             return factor * fd
         else:
             return None
 
-    def moment(self, x1_xu: float, x2_xu: float, fd: float=1.0) -> float:
+    def moment(self, x1_xu: float, x2_xu: float, fd: float = 1.0) -> float:
         factor = self.stress_block.moment(x1_xu, x2_xu)
         if factor:
             return factor * fd
         else:
             return None
 
-    def centroid(self, x1_xu: float, x2_xu: float, fd: float=1.0) -> float:
+    def centroid(self, x1_xu: float, x2_xu: float, fd: float = 1.0) -> float:
         return self.moment(x1_xu, x2_xu) / self.area(x1_xu, x2_xu)
 
     def tauc_max(self):
-        tauc = np.array([[15, 20, 25, 30, 35, 40], [2.5, 2.8, 3.1, 3.5, 3.7, 4.0]])
+        tauc = np.array(
+            [[15, 20, 25, 30, 35, 40], [2.5, 2.8, 3.1, 3.5, 3.7, 4.0]]
+        )
         if self.fck < 15:
             return 0.0
         elif self.fck >= tauc[0, -1]:
@@ -156,8 +161,11 @@ class Concrete:
         if pt > 3:
             pt = 3.0
         beta = max(1.0, (0.8 * self.fck) / (6.89 * pt))
-        return 0.85 * np.sqrt(0.8 * self.fck) * (np.sqrt(1 + 5 * beta) - 1) / (6 * beta)
+        num = 0.85 * np.sqrt(0.8 * self.fck) * (np.sqrt(1 + 5 * beta) - 1)
+        den = (6 * beta)
+        return num / den
 
-    def __repr__(self): # pragma: no cover
-        return f"Stress Block {self.stress_block.label} - {self.label}: {self.fck} {self.fd:.2f} {self.density}"
-
+    def __repr__(self):  # pragma: no cover
+        s = f"Stress Block {self.stress_block.label} - {self.label}: "
+        s += f'{self.fck} {self.fd:.2f} {self.density}'
+        return s

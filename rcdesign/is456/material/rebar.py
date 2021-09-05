@@ -1,4 +1,5 @@
-""" Classes to represent reinforcement bars, layers of reinforcement bars and groups of reinforcement layers"""
+"""Classes to represent reinforcement bars, layers of reinforcement bars
+and groups of reinforcement layers"""
 
 from typing import List
 from dataclasses import dataclass
@@ -7,12 +8,14 @@ from abc import ABC, abstractmethod
 import numpy as np
 from math import pi, sin
 
-from .concrete import ConcreteStressBlock, Concrete
+from .concrete import Concrete
+
 
 # Rebar class
 
+
 @dataclass
-class Rebar(ABC): # pragma: no cover
+class Rebar(ABC):  # pragma: no cover
     label: str
     fy: float
     gamma_m = 1.15
@@ -30,12 +33,16 @@ class Rebar(ABC): # pragma: no cover
     def fs(self, es):
         pass
 
-"""Mild steel reinforcement bars as defined in IS456:2000 with a well defined yield point"""
+
+"""Mild steel reinforcement bars as defined in IS456:2000 with a
+well defined yield point"""
+
+
 class RebarMS(Rebar):
     def __init__(self, label: str, fy: float):
         super().__init__(label, fy)
 
-    def __repr__(self): # pragma: no cover
+    def __repr__(self):  # pragma: no cover
         return f"{self.label:>6}: Type={'MS':4} fy={self.fy} fd={self.fd:.2f}"
 
     def _fs(self, es: float):
@@ -54,20 +61,23 @@ class RebarMS(Rebar):
             return self._fs(es)
 
 
-"""High yield strength deformed bars as defined in IS456:2000 with piece-wise linear stress-strain relation
-between 0.8 to 1.0 times design strength"""
+"""High yield strength deformed bars as defined in IS456:2000 with piece-wise
+linear stress-strain relation between 0.8 to 1.0 times design strength"""
+
+
 class RebarHYSD(Rebar):
     inel = np.array([
-            [   0.8,   0.85,    0.9,  0.95, 0.975, 1.0],
-            [   0.0, 0.0001, 0.0003, 0.0007, 0.001, 0.002]
+            [0.8, 0.85, 0.9, 0.95, 0.975, 1.0],
+            [0.0, 0.0001, 0.0003, 0.0007, 0.001, 0.002]
     ]).T
+
     def __init__(self, label: str, fy: float):
         super().__init__(label, fy)
         self.es = RebarHYSD.inel.copy()
-        self.es[:,0] = self.es[:,0] * self.fy / self.gamma_m
-        self.es[:,1] = self.es[:,0] / self.Es + self.es[:,1]
+        self.es[:, 0] = self.es[:, 0] * self.fy / self.gamma_m
+        self.es[:, 1] = self.es[:, 0] / self.Es + self.es[:, 1]
 
-    def __repr__(self): # pragma: no cover
+    def __repr__(self):  # pragma: no cover
         return f"{self.label:>6}: Type={'HYSD'} fy={self.fy} fd={self.fd:.2f}"
 
     def _fs(self, es: float):
@@ -99,10 +109,12 @@ class RebarHYSD(Rebar):
 
 
 """Layer of reinforcement bars"""
+
+
 @dataclass
 class RebarLayer:
     _dc: float        # Distance of centre of layer from edge of section
-    dia: List[int]    # List of bar diameters, from left to right, all of the same type to be defined in RebarGroup
+    dia: List[int]    # List of bar diameters, left to right, all of same type
 
     def max_dia(self):
         return max(self.dia)
@@ -117,7 +129,7 @@ class RebarLayer:
     def x(self, xu: float):
         return xu - self._dc
 
-    def __repr__(self): # pragma: no cover
+    def __repr__(self):  # pragma: no cover
         s = "Dia: "
         b = ''
         for bardia in self.dia:
@@ -126,7 +138,7 @@ class RebarLayer:
         s += f"{b} at {self.dc}. Area: {self.area():.2f}"
         return s
 
-    def fs(self, xu: float, rebar: Rebar, ecu:float):
+    def fs(self, xu: float, rebar: Rebar, ecu: float):
         es = ecu / xu * self.x(xu)
         return rebar._fs(es)
 
@@ -134,26 +146,29 @@ class RebarLayer:
         x = D_xu - self._dc
         es = ecu / xu * x
         fs = rebar.fs(es)
-        
+
         _f = self.area() * fs
         _m = _f * x
         return _f, _m
 
-    def force_compression(self, xu: float, conc: Concrete, rebar: Rebar, ecu: float):
+    def force_compression(self, xu: float, conc: Concrete, rebar: Rebar,
+                          ecu: float):
         x = xu - self._dc
         esc = ecu / xu * x
-        fsc = rebar._fs(esc)           # Stress in compression steel
-        fcc = conc.fc(x / xu, conc.fd) # Stress in concrete
+        fsc = rebar._fs(esc)            # Stress in compression steel
+        fcc = conc.fc(x / xu, conc.fd)  # Stress in concrete
         _f = self.area() * (fsc - fcc)
         _m = _f * x
         return _f, _m
 
 
 """Group of reinforcement bars"""
+
+
 @dataclass
 class RebarGroup:
     rebar: Rebar              # Rebar object
-    layers: List[RebarLayer]  # Layers each with its own dc and list of bar diameters
+    layers: List[RebarLayer]  # List of layers of bars, in any order from edge
 
     def area(self):
         return sum([layer.area() for layer in self.layers])
@@ -171,15 +186,16 @@ class RebarGroup:
     def dc(self):
         return self._dc()
 
-    def __repr__(self): # pragma: no cover
+    def __repr__(self):  # pragma: no cover
         sl = 'layers' if len(self.layers) > 1 else 'layer'
         s = f"Rebar Group {self.rebar.label} in {len(self.layers)} {sl}\n"
         for layer in self.layers:
             s += '\t' + layer.__repr__() + '\n'
-        s += f"\tTotal Area: {self.area():.2f} centroid at {self.dc:.2f} from edge"
+        s += f"\tTotal Area: {self.area():.2f} "
+        s += f"centroid at {self.dc:.2f} from the edge"
         return s
 
-    def force_tension(self, xu: float, D_xu: float, ecu:float):
+    def force_tension(self, xu: float, D_xu: float, ecu: float):
         _f = 0.0
         _m = 0.0
         for layer in self.layers:
@@ -198,8 +214,11 @@ class RebarGroup:
         return _f, _m
 
 
-class ShearReinforcement(ABC): # pragma: no cover
-    def __init__(self, rebar: Rebar, _Asv: float=0.0, _sv: float=0.0):
+"""Shear reinforcement"""
+
+
+class ShearReinforcement(ABC):  # pragma: no cover
+    def __init__(self, rebar: Rebar, _Asv: float = 0.0, _sv: float = 0.0):
         self.rebar = rebar
         self._Asv = _Asv
         self._sv = _sv
@@ -210,8 +229,11 @@ class ShearReinforcement(ABC): # pragma: no cover
 
 
 """Vertical or inclined stirrups as shear reinforcement"""
+
+
 class Stirrups(ShearReinforcement):
-    def __init__(self, rebar: Rebar, _nlegs: int, _bar_dia: int, _sv: float=0.0, _alpha_deg: float=90):
+    def __init__(self, rebar: Rebar, _nlegs: int, _bar_dia: int,
+                 _sv: float = 0.0, _alpha_deg: float = 90):
         self.rebar = rebar
         self._nlegs = _nlegs
         self._bar_dia = _bar_dia
@@ -260,8 +282,11 @@ class Stirrups(ShearReinforcement):
 
 
 """Bent up bars as shear reinforcement"""
+
+
 class BentupBars(Stirrups):
-    def __init__(self, rebar: Rebar, bars: List[int], _sv: float=0.0, _alpha_deg: float=45):
+    def __init__(self, rebar: Rebar, bars: List[int], _sv: float = 0.0,
+                 _alpha_deg: float = 45):
         self.rebar = rebar
         self.bars = bars
         self._alpha_deg = _alpha_deg
@@ -274,51 +299,3 @@ class BentupBars(Stirrups):
         for bar_dia in self.bars:
             area += bar_dia**2
         return pi * area / 4
-
-
-# if __name__ == '__main__':
-#     # Test RebarMS and RebarHYSD
-
-#     ms = RebarMS('MS 250', 250)
-#     print(f"{ms} {ms.fs(0.001):.2f}")
-
-#     fe415 = RebarHYSD('Fe 415', 415)
-#     print(f"{fe415} {fe415.fs(0.002):.2f}")
-#     print(fe415.es)
-#     print(fe415.fs(0.8*415/1.15/2e5 + 1e-6))
-
-#     fe500 = RebarHYSD('Fe 500', 500)
-#     print(f"{fe500} {fe500.fs(0.002):.2f}")
-
-#     # Test RebarLayer
-
-#     t1 = RebarLayer(35, [16, 16, 16])
-#     t2 = RebarLayer(70, [16, 16])
-#     c1 = RebarLayer(35, [16, 16])
-#     print(t1)
-#     print(t2)
-#     print(c1)
-
-#     is456_lsm = ConcreteStressBlock('IS456:2000 LSM', 0.002, 0.0035)
-#     fe415 = RebarHYSD('Fe 415', 415)
-#     m20 = Concrete('M20', 20, is456_lsm)
-#     D = 450
-#     xu = 131.8722
-#     print('   Concrete:', m20.area(0, 1, m20.fd)*xu*230)
-#     print('Compression:', c1.force_compression(xu, m20, fe415, 0.0035))
-#     print('    Tension:', t1.force_tension(xu, D - xu, fe415, 0.0035))
-#     print('    Tension:', t2.force_tension(xu, D - xu, fe415, 0.0035))
-
-#     t1 = RebarLayer(35, [16, 16, 16])
-#     t2 = RebarLayer(70, [16, 16])
-#     c1 = RebarLayer(35, [16, 16])
-#     t_st = RebarGroup(fe415, [t1, t2])
-#     print(t_st)
-#     print(t_st.area(), t_st._dc())
-#     xu = 131.8722
-#     D = 450
-#     print(t_st.force_tension(xu, D, 0.0035))
-
-#     c_st = RebarGroup(fe415, [c1])
-#     print(c_st)
-#     print(c_st.force_compression(xu, m20, 0.0035))

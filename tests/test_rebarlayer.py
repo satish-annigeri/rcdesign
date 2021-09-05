@@ -1,9 +1,8 @@
-from math import isclose, pi, sqrt
+from math import pi
 
-from rcdesign.is456.material.rebar import RebarMS, RebarHYSD, RebarLayer
+from rcdesign.is456.material.rebar import RebarHYSD, RebarLayer
 from rcdesign.is456.material.concrete import ConcreteStressBlock, Concrete
 
-from .test_rebar import get_fs
 
 class Test_RebarLayer:
     def test_rebarlayer01(self):

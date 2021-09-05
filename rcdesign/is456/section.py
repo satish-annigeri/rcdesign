@@ -1,21 +1,22 @@
 """Class to represent reinforced concrete cross sections"""
 
+
 from enum import Enum
 # from typing import List
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
 from scipy.optimize import brentq
 
-# import numpy as np
-# from numpy import pi
 
-from .material.concrete import ConcreteStressBlock, Concrete
-from .material.rebar import Rebar, RebarMS, RebarHYSD, RebarLayer, RebarGroup, ShearReinforcement #, Stirrups, BentupBars
+from .material.concrete import Concrete
+from .material.rebar import Rebar, RebarGroup, ShearReinforcement
 from rcdesign.utils import floor
 
 from ..utils import rootsearch
 
+
 # DesignForce class
+
 
 class DesignForceType(Enum):
     BEAM = 1
@@ -24,7 +25,7 @@ class DesignForceType(Enum):
     SHEARWALL = 4
 
 
-class Section(ABC): # pragma: no cover
+class Section(ABC):  # pragma: no cover
     def __init__(self, design_force_type, clear_cover):
         self.design_force_type = design_force_type
         self.clear_cover = clear_cover
@@ -32,18 +33,15 @@ class Section(ABC): # pragma: no cover
     @abstractmethod
     def C(self, xu: float, ecmax: float):
         pass
-    # @abstractmethod
-    # def design(self):
-    #     pass
 
-    # @abstractmethod
-    # def analyse(self, ecu: float):
-    #     pass
 
-# RectSection class to repersent a rectangular section
+"""Class to repersent a rectangular beam section"""
+
 
 class RectBeamSection(Section):
-    def __init__(self, b: float, D: float, conc: Concrete, t_steel: RebarGroup, c_steel: RebarGroup, shear_steel: ShearReinforcement, clear_cover: float):
+    def __init__(self, b: float, D: float, conc: Concrete,
+                 t_steel: RebarGroup, c_steel: RebarGroup,
+                 shear_steel: ShearReinforcement, clear_cover: float):
         super().__init__(DesignForceType.BEAM, clear_cover)
         self.b = b
         self.D = D
@@ -52,7 +50,7 @@ class RectBeamSection(Section):
         self.c_steel = c_steel
         self.shear_steel = shear_steel
 
-    def xumax(self, d: float=1):
+    def xumax(self, d: float = 1):
         es_min = self.t_steel.rebar.es_min()
         return 0.0035 / (es_min + 0.0035) * d
 
@@ -104,10 +102,12 @@ class RectBeamSection(Section):
     def tauc(self):
         return self.conc.tauc(self.pt())
 
-    def __repr__(self): # pragma: no cover
-        return f"Size: {self.b} x {self.D}\nTension Steel: {self.t_steel}\nCompression Steel: {self.c_steel}"
+    def __repr__(self):  # pragma: no cover
+        s = f"Size: {self.b} x {self.D}\nTension Steel: {self.t_steel}\n"
+        s += f"Compression Steel: {self.c_steel}"
+        return s
 
-    def report(self, xu: float, ecu: float): # pragma: no cover
+    def report(self, xu: float, ecu: float):  # pragma: no cover
         print(f"Rectangular Beam Section {self.b}x{self.D} (xu = {xu:.2f})")
         print('Units: Distance in mm, Area in mm^2, Force in kN, Moment in kNm')
         C = self.conc.area(0, 1, self.conc.fd) * xu * self.b
@@ -145,18 +145,18 @@ class RectBeamSection(Section):
         print('-'*71)
         print(f"{' '*54}{(C - T)/1e3:8.4f} {M/1e6:8.2f}")
 
-    # def design(self, Mu: float, Vu: float=0, Tu: float=0):
+    # def design(self, Mu: float, Vu: float = 0, Tu: float = 0):
     #     d = self.D - self.clear_cover - 25.0
     #     mulim = self.mulim(d) * self.conc.fck * self.b * d**2
     #     if abs(Mu) > mulim:
     #         print(f'Doubly reinforced section (Mu,lim = {mulim / 1e6}')
     #     else:
     #         print(f'Singly reinforced section (Mu,lim = {mulim / 1e6})')
-    
+
     def eff_d(self):
         return self.D - self.t_steel._dc()
 
-    def Vu(self, nlegs: int=0, bar_dia: int=0, sv: float=0):
+    def Vu(self, nlegs: int = 0, bar_dia: int = 0, sv: float = 0):
         if nlegs > 0:
             self.shear_steel.nlegs = nlegs
         if bar_dia > 0:
@@ -167,11 +167,9 @@ class RectBeamSection(Section):
         tauc = self.conc.tauc(pt)
         Vuc = tauc * self.b * self.eff_d()
         Vus = self.shear_steel.rebar.fd * self.shear_steel.Asv * self.eff_d() / self.shear_steel._sv
-        # print(self.shear_steel._nlegs, self.shear_steel._bar_dia, self.shear_steel._sv)
-        # print(Vus, Vuc, Vus+Vuc)
         return Vuc + Vus
 
-    def sv(self, Vu: float, nlegs: int, bar_dia: int, mof: float=25):
+    def sv(self, Vu: float, nlegs: int, bar_dia: int, mof: float = 25):
         self.shear_steel.nlegs = nlegs
         self.shear_steel.bar_dia = bar_dia
 
@@ -183,12 +181,16 @@ class RectBeamSection(Section):
         self._sv = self.shear_steel.rebar.fd * self.shear_steel._Asv * self.eff_d() / Vus
         self._sv = floor(self._sv, mof)
         return self._sv
-    
+
 
 """Class to repersent flanged section"""
+
+
 @dataclass
 class FlangedBeamSection(RectBeamSection):
-    def __init__(self, bw: float, D: float, bf: float, Df: float, conc: Concrete, t_steel: RebarGroup, c_steel: RebarGroup, shear_steel: Rebar, clear_cover: float):
+    def __init__(self, bw: float, D: float, bf: float, Df: float,
+                 conc: Concrete, t_steel: RebarGroup, c_steel: RebarGroup,
+                 shear_steel: Rebar, clear_cover: float):
         super().__init__(bw, D, conc, t_steel, c_steel, shear_steel, clear_cover)
         bw: float
         # D: float
@@ -232,7 +234,7 @@ class FlangedBeamSection(RectBeamSection):
         C, M = self.C(xu, ecu)
         return M + C * (self.eff_d() - xu)
 
-    def __repr__(self): # pragma: no cover
+    def __repr__(self):  # pragma: no cover
         s = f'Flanged Beam Section {self.bw}x{self.D} {self.bf}x{self.Df}\n'
         s += self.conc.__repr__() + '\n'
         s += f"{self.c_steel.layers[0]}\n"
@@ -243,41 +245,3 @@ class FlangedBeamSection(RectBeamSection):
 
     def design(self):
         pass
-
-
-# if __name__ == '__main__':
-#     m20 = Concrete('M20', 20, ConcreteStressBlock('IS456:2000 LSM', 0.002, 0.0035))
-#     # print(m20.fd, m20._area(0, 1))
-
-#     ms = RebarMS('MS 250', 250)
-#     # print(ms)
-
-#     fe415 = RebarHYSD('Fe 415', 415)
-#     # print(fe415)
-
-#     fe500 = RebarHYSD('Fe 500', 500)
-#     print(fe500)
-
-#     t1 = RebarLayer(35, [16, 16, 16])
-#     t2 = RebarLayer(70, [16, 16])
-#     c1 = RebarLayer(35, [16, 16])
-#     t_st = RebarGroup(fe415, [t1, t2])
-#     c_st = RebarGroup(fe415, [c1])
-
-    # sec1 = RectBeamSection(230, 450, m20, t_st, c_st, fe415, 25)
-    # print(sec1)
-    # xu = 136.210193097794
-    # print('Compression:', sec1.C(xu, 0.0035))
-    # print('    Tension:', sec1.T(xu, 0.0035))
-    # print(sec1.C_T(xu, 0.0035))
-    # x1, x2 = rootsearch(sec1.C_T, 50, 400, 10, sec1.conc.ecu)
-    # print(x1, x2)
-    # xu = brentq(sec1.C_T, x1, x2, args=(sec1.conc.ecu,), xtol=1e-4)
-    # print(xu, sec1.C_T(xu, sec1.conc.ecu))
-    # sec1.report(xu, sec1.conc.ecu)
-    # bw = 230
-    # D = 450
-    # bf = 1000
-    # Df = 150
-    # tsec = FlangedBeamSection(bw, D, bf, Df, m20, t_st, c_st, fe415, 25)
-    # print(tsec.C(160, 0.0035))

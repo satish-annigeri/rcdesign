@@ -1,7 +1,8 @@
-from math import isclose, pi
+from math import pi
 
-from rcdesign.is456.material.rebar import RebarMS, RebarHYSD, RebarLayer, RebarGroup
+from rcdesign.is456.material.rebar import RebarHYSD, RebarLayer, RebarGroup
 from rcdesign.is456.material.concrete import ConcreteStressBlock, Concrete
+
 
 class TestRebarGroup:
     def test_rebargroup01(self):
@@ -45,4 +46,3 @@ class TestRebarGroup:
         f1, m1 = l1.force_compression(xu, conc, fe415, ecu)
         f2, m2 = l2.force_compression(xu, conc, fe415, ecu)
         assert (f == f1 + f2) and (m == m1 + m2)
-

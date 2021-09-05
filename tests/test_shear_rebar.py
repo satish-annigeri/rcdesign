@@ -1,7 +1,7 @@
-from math import isclose, pi, sin
+from math import pi, sin
 
-from rcdesign.is456.material.rebar import BentupBars, RebarMS, RebarHYSD, RebarLayer, RebarGroup, Stirrups
-from rcdesign.is456.material.concrete import ConcreteStressBlock, Concrete
+from rcdesign.is456.material.rebar import RebarHYSD, Stirrups, BentupBars
+
 
 class TestStirrup:
     def test_shearrebar01(self):
@@ -24,7 +24,7 @@ class TestStirrup:
     def test_shearrebar04(self):
         fe415 = RebarHYSD('Fe 415', 415)
         st = Stirrups(fe415, 2, 8, 150, 40)
-        assert st.calc_sv(80e3, 400) == None
+        assert st.calc_sv(80e3, 400) is None
 
     def test_shearrebar05(self):
         fe415 = RebarHYSD('Fe 415', 415)
@@ -47,6 +47,7 @@ class TestStirrup:
         st = Stirrups(fe415, 2, 8, 150, 45)
         assert st.sv == 150
 
+
 class TestBentupBars:
     def test_bentupbars01(self):
         fe415 = RebarHYSD('Fe 415', 415)
@@ -60,4 +61,3 @@ class TestBentupBars:
         d = 400
         sv = bup.rebar.fd * (2 * pi * 16**2 / 4) * d * sin(45 * pi / 180) / Vus
         assert bup.calc_sv(Vus, d) == sv
-

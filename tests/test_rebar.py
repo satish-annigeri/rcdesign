@@ -3,12 +3,15 @@ import numpy as np
 
 from rcdesign.is456.material.rebar import RebarMS, RebarHYSD
 
+
 def get_fs(fd, es, fd1, fd2, es1, es2, Es=2e5):
     x = fd1 * fd / Es + es1 + es
-    y1 = fd1 * fd; y2 = fd2 * fd
-    x1 = y1 / Es + es1; x2 = y2 / Es + es2
-    # print(x, x1, x2, y1, y2)
+    y1 = fd1 * fd
+    y2 = fd2 * fd
+    x1 = y1 / Es + es1
+    x2 = y2 / Es + es2
     return y1 + (y2 - y1) / (x2 - x1) * (x - x1)
+
 
 class Test_rebar:
     # Verify stress in linear elastic region
@@ -79,7 +82,7 @@ class Test_rebar:
     def test_rebar13(self):
         fe415 = RebarHYSD('Fe 415', 415)
         Es = fe415.Es
-        x = 0.9 * fe415.fd / Es + 0.0003 +0.00005
+        x = 0.9 * fe415.fd / Es + 0.0003 + 0.00005
         y = get_fs(fe415.fd, 0.00005, 0.9, 0.95, 0.0003, 0.0007)
         assert isclose(fe415.fs(x), y)
 
@@ -87,7 +90,7 @@ class Test_rebar:
     def test_rebar14(self):
         fe415 = RebarHYSD('Fe 415', 415)
         Es = fe415.Es
-        x = 0.95 * fe415.fd / Es + 0.0007 +0.00005
+        x = 0.95 * fe415.fd / Es + 0.0007 + 0.00005
         y = get_fs(fe415.fd, 0.00005, 0.95, 0.975, 0.0007, 0.001)
         assert isclose(fe415.fs(x), y)
 
@@ -95,7 +98,7 @@ class Test_rebar:
     def test_rebar15(self):
         fe415 = RebarHYSD('Fe 415', 415)
         Es = fe415.Es
-        x = 0.975 * fe415.fd / Es + 0.001 +0.00005
+        x = 0.975 * fe415.fd / Es + 0.001 + 0.00005
         y = get_fs(fe415.fd, 0.00005, 0.975, 1.0, 0.001, 0.002)
         assert isclose(fe415.fs(x), y)
 
@@ -112,4 +115,3 @@ class Test_rebar:
         fs = fe415.fs(es)
         a = fs == np.array([200, 415/1.15])
         assert a.all()
-
