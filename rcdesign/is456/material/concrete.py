@@ -35,7 +35,9 @@ class ConcreteStressBlock(StressBlock):
         self.ecu = ecu
 
     def invalidx(self, x1: float, x2: float=1):
-        return not ((0 <= x1 <= 1) and (0 <= x2 <= 1) and (x1 <= x2))
+        if x1 > x2:
+            x1, x2 = x2, x1
+        return not ((0 <= x1 <= 1) and (0 <= x2 <= 1))
 
     def stress(self, x: float, ecmax: float=0.0035):
         k = self.ecy / ecmax
@@ -47,45 +49,37 @@ class ConcreteStressBlock(StressBlock):
         return r
 
     def area(self, x1: float, x2: float, ecmax: float=0.0035):
-        if (x1 < 0) or (x1 > 1) or (x2 < 0) or (x2 > 1):
-            print('Error')
-            return
+        if self.invalidx(x1, x2):
+            return None
         if x1 > x2:
             x1, x2 = x2, x1
         k = nsimplify(self.ecy / ecmax)
 
         if x2 <= k:
-#             print('Only parabolic')
             a1 = integrate(self.expr, (self.z, x1/k, x2/k)) * k
             a2 = 0.0
         elif x1 >= k:
-#             print('Only rectangular')
             a1 = 0.0
             a2 = integrate(1, (self.z, x1, x2))
         else:
-#             print('Parabolic and rectangular')
             a1 = integrate(self.expr, (self.z, x1/k, 1)) * k
             a2 = integrate(1, (self.z, k, x2))
         return a1 + a2
 
     def moment(self, x1: float, x2: float, ecmax: float=0.0035):
-        if (x1 < 0) or (x1 > 1) or (x2 < 0) or (x2 > 1):
-            print('Error')
+        if self.invalidx(x1, x2):
             return
         if x1 > x2:
             x1, x2 = x2, x1
         k = nsimplify(self.ecy / ecmax)
 
         if x2 <= k:
-#             print('Only parabolic')
             m1 = integrate(self.expr * self.z, (self.z, x1/k, x2/k)) * k**2
             m2 = 0.0
         elif x1 >= k:
-#             print('Only rectangular')
             m1 = 0.0
             m2 = integrate(self.z, (self.z, x1, x2))
         else:
-#             print('Parabolic and rectangular')
             m1 = integrate(self.expr * self.z, (self.z, x1/k, 1)) * k**2
             m2 = integrate(self.z, (self.z, k, x2))
         return m1 + m2
@@ -125,10 +119,19 @@ class Concrete:
             raise ValueError('x/xu = %.4f. It must be between 0 and 1' % (x_xu))
 
     def area(self, x1_xu: float, x2_xu: float, fd:float=1.0) -> float:
-        return self.stress_block.area(x1_xu, x2_xu) * fd
+        factor = self.stress_block.area(x1_xu, x2_xu)
+        print('**', factor)
+        if factor:
+            return factor * fd
+        else:
+            return None
 
     def moment(self, x1_xu: float, x2_xu: float, fd: float=1.0) -> float:
-        return self.stress_block.moment(x1_xu, x2_xu) * fd
+        factor = self.stress_block.moment(x1_xu, x2_xu)
+        if factor:
+            return factor * fd
+        else:
+            return None
 
     def centroid(self, x1_xu: float, x2_xu: float, fd: float=1.0) -> float:
         return self.moment(x1_xu, x2_xu) / self.area(x1_xu, x2_xu)
@@ -159,19 +162,3 @@ class Concrete:
     def __repr__(self):
         return f"Stress Block {self.stress_block.label} - {self.label}: {self.fck} {self.fd:.2f} {self.density}"
 
-if __name__ == '__main__':
-    is456_lsm = ConcreteStressBlock('IS456:2000 LSM', 0.002, 0.0035)
-    m20 = Concrete('M20', 20, is456_lsm)
-    print(m20, m20.Ec)
-    print(m20.ecy / m20.ecu)
-    print(m20.fc(1, m20.fd))
-    print(m20.area(0, 1, m20.fd))
-    print(m20.moment(0, 1, m20.fd))
-    print(1 - m20.centroid(0, 1))
-
-    print(m20.tauc_max())
-    pt = np.arange(0, 3.1, 0.25)
-    pt[0] = 0.15
-    print(pt)
-    tauc = np.array([m20.tauc(xx) for xx in pt])
-    print(tauc)

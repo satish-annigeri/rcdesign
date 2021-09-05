@@ -1,6 +1,5 @@
 """ Classes to represent reinforcement bars, layers of reinforcement bars and groups of reinforcement layers"""
 
-from enum import Enum
 from typing import List
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
@@ -119,7 +118,7 @@ class RebarLayer:
         return xu - self._dc
 
     def __repr__(self):
-        s = f"Dia: "
+        s = "Dia: "
         b = ''
         for bardia in self.dia:
             b += f"{bardia}, "
@@ -265,49 +264,49 @@ class BentupBars(Stirrups):
         return np.pi * area / 4
 
 
-if __name__ == '__main__':
-    # Test RebarMS and RebarHYSD
+# if __name__ == '__main__':
+#     # Test RebarMS and RebarHYSD
 
-    ms = RebarMS('MS 250', 250)
-    print(f"{ms} {ms.fs(0.001):.2f}")
+#     ms = RebarMS('MS 250', 250)
+#     print(f"{ms} {ms.fs(0.001):.2f}")
 
-    fe415 = RebarHYSD('Fe 415', 415)
-    print(f"{fe415} {fe415.fs(0.002):.2f}")
-    print(fe415.es)
-    print(fe415.fs(0.8*415/1.15/2e5 + 1e-6))
+#     fe415 = RebarHYSD('Fe 415', 415)
+#     print(f"{fe415} {fe415.fs(0.002):.2f}")
+#     print(fe415.es)
+#     print(fe415.fs(0.8*415/1.15/2e5 + 1e-6))
 
-    fe500 = RebarHYSD('Fe 500', 500)
-    print(f"{fe500} {fe500.fs(0.002):.2f}")
+#     fe500 = RebarHYSD('Fe 500', 500)
+#     print(f"{fe500} {fe500.fs(0.002):.2f}")
 
-    # Test RebarLayer
+#     # Test RebarLayer
 
-    t1 = RebarLayer(35, [16, 16, 16])
-    t2 = RebarLayer(70, [16, 16])
-    c1 = RebarLayer(35, [16, 16])
-    print(t1)
-    print(t2)
-    print(c1)
+#     t1 = RebarLayer(35, [16, 16, 16])
+#     t2 = RebarLayer(70, [16, 16])
+#     c1 = RebarLayer(35, [16, 16])
+#     print(t1)
+#     print(t2)
+#     print(c1)
 
-    is456_lsm = ConcreteStressBlock('IS456:2000 LSM', 0.002, 0.0035)
-    fe415 = RebarHYSD('Fe 415', 415)
-    m20 = Concrete('M20', 20, is456_lsm)
-    D = 450
-    xu = 131.8722
-    print('   Concrete:', m20.area(0, 1, m20.fd)*xu*230)
-    print('Compression:', c1.force_compression(xu, m20, fe415, 0.0035))
-    print('    Tension:', t1.force_tension(xu, D - xu, fe415, 0.0035))
-    print('    Tension:', t2.force_tension(xu, D - xu, fe415, 0.0035))
+#     is456_lsm = ConcreteStressBlock('IS456:2000 LSM', 0.002, 0.0035)
+#     fe415 = RebarHYSD('Fe 415', 415)
+#     m20 = Concrete('M20', 20, is456_lsm)
+#     D = 450
+#     xu = 131.8722
+#     print('   Concrete:', m20.area(0, 1, m20.fd)*xu*230)
+#     print('Compression:', c1.force_compression(xu, m20, fe415, 0.0035))
+#     print('    Tension:', t1.force_tension(xu, D - xu, fe415, 0.0035))
+#     print('    Tension:', t2.force_tension(xu, D - xu, fe415, 0.0035))
 
-    t1 = RebarLayer(35, [16, 16, 16])
-    t2 = RebarLayer(70, [16, 16])
-    c1 = RebarLayer(35, [16, 16])
-    t_st = RebarGroup(fe415, [t1, t2])
-    print(t_st)
-    print(t_st.area(), t_st._dc())
-    xu = 131.8722
-    D = 450
-    print(t_st.force_tension(xu, D, 0.0035))
+#     t1 = RebarLayer(35, [16, 16, 16])
+#     t2 = RebarLayer(70, [16, 16])
+#     c1 = RebarLayer(35, [16, 16])
+#     t_st = RebarGroup(fe415, [t1, t2])
+#     print(t_st)
+#     print(t_st.area(), t_st._dc())
+#     xu = 131.8722
+#     D = 450
+#     print(t_st.force_tension(xu, D, 0.0035))
 
-    c_st = RebarGroup(fe415, [c1])
-    print(c_st)
-    print(c_st.force_compression(xu, m20, 0.0035))
+#     c_st = RebarGroup(fe415, [c1])
+#     print(c_st)
+#     print(c_st.force_compression(xu, m20, 0.0035))

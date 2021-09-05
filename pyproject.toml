@@ -2,7 +2,7 @@
 name = "rcdesign"
 version = "0.1.0"
 description = ""
-authors = ["Satish Annigeri <cwsatish.annigeri@gmail.com>"]
+authors = ["Satish Annigeri <satish.annigeri@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.10"

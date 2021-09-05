@@ -1,8 +1,7 @@
-import numpy as np
+# import numpy as np
 from numpy import sign
-from scipy.optimize import fsolve, brentq
+# from scipy.optimize import brentq
 from typing import Callable
-import math
 
 def func(x: float, *args) -> float:
     # return a*x**2 + c*x - 4
@@ -31,6 +30,5 @@ def ceiling(x: float, multipleof: float=1.0):
 
 def floor(x: float, multipleof: float=1.0):
     i = x // multipleof
-    if not (x - i * multipleof) > 0:
-        i -= 1
     return i * multipleof
+

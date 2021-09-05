@@ -1,8 +1,9 @@
 from sympy import nsimplify, Rational
 from math import isclose, sqrt
+import pytest
 
 from rcdesign import __version__
-from rcdesign.is456.material.concrete import ConcreteStressBlock, Concrete
+from rcdesign.is456.material.concrete import StressBlock, ConcreteStressBlock, Concrete, StressBlock
 
 
 def test_version():
@@ -112,6 +113,20 @@ class TestCSB:
         sb = ConcreteStressBlock('IS456_LSFlexure', 0.002, 0.0035)
         assert isclose(sb.moment(0, 1, 0.0035), moment(0, 1, k))
 
+    def test_csb_14(self):
+        k = 0.002 / 0.0035
+        sb = ConcreteStressBlock('IS456_LSFlexure', 0.002, 0.0035)
+        assert isclose(sb.moment(1, 0, 0.0035), moment(0, 1, k))
+
+    def test_csb_15(self):
+        k = 0.002 / 0.0035
+        sb = ConcreteStressBlock('IS456_LSFlexure', 0.002, 0.0035)
+        assert isclose(sb.moment(0.6, 1, 0.0035), moment(0.6, 1, k))
+
+    def test_csb_16(self):
+        with pytest.raises(TypeError):
+            assert StressBlock('Stress Block').stress(0)
+
 
 class TestConcrete:
     # Verify design stress
@@ -176,3 +191,82 @@ class TestConcrete:
         m20 = Concrete('M20', 20, csb)
         pt = 0.25
         assert isclose(m20.tauc(pt), tauc(m20.fck, pt))
+    
+    # Verify invalid range for x1 and x2
+    def test_conc11(self):
+        csb = ConcreteStressBlock('IS456 LSM', 0.002, 0.0035)
+        m20 = Concrete('M20', 20, csb)
+        assert m20.area(0, 1.1) == None
+    
+    # Verify reversed values of x1 and x2
+    def test_conc12(self):
+        csb = ConcreteStressBlock('IS456 LSM', 0.002, 0.0035)
+        m20 = Concrete('M20', 20, csb)
+        assert m20.area(1, 0) == m20.area(0, 1)
+    
+    # Verify invalid range for x1 and x2
+    def test_conc13(self):
+        csb = ConcreteStressBlock('IS456 LSM', 0.002, 0.0035)
+        m20 = Concrete('M20', 20, csb)
+        assert isclose(m20.area(0.6, 1, m20.fd), area(0.6, 1) * m20.fd)
+    
+    # Verify invalid range for x1 and x2
+    def test_conc14(self):
+        csb = ConcreteStressBlock('IS456 LSM', 0.002, 0.0035)
+        m20 = Concrete('M20', 20, csb)
+        assert m20.moment(0, 1.1) == None
+    
+    # Verify ecy
+    def test_conc15(self):
+        csb = ConcreteStressBlock('IS456 LSM', 0.002, 0.0035)
+        m20 = Concrete('M20', 20, csb)
+        assert m20.ecy == 0.002
+    
+    # Verify ecu
+    def test_conc16(self):
+        csb = ConcreteStressBlock('IS456 LSM', 0.002, 0.0035)
+        m20 = Concrete('M20', 20, csb)
+        assert m20.ecu == 0.0035
+    
+    # Verify fd
+    def test_conc17(self):
+        csb = ConcreteStressBlock('IS456 LSM', 0.002, 0.0035)
+        m20 = Concrete('M20', 20, csb)
+        assert m20.fd == m20.fck * 0.67 / m20.gamma_m
+    
+    # Verify fc for invalid range of x1 and x2
+    def test_conc18(self):
+        csb = ConcreteStressBlock('IS456 LSM', 0.002, 0.0035)
+        m20 = Concrete('M20', 20, csb)
+        with pytest.raises(ValueError):
+            assert m20.fc(1.1)
+    
+    # Verify tau_c
+    def test_conc19(self):
+        csb = ConcreteStressBlock('IS456 LSM', 0.002, 0.0035)
+        m10 = Concrete('M10', 10, csb)
+        assert isclose(m10.tauc_max(), 0.0)
+    
+    # Verify tau_c
+    def test_conc20(self):
+        csb = ConcreteStressBlock('IS456 LSM', 0.002, 0.0035)
+        m40 = Concrete('M40', 40, csb)
+        m45 = Concrete('M45', 45, csb)
+        assert isclose(m45.tauc_max(), m40.tauc_max())
+    
+    # Verify tau_c
+    def test_conc21(self):
+        csb = ConcreteStressBlock('IS456 LSM', 0.002, 0.0035)
+        m20 = Concrete('M20', 20, csb)
+        pt = 0.10
+        assert isclose(m20.tauc(pt), tauc(m20.fck, 0.15))
+    
+    # Verify tau_c
+    def test_conc22(self):
+        csb = ConcreteStressBlock('IS456 LSM', 0.002, 0.0035)
+        m20 = Concrete('M20', 20, csb)
+        pt = 3.1
+        assert isclose(m20.tauc(pt), tauc(m20.fck, 3.0))
+
+
+

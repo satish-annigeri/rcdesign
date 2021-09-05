@@ -1,4 +1,5 @@
 from math import isclose
+import numpy as np
 
 from rcdesign.is456.material.rebar import RebarMS, RebarHYSD
 
@@ -98,4 +99,17 @@ class Test_rebar:
         y = get_fs(fe415.fd, 0.00005, 0.975, 1.0, 0.001, 0.002)
         assert isclose(fe415.fs(x), y)
 
+    def test_rebar16(self):
+        ms = RebarMS('MS', 250)
+        es = np.array([0.001, 0.002])
+        fs = ms.fs(es)
+        a = fs == np.array([200, 250/1.15])
+        assert a.all()
+
+    def test_rebar17(self):
+        fe415 = RebarHYSD('Fe 415', 415)
+        es = np.array([0.001, 0.003805])
+        fs = fe415.fs(es)
+        a = fs == np.array([200, 415/1.15])
+        assert a.all()
 

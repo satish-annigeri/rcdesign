@@ -1,17 +1,17 @@
 """Class to represent reinforced concrete cross sections"""
 
 from enum import Enum
-from typing import List
+# from typing import List
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
 from scipy.optimize import brentq
 
-import numpy as np
-from numpy import pi
+# import numpy as np
+# from numpy import pi
 
 from .material.concrete import ConcreteStressBlock, Concrete
-from .material.rebar import Rebar, RebarMS, RebarHYSD, RebarLayer, RebarGroup, ShearReinforcement, Stirrups, BentupBars
-from rcdesign.utils import ceiling, floor
+from .material.rebar import Rebar, RebarMS, RebarHYSD, RebarLayer, RebarGroup, ShearReinforcement #, Stirrups, BentupBars
+from rcdesign.utils import floor
 
 from ..utils import rootsearch
 
@@ -108,12 +108,12 @@ class RectBeamSection(Section):
 
     def report(self, xu: float, ecu: float):
         print(f"Rectangular Beam Section {self.b}x{self.D}")
-        print(f"")
+        print()
         C = self.conc.area(0, 1, self.conc.fd) * xu * self.b
         Mc = self.conc.moment(0, 1, self.conc.fd) * xu**2 * self.b
         print(f"{' ':54}{'C':>8} {'M':>8}")
         print(f"{'Concrete in Compression':54}{C/1e3:8.2f} {Mc/1e6:8.2f}")
-        print(f"Compression Reinforcement")
+        print("Compression Reinforcement")
         print(f"{'dc':>4} {'Area':>8} {'x':>8} {'Strain':>12} {'f_sc':>8} {'f_cc':>8} {'C':>8} {'M':>8}")
         for layer in self.c_steel.layers:
             x = xu - layer.dc
@@ -126,7 +126,7 @@ class RectBeamSection(Section):
             Mc += Msc
             print(f"{layer.dc:4.0f} {layer.area():8.2f} {x:8.2f} {esc:12.4e} {fsc:8.2f} {fcc:8.2f} {Fsc/1e3:8.2f} {Msc/1e6:8.2f}")
         print(f"{' '*54}{C/1e3:8.2f} {Mc/1e6:8.2f}")
-        print(f"Tension Reinforcement")
+        print("Tension Reinforcement")
         T = 0
         Mt = 0
         print(f"{'dc':>4} {'Area':>8} {'x':>8} {'Strain':>12} {'f_st':>8} {' ':8} {'T':>8} {'M':>8}")
