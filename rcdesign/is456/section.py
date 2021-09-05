@@ -199,36 +199,36 @@ class FlangedBeamSection(RectBeamSection):
     def bw(self):
         return self.b
 
+    @bw.setter
+    def bw(self, _bw):
+        self.b = _bw
+
     def C(self, xu: float, ecu: float):
         # Compression force and moment due to concrete of web
         C1 = self.conc.area(0, 1, self.conc.fd) * xu * self.bw
         M1 = self.conc.moment(0, 1, self.conc.fd) * xu**2 * self.bw
-        # print('Flanged - Web:', C1, M1)
         # Compression force and moment due to compression reinforcement bars
         if self.c_steel:
             C2, M2 = self.c_steel.force_compression(xu, self.conc, ecu)
         else:
-            # print('No compression steel')
             C2 = 0.0
             M2 = 0.0
-        # print('Flanged - Compression steel:', C2, M2)
         # Compression force and moment due to concrete of flange
         df = xu if xu <= self.Df else self.Df
         x1 = xu - df
         C3 = self.conc.area(x1/xu, 1, self.conc.fd) * xu * (self.bf - self.bw)
         M3 = self.conc.moment(x1/xu, 1, self.conc.fd) * df**2 * (self.bf - self.bw)
-        # print('Flanged - Flange', C3, M3)
+        # Sum it all up
         C = C1 + C2 + C3
         M = M1 + M2 + M3
-        # print(C1, C2, C3, C)
         return C, M
 
-    def T(self, xu: float, ecu: float):
-        _T, _M = self.t_steel.force_tension(xu, self.D - xu, ecu)
-        return _T, _M
+    # def T(self, xu: float, ecu: float):
+    #     _T, _M = self.t_steel.force_tension(xu, self.D - xu, ecu)
+    #     return _T, _M
 
-    def Mr(self, xu: float, ecu: float):
-        # Assuming tension steel to produce an equal tension force as C
+    def Mu(self, xu: float, ecu: float):
+        # Based on compression force C, assuming the right amount of tension steel
         C, M = self.C(xu, ecu)
         return M + C * (self.eff_d() - xu)
 
@@ -245,24 +245,24 @@ class FlangedBeamSection(RectBeamSection):
         pass
 
 
-if __name__ == '__main__':
-    m20 = Concrete('M20', 20, ConcreteStressBlock('IS456:2000 LSM', 0.002, 0.0035))
-    # print(m20.fd, m20._area(0, 1))
+# if __name__ == '__main__':
+#     m20 = Concrete('M20', 20, ConcreteStressBlock('IS456:2000 LSM', 0.002, 0.0035))
+#     # print(m20.fd, m20._area(0, 1))
 
-    ms = RebarMS('MS 250', 250)
-    # print(ms)
+#     ms = RebarMS('MS 250', 250)
+#     # print(ms)
 
-    fe415 = RebarHYSD('Fe 415', 415)
-    # print(fe415)
+#     fe415 = RebarHYSD('Fe 415', 415)
+#     # print(fe415)
 
-    fe500 = RebarHYSD('Fe 500', 500)
-    print(fe500)
+#     fe500 = RebarHYSD('Fe 500', 500)
+#     print(fe500)
 
-    t1 = RebarLayer(35, [16, 16, 16])
-    t2 = RebarLayer(70, [16, 16])
-    c1 = RebarLayer(35, [16, 16])
-    t_st = RebarGroup(fe415, [t1, t2])
-    c_st = RebarGroup(fe415, [c1])
+#     t1 = RebarLayer(35, [16, 16, 16])
+#     t2 = RebarLayer(70, [16, 16])
+#     c1 = RebarLayer(35, [16, 16])
+#     t_st = RebarGroup(fe415, [t1, t2])
+#     c_st = RebarGroup(fe415, [c1])
 
     # sec1 = RectBeamSection(230, 450, m20, t_st, c_st, fe415, 25)
     # print(sec1)
@@ -275,9 +275,9 @@ if __name__ == '__main__':
     # xu = brentq(sec1.C_T, x1, x2, args=(sec1.conc.ecu,), xtol=1e-4)
     # print(xu, sec1.C_T(xu, sec1.conc.ecu))
     # sec1.report(xu, sec1.conc.ecu)
-    bw = 230
-    D = 450
-    bf = 1000
-    Df = 150
-    tsec = FlangedBeamSection(bw, D, bf, Df, m20, t_st, c_st, fe415, 25)
-    print(tsec.C(160, 0.0035))
+    # bw = 230
+    # D = 450
+    # bf = 1000
+    # Df = 150
+    # tsec = FlangedBeamSection(bw, D, bf, Df, m20, t_st, c_st, fe415, 25)
+    # print(tsec.C(160, 0.0035))

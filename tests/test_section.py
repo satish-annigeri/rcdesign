@@ -1,8 +1,10 @@
-from math import isclose, pi
+from math import isclose, pi, sin
 
 from rcdesign.is456.material.rebar import RebarMS, RebarHYSD, RebarLayer, RebarGroup, Stirrups
 from rcdesign.is456.material.concrete import ConcreteStressBlock, Concrete
 from rcdesign.is456.section import RectBeamSection, FlangedBeamSection
+from rcdesign.utils import floor
+
 
 fe415 = RebarHYSD('Fe 415', 415)
 csb = ConcreteStressBlock('IS456 LSM', 0.002, 0.0035)
@@ -154,8 +156,9 @@ class TestRectBeamSection:
         nlegs = 4
         bar_dia = 10
         sv = 125
+        alpha = rsec.shear_steel._alpha_deg * pi / 180
         # Manual calculation for shear reinforcement
-        Asv = nlegs * pi * bar_dia**2 / 4
+        Asv = nlegs * pi * bar_dia**2 / 4 * sin(alpha)
         fd = 415 / 1.15
         Vus = fd * Asv * d / sv
         # Manual calculation for concrete
@@ -163,5 +166,134 @@ class TestRectBeamSection:
         tauc = rsec.conc.tauc(pt)
         Vuc = tauc * 230 * d
         V = Vus + Vuc
-        print(Vus, Vuc, V)
         assert isclose(rsec.Vu(nlegs, bar_dia, sv), V)
+
+    def test_rectbeam14(self):
+        rsec = RectBeamSection(230, 450, m20, t_st, c_st, sh_st, 25)
+        d = rsec.eff_d()
+        fd = 415 / 1.15
+        mof = 25
+
+        # Modify stirrup details
+        Vu = 125e3
+        nlegs = 2
+        bar_dia = 8
+
+        # Manual calculation for shear capacity of shear reinforcement
+        Asv = nlegs * pi * bar_dia**2 / 4
+
+        # Manual calculation for shear capacity of concrete
+        pt = 5 * pi * 16**2 / 4 * 100 / (230 * d)
+        tauc = rsec.conc.tauc(pt)
+        Vuc = tauc * 230 * d
+        Vus = Vu - Vuc
+        sv = floor(fd * Asv * d / Vus, mof)
+        assert isclose(rsec.sv(Vu, nlegs, bar_dia, mof), sv)
+
+bw = 230
+bf = 1000
+Df = 150
+
+def para_area(x1, x2, xu):
+    k = 0.002 / 0.0035
+    z1 = max((x1 / xu) / k, 0)
+    z2 = min((x2 / xu) / k, 1)
+    a = ((z2**2 - z1**2) - (z2**3 - z1**3) / 3)
+    print(z1, z2, a)
+    return a * k
+
+def rect_area(x1, x2, xu):
+    k = 0.002 / 0.0035
+    z1 = max(x1 / xu, k)
+    z2 = max(x2 / xu, 1)
+    a = z2 - z1
+    return a
+
+
+class TestFlangedBeamSection:
+    def test_flangedbeam01(self):
+        tsec = FlangedBeamSection(230, 450, bf, Df, m20, t_st, None, sh_st, 25)
+        assert tsec.bw == 230
+
+    def test_flangedbeam02(self):
+        tsec = FlangedBeamSection(230, 450, bf, Df, m20, t_st, None, sh_st, 25)
+        tsec.bw = 250
+        assert tsec.bw == 250
+
+    # Without compression steel
+    def test_flangedbeam03(self):
+        tsec = FlangedBeamSection(230, 450, bf, Df, m20, t_st, None, sh_st, 25)
+        xu = 160 # xu > Df
+        fd = tsec.conc.fd
+        # Calculate compression force manually
+        C_web_conc = 17 / 21 * tsec.conc.fd * tsec.bw * xu
+        x1 = xu - tsec.Df
+        x2 = xu
+        a1 = para_area(x1, x2, xu) * fd * xu * (tsec.bf - tsec.bw)
+        a2 = rect_area(x1, x2, xu) * fd * xu * (tsec.bf - tsec.bw)
+        C = C_web_conc + a1 + a2
+        CC, _ = tsec.C(xu, 0.0035)
+        print(C_web_conc, a1, a2, C, CC)
+        assert CC == C
+
+    def test_flangedbeam04(self):
+        tsec = FlangedBeamSection(230, 450, bf, Df, m20, t_st, None, sh_st, 25)
+        xu = 150 # xu = Df
+        fd = tsec.conc.fd
+        # Calculate compression force in concrete manually
+        # Web
+        C_web_conc = 17 / 21 * tsec.conc.fd * tsec.bw * xu
+        x1 = xu - tsec.Df
+        x2 = xu
+        # Flange
+        a1 = para_area(x1, x2, xu) * fd * xu * (tsec.bf - tsec.bw)
+        a2 = rect_area(x1, x2, xu) * fd * xu * (tsec.bf - tsec.bw)
+        C = C_web_conc + a1 + a2
+        # Method
+        CC, _ = tsec.C(xu, 0.0035)
+        assert CC == C
+
+    def test_flangedbeam05(self):
+        tsec = FlangedBeamSection(230, 450, bf, Df, m20, t_st, None, sh_st, 25)
+        xu = 120 # xu > Df
+        fd = tsec.conc.fd
+        # Calculate compression force in concrete manually
+        # Web
+        C_web_conc = 17 / 21 * tsec.conc.fd * tsec.bw * xu
+        x1 = xu - tsec.Df
+        x2 = xu
+        # Flange
+        a1 = para_area(x1, x2, xu) * fd * xu * (tsec.bf - tsec.bw)
+        a2 = rect_area(x1, x2, xu) * fd * xu * (tsec.bf - tsec.bw)
+        C = C_web_conc + a1 + a2
+        # Method
+        CC, _ = tsec.C(xu, 0.0035)
+        assert CC == C
+
+    # With compression steel
+    def test_flangedbeam06(self):
+        tsec = FlangedBeamSection(230, 450, bf, Df, m20, t_st, c_st, sh_st, 25)
+        xu = 160 # xu > Df
+        fd = tsec.conc.fd
+        # Compression force in compression steel
+        x = xu - 35
+        esc = 0.0035 / xu * x
+        fsc = tsec.c_steel.rebar.fs(esc)
+        fcc = tsec.conc.fc(x / xu, tsec.conc.fd)
+        print(esc, fsc, fcc)
+        C_steel = tsec.c_steel.area() * (fsc - fcc)
+        # Calculate compression force in concrete manually
+        # Web
+        C_web_conc = 17 / 21 * tsec.conc.fd * tsec.bw * xu
+        x1 = xu - tsec.Df
+        x2 = xu
+        # Flange
+        a1 = para_area(x1, x2, xu) * fd * xu * (tsec.bf - tsec.bw)
+        a2 = rect_area(x1, x2, xu) * fd * xu * (tsec.bf - tsec.bw)
+        C = C_steel + C_web_conc + a1 + a2
+        # Method
+        CC, _ = tsec.C(xu, 0.0035)
+        print(C_steel, C_web_conc, a1, a2, C, CC)
+        assert CC == C
+
+
