@@ -108,11 +108,11 @@ class RectBeamSection(Section):
         return f"Size: {self.b} x {self.D}\nTension Steel: {self.t_steel}\nCompression Steel: {self.c_steel}"
 
     def report(self, xu: float, ecu: float): # pragma: no cover
-        print(f"Rectangular Beam Section {self.b}x{self.D} (xu = {xu})")
-        print()
+        print(f"Rectangular Beam Section {self.b}x{self.D} (xu = {xu:.2f})")
+        print('Units: Distance in mm, Area in mm^2, Force in kN, Moment in kNm')
         C = self.conc.area(0, 1, self.conc.fd) * xu * self.b
         Mc = self.conc.moment(0, 1, self.conc.fd) * xu**2 * self.b
-        print(f"{' ':54}{'C':>8} {'M':>8}")
+        print(f"{' ':54}{'C (kN)':>8} {'M (kNm)':>8}")
         print(f"{'Concrete in Compression':54}{C/1e3:8.2f} {Mc/1e6:8.2f}")
         print("Compression Reinforcement")
         print(f"{'dc':>4} {'Area':>8} {'x':>8} {'Strain':>12} {'f_sc':>8} {'f_cc':>8} {'C':>8} {'M':>8}")
@@ -130,7 +130,7 @@ class RectBeamSection(Section):
         print("Tension Reinforcement")
         T = 0
         Mt = 0
-        print(f"{'dc':>4} {'Area':>8} {'x':>8} {'Strain':>12} {'f_st':>8} {' ':8} {'T':>8} {'M':>8}")
+        print(f"{'dc':>4} {'Area':>8} {'x':>8} {'Strain':>12} {'f_st':>8} {' ':8} {'T (kN)':>8} {'M (kNm)':>8}")
         for layer in self.t_steel.layers:
             x = self.D - xu - layer.dc
             est = ecu / xu * x
@@ -167,8 +167,8 @@ class RectBeamSection(Section):
         tauc = self.conc.tauc(pt)
         Vuc = tauc * self.b * self.eff_d()
         Vus = self.shear_steel.rebar.fd * self.shear_steel.Asv * self.eff_d() / self.shear_steel._sv
-        print(self.shear_steel._nlegs, self.shear_steel._bar_dia, self.shear_steel._sv)
-        print(Vus, Vuc, Vus+Vuc)
+        # print(self.shear_steel._nlegs, self.shear_steel._bar_dia, self.shear_steel._sv)
+        # print(Vus, Vuc, Vus+Vuc)
         return Vuc + Vus
 
     def sv(self, Vu: float, nlegs: int, bar_dia: int, mof: float=25):

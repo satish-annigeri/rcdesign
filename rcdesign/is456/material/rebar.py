@@ -176,7 +176,7 @@ class RebarGroup:
         s = f"Rebar Group {self.rebar.label} in {len(self.layers)} {sl}\n"
         for layer in self.layers:
             s += '\t' + layer.__repr__() + '\n'
-        s += f"\tTotal Area: {self.area():.2f} at {self.dc:.2f}"
+        s += f"\tTotal Area: {self.area():.2f} centroid at {self.dc:.2f} from edge"
         return s
 
     def force_tension(self, xu: float, D_xu: float, ecu:float):
