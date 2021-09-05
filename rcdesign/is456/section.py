@@ -24,7 +24,7 @@ class DesignForceType(Enum):
     SHEARWALL = 4
 
 
-class Section(ABC):
+class Section(ABC): # pragma: no cover
     def __init__(self, design_force_type, clear_cover):
         self.design_force_type = design_force_type
         self.clear_cover = clear_cover
@@ -103,10 +103,10 @@ class RectBeamSection(Section):
     def tauc(self):
         return self.conc.tauc(self.pt())
 
-    def __repr__(self):
+    def __repr__(self): # pragma: no cover
         return f"Size: {self.b} x {self.D}\nTension Steel: {self.t_steel}\nCompression Steel: {self.c_steel}"
 
-    def report(self, xu: float, ecu: float):
+    def report(self, xu: float, ecu: float): # pragma: no cover
         print(f"Rectangular Beam Section {self.b}x{self.D}")
         print()
         C = self.conc.area(0, 1, self.conc.fd) * xu * self.b
@@ -229,7 +229,7 @@ class FlangedBeamSection(RectBeamSection):
         C, M = self.C(xu, ecu)
         return M + C * (self.eff_d() - xu)
 
-    def __repr__(self):
+    def __repr__(self): # pragma: no cover
         s = f'Flanged Beam Section {self.bw}x{self.D} {self.bf}x{self.Df}\n'
         s += self.conc.__repr__() + '\n'
         s += f"{self.c_steel.layers[0]}\n"

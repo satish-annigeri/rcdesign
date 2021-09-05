@@ -12,7 +12,7 @@ from .concrete import ConcreteStressBlock, Concrete
 # Rebar class
 
 @dataclass
-class Rebar(ABC):
+class Rebar(ABC): # pragma: no cover
     label: str
     fy: float
     gamma_m = 1.15
@@ -35,7 +35,7 @@ class RebarMS(Rebar):
     def __init__(self, label: str, fy: float):
         super().__init__(label, fy)
 
-    def __repr__(self):
+    def __repr__(self): # pragma: no cover
         return f"{self.label:>6}: Type={'MS':4} fy={self.fy} fd={self.fd:.2f}"
 
     def _fs(self, es: float):
@@ -67,7 +67,7 @@ class RebarHYSD(Rebar):
         self.es[:,0] = self.es[:,0] * self.fy / self.gamma_m
         self.es[:,1] = self.es[:,0] / self.Es + self.es[:,1]
 
-    def __repr__(self):
+    def __repr__(self): # pragma: no cover
         return f"{self.label:>6}: Type={'HYSD'} fy={self.fy} fd={self.fd:.2f}"
 
     def _fs(self, es: float):
@@ -117,7 +117,7 @@ class RebarLayer:
     def x(self, xu: float):
         return xu - self._dc
 
-    def __repr__(self):
+    def __repr__(self): # pragma: no cover
         s = "Dia: "
         b = ''
         for bardia in self.dia:
@@ -172,7 +172,7 @@ class RebarGroup:
     def dc(self):
         return self._dc()
 
-    def __repr__(self):
+    def __repr__(self): # pragma: no cover
         sl = 'layers' if len(self.layers) > 1 else 'layer'
         s = f"Rebar Group {self.rebar.label} in {len(self.layers)} {sl}\n"
         for layer in self.layers:
@@ -199,7 +199,7 @@ class RebarGroup:
         return _f, _m
 
 
-class ShearReinforcement(ABC):
+class ShearReinforcement(ABC): # pragma: no cover
     @abstractmethod
     def Asv(self):
         pass

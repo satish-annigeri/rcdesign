@@ -7,7 +7,7 @@ from sympy import symbols, integrate, nsimplify
 
 
 # Generalized Stress Block
-class StressBlock(ABC):
+class StressBlock(ABC): # pragma: no cover
     def __init__(self, label: str):
         self.label = label
 
@@ -159,6 +159,6 @@ class Concrete:
         beta = max(1.0, (0.8 * self.fck) / (6.89 * pt))
         return 0.85 * np.sqrt(0.8 * self.fck) * (np.sqrt(1 + 5 * beta) - 1) / (6 * beta)
 
-    def __repr__(self):
+    def __repr__(self): # pragma: no cover
         return f"Stress Block {self.stress_block.label} - {self.label}: {self.fck} {self.fd:.2f} {self.density}"
 
