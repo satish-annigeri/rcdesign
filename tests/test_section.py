@@ -62,3 +62,74 @@ class TestRectBeamSection:
         C2 = rsec.c_steel.area() * (fsc - fcc)
         assert isclose(C, C1 + C2)
 
+    def test_rectbeam07(self):
+        rsec = RectBeamSection(230, 450, m20, t_st, None, sh_st, 25)
+        xu = 190
+        ecu = 0.0035
+        C, _ = rsec.C(xu, ecu)
+        # Manual calculation
+        C1 = 17 / 21 * rsec.conc.fd * rsec.b * xu
+        C2 = 0.0
+        assert isclose(C, C1 + C2)
+
+    def test_rectbeam08(self):
+        rsec = RectBeamSection(230, 450, m20, t_st, c_st, sh_st, 25)
+        xu = 190
+        ecu = 0.0035
+
+        T, M = rsec.T(xu, ecu)
+        # Manual calculation for tension force
+        D = 450
+        D_xu = D - xu
+        ast1 = 3 * pi * 16**2 / 4
+        x1 = D_xu - 35
+        es1 = ecu / xu * x1
+        fs1 = rsec.t_steel.rebar.fs(es1)
+        ast2 = 2 * pi * 16**2 / 4
+        x2 = D_xu - 70
+        es2 = ecu / xu * x2
+        fs2 = rsec.t_steel.rebar.fs(es2)
+        T_manual = ast1 * fs1 + ast2 * fs2
+        M_manual = ast1 * fs1 * x1 + ast2 * fs2 * x2
+        assert isclose(T, T_manual) and isclose(M, M_manual)
+
+    def test_rectbeam09(self):
+        rsec = RectBeamSection(230, 450, m20, t_st, c_st, sh_st, 25)
+        xu = 190
+        ecu = 0.0035
+        # Methods to calculate C and T
+        C_T = rsec.C_T(xu, ecu)
+        # Manual calculation for compression force
+        C1 = 17 / 21 * rsec.conc.fd * rsec.b * xu
+        fd = rsec.conc.fd
+        x = xu - 35
+        esc = ecu / xu * x
+        fsc = rsec.c_steel.rebar.fs(esc)
+        fcc = rsec.conc.fc(x / xu, fd)
+        C2 = rsec.c_steel.area() * (fsc - fcc)
+        C = C1 + C2
+        # Manual calculation for tension force
+        D = 450
+        D_xu = D - xu
+        ast1 = 3 * pi * 16**2 / 4
+        x1 = D_xu - 35
+        es1 = ecu / xu * x1
+        fs1 = rsec.t_steel.rebar.fs(es1)
+        ast2 = 2 * pi * 16**2 / 4
+        x2 = D_xu - 70
+        es2 = ecu / xu * x2
+        fs2 = rsec.t_steel.rebar.fs(es2)
+        T = ast1 * fs1 + ast2 * fs2
+
+        assert isclose(C_T, C - T)
+
+    def test_rectbeam10(self):
+        rsec = RectBeamSection(230, 450, m20, t_st, c_st, sh_st, 25)
+        xu = rsec.xu(0.0035)
+        assert isclose(xu, 136.21019, rel_tol=1e-3)
+
+    def test_rectbeam11(self):
+        rsec = RectBeamSection(230, 450, m20, t_st, c_st, sh_st, 25)
+        xu, Mu = rsec.analyse(0.0035)
+        assert isclose(xu, 136.21019, rel_tol=1e-3) and isclose(Mu, 127872548.021942, rel_tol=1e-4)
+

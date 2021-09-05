@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from abc import ABC, abstractmethod
 
 import numpy as np
-from numpy import pi
+from math import pi, sin
 
 from .concrete import ConcreteStressBlock, Concrete
 
@@ -200,6 +200,11 @@ class RebarGroup:
 
 
 class ShearReinforcement(ABC): # pragma: no cover
+    def __init__(self, rebar: Rebar, _Asv: float=0.0, _sv: float=0.0):
+        self.rebar = rebar
+        self._Asv = _Asv
+        self._sv = _sv
+
     @abstractmethod
     def Asv(self):
         pass
@@ -210,14 +215,14 @@ class ShearReinforcement(ABC): # pragma: no cover
 
 
 """Vertical or inclined stirrups as shear reinforcement"""
-@dataclass
 class Stirrups(ShearReinforcement):
-    rebar: Rebar
-    _nlegs: int
-    _bar_dia: int
-    _alpha_deg: float = 90
-    _sv: float = 0.0
-    _Asv: float = 0.0
+    def __init__(self, rebar: Rebar, _nlegs: int, _bar_dia: int, _alpha_deg: float=90, _sv: float=0.0):
+        self.rebar = rebar
+        self._nlegs = _nlegs
+        self._bar_dia = _bar_dia
+        self._alpha_deg = _alpha_deg
+        self._Asv = self.Asv
+        self._sv = _sv
 
     @property
     def Asv(self):
@@ -246,22 +251,25 @@ class Stirrups(ShearReinforcement):
         if (self._alpha_deg < 45) or (self._alpha_deg > 90):
             return
         alpha_rad = self._alpha_deg * pi / 180
-        self._sv = self.rebar.fd * self.Asv * d * np.sin(alpha_rad) / Vus
+        self._sv = self.rebar.fd * self.Asv * d * sin(alpha_rad) / Vus
         return self._sv
 
 
 """Bent up bars as shear reinforcement"""
 class BentupBars(Stirrups):
-    def __init__(self, rebar: Rebar, bars: List[int], alpha_deg: float):
-        super().__init__(rebar, 0, 0, alpha_deg)
+    def __init__(self, rebar: Rebar, bars: List[int], _sv: float=0.0, _alpha_deg: float=45):
+        self.rebar = rebar
         self.bars = bars
+        self._alpha_deg = _alpha_deg
+        self._Asv = self.Asv
+        self._sv = _sv
 
     @property
     def Asv(self):
         area = 0.0
         for bar_dia in self.bars:
             area += bar_dia**2
-        return np.pi * area / 4
+        return pi * area / 4
 
 
 # if __name__ == '__main__':

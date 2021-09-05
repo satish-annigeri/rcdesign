@@ -82,18 +82,20 @@ class RectBeamSection(Section):
         return C - T
 
     def xu(self, ecu: float):
-        x1, x2 = rootsearch(self.C_T, self.t_steel.layers[0].dc, self.D, 20, ecu)
-        print('Root Search results:', x1, x2)
+        x1, x2 = rootsearch(self.C_T, self.t_steel.layers[0].dc, self.D, 10, ecu)
         x = brentq(self.C_T, x1, x2, args=(ecu,))
         return x
 
-    def analyse(self, xu: float, ecu: float):
-        print('Analysis of a rectangular beam section')
+    def Mu(self, xu: float, ecu: float):
+        # Assuming tension steel to produce an equal tension force as C
+        C, M = self.C(xu, ecu)
+        return M + C * (self.eff_d() - xu)
 
-        C, Mc = self.C(xu, ecu)
-        T, Mt = self.T(xu, ecu)
-        print(C, T, C - T)
-        return xu, Mc + Mt
+    def analyse(self, ecu: float):
+        xu = self.xu(ecu)
+        Mu = self.Mu(xu, ecu)
+        print('***', xu, Mu)
+        return xu, Mu
 
     def pt(self):
         d = self.eff_d()
@@ -144,13 +146,13 @@ class RectBeamSection(Section):
         print('-'*71)
         print(f"{' '*54}{(C - T)/1e3:8.4f} {M/1e6:8.2f}")
 
-    def design(self, Mu: float, Vu: float=0, Tu: float=0):
-        d = self.D - self.clear_cover - 25.0
-        mulim = self.mulim(d) * self.conc.fck * self.b * d**2
-        if abs(Mu) > mulim:
-            print(f'Doubly reinforced section (Mu,lim = {mulim / 1e6}')
-        else:
-            print(f'Singly reinforced section (Mu,lim = {mulim / 1e6})')
+    # def design(self, Mu: float, Vu: float=0, Tu: float=0):
+    #     d = self.D - self.clear_cover - 25.0
+    #     mulim = self.mulim(d) * self.conc.fck * self.b * d**2
+    #     if abs(Mu) > mulim:
+    #         print(f'Doubly reinforced section (Mu,lim = {mulim / 1e6}')
+    #     else:
+    #         print(f'Singly reinforced section (Mu,lim = {mulim / 1e6})')
     
     def eff_d(self):
         return self.D - self.t_steel._dc()
@@ -165,7 +167,7 @@ class RectBeamSection(Section):
         pt = self.t_steel.area() * 100 / (self.b * self.eff_d())
         tauc = self.conc.tauc(pt)
         Vuc = tauc * self.b * self.eff_d()
-        Vus = self.shear_steel.rebar.fd * self.shear_steel._Asv * self.eff_d() / self.shear_steel._sv
+        Vus = self.shear_steel.rebar.fd * self.shear_steel.Asv * self.eff_d() / self.shear_steel._sv
         return Vuc + Vus
 
     def sv(self, Vu: float, nlegs: int, bar_dia: int, mof: float=25):

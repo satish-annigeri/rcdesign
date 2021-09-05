@@ -72,6 +72,9 @@ tsec = FlangedBeamSection(230, 450, 1000, 150, conc, t_st, None, shear_steel, 25
 # x = np.linspace(5, xumax, 5)
 # for xx in x:
 #     print(f"xu = {xx:8.2f} Mr = {tsec.Mr(xx, 0.0035)/1e6:8.2f}")
+
+xu, Mu = sec1.analyse(0.0035)
+print('xxx', xu, Mu)
 Vu = tsec.Vu()
 print(f"Vu = {Vu/1e3:.2f}")
 Vu = 190e3

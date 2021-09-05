@@ -1,9 +1,9 @@
 from math import isclose, pi, sin
 
-from rcdesign.is456.material.rebar import RebarMS, RebarHYSD, RebarLayer, RebarGroup, Stirrups
+from rcdesign.is456.material.rebar import BentupBars, RebarMS, RebarHYSD, RebarLayer, RebarGroup, Stirrups
 from rcdesign.is456.material.concrete import ConcreteStressBlock, Concrete
 
-class TestShearRebar:
+class TestStirrup:
     def test_shearrebar01(self):
         fe415 = RebarHYSD('Fe 415', 415)
         st = Stirrups(fe415, 2, 8)
@@ -33,4 +33,26 @@ class TestShearRebar:
         d = 400
         sv = fe415.fd * (2 * pi * 8**2 / 4) * d * sin(pi/2) / Vus
         assert st.sv(Vus, d) == sv
+
+    def test_shearrebar06(self):
+        fe415 = RebarHYSD('Fe 415', 415)
+        st = Stirrups(fe415, 2, 8, 45)
+        Vus = 80e3
+        d = 400
+        sv = st.rebar.fd * (2 * pi * 8**2 / 4) * d * sin(pi/2) * sin(45 * pi / 180) / Vus
+        assert st.sv(Vus, d) == sv
+
+class TestBentupBars:
+    def test_bentupbars01(self):
+        fe415 = RebarHYSD('Fe 415', 415)
+        bup = BentupBars(fe415, [16, 16], 150)
+        assert (bup.Asv == 2 * pi * 16**2 / 4) and (bup._sv == 150)
+
+    def test_bentupbars02(self):
+        fe415 = RebarHYSD('Fe 415', 415)
+        bup = BentupBars(fe415, [16, 16], 150, 45)
+        Vus = 80e3
+        d = 400
+        sv = bup.rebar.fd * (2 * pi * 16**2 / 4) * d * sin(45 * pi / 180) / Vus
+        assert bup.sv(Vus, d) == sv
 
