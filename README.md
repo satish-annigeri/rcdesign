@@ -50,11 +50,14 @@ Testing  has been implemented using pytest and unit tests have been implemented 
 2. **RebarMS** and **RebarHYSD**
 3. **RebarLayer** and **RebarGroup**
 4. **ShearReinforcement** and **Stirrups**
+5. **RectBeamSection** and **FlangedBeamSection**
+
+Code coverage through tests is currently 96% and analysis of rectangular and flanged beam sections with and without compression reinforcement is almost complete.
 
 More tests are being implemented.
 
 ### Documentation
-No documentation is available at present.
+Documentation is currently not available, but is the immediate next task as soon as testing is complete.
 
 ## Future Plans
 
