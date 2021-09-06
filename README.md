@@ -50,6 +50,38 @@ With the required packages installed, you can run the `main.py` script in the ro
 
 and you must see the resuls output to the screen.
 
+    Analysis of Reinforced Concrete Sections v0.1.0
+
+    Size: 230 x 450
+    Tension Steel: Rebar Group Fe 415 in 2 layers
+        Dia: [16, 16, 16] at 35. Area: 603.19
+        Dia: [16, 16] at 70. Area: 402.12
+        Total Area: 1005.31 centroid at 49.00 from the edge
+    Compression Steel: Rebar Group Fe 415 in 1 layer
+        Dia: [16, 16] at 35. Area: 402.12
+        Total Area: 402.12 centroid at 35.00 from the edge
+
+    Analysis of section for xu = 150
+    Compression (C):     386.59 kN
+        Tension (T):     362.79 kN
+            C - T:      23.81 kN
+
+    Location of neutral axis for equilibrium
+    Neutral axis lies between 120.00 and 155.00 from compression edge
+    Depth of neutral axis: 136.21
+
+    Rectangular Beam Section 230x450 (xu = 136.21)
+    Units: Distance in mm, Area in mm^2, Force in kN, Moment in kNm
+    FLEXURE CAPACITY
+    ... (lines omitted)
+    SHEAR CAPACITY
+    Shear reinforcement: Vertical Stirrups 2-8 @ 150 c/c
+    Ultimate shear capacity (kN): 156.19
+
+    Flanged Section
+    xu = 50.17 Mu = 137.91
+
+
 ## Objective
 
 The objective is to devlop a package to represent materials, stress blocks, rebars, sections, and other components essential to analyse and design reinforced concrete sections. It is initally planned to carry out analysis of sections before taking up design of sections as per the limit state method of IS 456:2000.
