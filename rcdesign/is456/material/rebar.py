@@ -280,6 +280,14 @@ class Stirrups(ShearReinforcement):
         self._sv = self.rebar.fd * self.Asv * d * sin(alpha_rad) / Vus
         return self._sv
 
+    def __repr__(self):  # pragma: no cover
+        sh_rein = "Vertical" if self._alpha_deg == 90 else "Inclined"
+        s = f"Shear reinforcement: {sh_rein} Stirrups "
+        s += f"{self._nlegs}-{self._bar_dia} @ {self._sv} c/c"
+        if self._alpha_deg != 90:
+            s += " inclined at {self._alpha_deg} degrees"
+        return s
+
 
 """Bent up bars as shear reinforcement"""
 

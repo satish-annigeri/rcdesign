@@ -109,7 +109,8 @@ class RectBeamSection(Section):
 
     def report(self, xu: float, ecu: float):  # pragma: no cover
         print(f"Rectangular Beam Section {self.b}x{self.D} (xu = {xu:.2f})")
-        print('Units: Distance in mm, Area in mm^2, Force in kN, Moment in kNm')
+        print("Units: Distance in mm, Area in mm^2, Force in kN, Moment in kNm")
+        print("FLEXURE CAPACITY")
         C = self.conc.area(0, 1, self.conc.fd) * xu * self.b
         Mc = self.conc.moment(0, 1, self.conc.fd) * xu**2 * self.b
         print(f"{' ':54}{'C (kN)':>8} {'M (kNm)':>8}")
@@ -144,6 +145,10 @@ class RectBeamSection(Section):
         M = Mc + Mt
         print('-'*71)
         print(f"{' '*54}{(C - T)/1e3:8.4f} {M/1e6:8.2f}")
+        print("SHEAR CAPACITY")
+        print(self.shear_steel.__repr__())
+        Vu = self.Vu()
+        print(f'Ultimate shear capacity (kN): {Vu/1e3:.2f}')
 
     # def design(self, Mu: float, Vu: float = 0, Tu: float = 0):
     #     d = self.D - self.clear_cover - 25.0
@@ -219,20 +224,19 @@ class FlangedBeamSection(RectBeamSection):
         df = xu if xu <= self.Df else self.Df
         x1 = xu - df
         C3 = self.conc.area(x1/xu, 1, self.conc.fd) * xu * (self.bf - self.bw)
-        M3 = self.conc.moment(x1/xu, 1, self.conc.fd) * df**2 * (self.bf - self.bw)
+        M3 = self.conc.moment(x1/xu, 1, self.conc.fd) * xu**2 * (self.bf - self.bw)
+        # print('---', C2, C1, C3)
+        # print('---', M2, M1, M3)
         # Sum it all up
         C = C1 + C2 + C3
         M = M1 + M2 + M3
         return C, M
 
-    # def T(self, xu: float, ecu: float):
-    #     _T, _M = self.t_steel.force_tension(xu, self.D - xu, ecu)
-    #     return _T, _M
-
-    def Mu(self, xu: float, ecu: float):
+    def Mu(self, d: float, xu: float, ecu: float):
         # Based on compression force C, assuming the right amount of tension steel
         C, M = self.C(xu, ecu)
-        return M + C * (self.eff_d() - xu)
+        Mu = M + C * (d - xu)
+        return Mu
 
     def __repr__(self):  # pragma: no cover
         s = f'Flanged Beam Section {self.bw}x{self.D} {self.bf}x{self.Df}\n'
@@ -240,8 +244,17 @@ class FlangedBeamSection(RectBeamSection):
         s += f"{self.c_steel.layers[0]}\n"
         return s
 
-    def analyse(self, xu: float, ecmax: float):
-        pass
+    def C_T(self, x: float, ecu: float):
+        C, _ = self.C(x, ecu)
+        T, _ = self.T(x, ecu)
+        return C - T
 
-    def design(self):
-        pass
+    def xu(self, ecu: float):
+        x1, x2 = rootsearch(self.C_T, self.t_steel.layers[0].dc, self.D, 10, ecu)
+        x = brentq(self.C_T, x1, x2, args=(ecu,))
+        return x
+
+    def analyse(self, ecu: float):
+        xu = self.xu(ecu)
+        Mu = self.Mu(self.eff_d(), xu, ecu)
+        return xu, Mu

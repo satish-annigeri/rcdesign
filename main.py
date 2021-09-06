@@ -6,7 +6,7 @@ from rcdesign.utils import rootsearch
 from rcdesign.is456.material.concrete import ConcreteStressBlock, Concrete
 from rcdesign.is456.material.rebar import (
     RebarHYSD, RebarLayer, RebarGroup, Stirrups)
-from rcdesign.is456.section import RectBeamSection
+from rcdesign.is456.section import RectBeamSection, FlangedBeamSection
 
 from rcdesign import __version__
 
@@ -27,7 +27,7 @@ t_st = RebarGroup(fe415, [t1, t2])  # Sequence is unimportant
 # Group of compression bars
 c_st = RebarGroup(fe415, [c1])
 # Ahear reinforcement in the form of vertical stirrups
-shear_st = Stirrups(fe415, 2, 8, 150, 90)
+shear_st = Stirrups(fe415, 2, 8, 150, 90)  # 2 legged 8# @ 150 c/c
 # Rectangular beam section
 rect_sec = RectBeamSection(230, 450, m20, t_st, c_st, shear_st, 25)
 print(rect_sec)
@@ -54,43 +54,9 @@ print()
 
 # Report of analysis of the section for xu corresponding to equilibriu,
 rect_sec.report(xu, rect_sec.conc.ecu)
-print()
 
-# Shear capacity of section
-Vu = rect_sec.Vu()
-print(f'Ultimate shear capacity (kN): {Vu/1e3:.2f}')
-
-# concsb = ConcreteStressBlock('IS456 LSM', 0.002, 0.0035)
-# print(concsb.ecy)
-# conc = Concrete('M20', 20, concsb)
-# t1 = RebarLayer(35, [16, 16, 16])
-# t2 = RebarLayer(70, [16, 16])
-# t_st = RebarGroup(RebarHYSD('Fe 415', 415), [t1, t2])
-# c_st = RebarGroup(RebarHYSD('Fe 415', 415), [c1])
-# sec_st = RebarHYSD('Fe415', 415)
-# shear_steel = Stirrups(RebarHYSD('Fe 415', 415), 2, 8, 90, 125)
-# print(shear_steel.nlegs, shear_steel.bar_dia, shear_steel.Asv)
-# shear_steel.nlegs = 4
-# print(shear_steel.nlegs, shear_steel.bar_dia, shear_steel.Asv)
-# shear_steel.bar_dia = 10
-# print(shear_steel.nlegs, shear_steel.bar_dia, shear_steel.Asv)
-
-# tsec = FlangedBeamSection(230, 450, 1000, 150, conc, t_st, None, shear_steel, 25)
-
-# xu = 50.16570748
-# xu = 150
-# print(f"xu = {xu} C = {tsec.C(xu, 0.0035)}")
-# print(f"xu = {xu} T = {tsec.T(xu, 0.0035)}")
-
-# xumax = tsec.xumax(tsec.eff_d())
-# xumax = 190
-# print('xumax =', xumax)
-# print(f"xu = {xumax} C = {tsec.C(xumax, 0.0035)} Mr = {tsec.Mr(xumax, 0.0035)}")
-
-# if xumax > tsec.Df:
-#     print(f"xu = {xumax} Mr = {tsec.Mr(xumax, 0.0035)}")
-
-# x = np.linspace(5, xumax, 5)
-# for xx in x:
-#     print(f"xu = {xx:8.2f} Mr = {tsec.Mr(xx, 0.0035)/1e6:8.2f}")
-
+# Flanged section
+t_sec = FlangedBeamSection(230, 450, 1000, 150, m20, t_st, None, shear_st, 25)
+print("\nFlanged Section")
+xu, Mu = t_sec.analyse(0.0035)
+print(f"xu = {xu:.2f} Mu = {Mu/1e6:.2f}")

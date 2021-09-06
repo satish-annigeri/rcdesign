@@ -201,9 +201,8 @@ def para_area(x1, x2, xu):
     k = 0.002 / 0.0035
     z1 = max((x1 / xu) / k, 0)
     z2 = min((x2 / xu) / k, 1)
-    a = ((z2**2 - z1**2) - (z2**3 - z1**3) / 3)
-    print(z1, z2, a)
-    return a * k
+    a = ((z2**2 - z1**2) - (z2**3 - z1**3) / 3) * k
+    return a
 
 
 def rect_area(x1, x2, xu):
@@ -212,6 +211,22 @@ def rect_area(x1, x2, xu):
     z2 = max(x2 / xu, 1)
     a = z2 - z1
     return a
+
+
+def para_moment(x1, x2, xu):
+    k = 0.002 / 0.0035
+    z1 = max((x1 / xu) / k, 0)
+    z2 = min((x2 / xu) / k, 1)
+    m = ((z2**3 - z1**3) * 2 / 3 - (z2**4 - z1**4) / 4) * k**2
+    return m
+
+
+def rect_moment(x1, x2, xu):
+    k = 0.002 / 0.0035
+    z1 = max(x1 / xu, k)
+    z2 = max(x2 / xu, 1)
+    m = (z2**2 - z1**2) / 2
+    return m
 
 
 class TestFlangedBeamSection:
@@ -233,7 +248,9 @@ class TestFlangedBeamSection:
         C_web_conc = 17 / 21 * tsec.conc.fd * tsec.bw * xu
         x1 = xu - tsec.Df
         x2 = xu
-        a1 = para_area(x1, x2, xu) * fd * xu * (tsec.bf - tsec.bw)
+        a1 = para_area(x1, x2, xu)
+        print('***', a1)
+        a1 *= fd * xu * (tsec.bf - tsec.bw)
         a2 = rect_area(x1, x2, xu) * fd * xu * (tsec.bf - tsec.bw)
         C = C_web_conc + a1 + a2
         CC, _ = tsec.C(xu, 0.0035)
@@ -274,7 +291,7 @@ class TestFlangedBeamSection:
         CC, _ = tsec.C(xu, 0.0035)
         assert CC == C
 
-    # With compression steel
+    # Compression force, with compression steel
     def test_flangedbeam06(self):
         tsec = FlangedBeamSection(230, 450, bf, Df, m20, t_st, c_st, sh_st, 25)
         xu = 160  # xu > Df
@@ -299,3 +316,72 @@ class TestFlangedBeamSection:
         CC, _ = tsec.C(xu, 0.0035)
         print(C_steel, C_web_conc, a1, a2, C, CC)
         assert CC == C
+
+    # Tension force. Method inherited from RectBeamSection
+    def test_flangedbeam07(self):
+        tsec = FlangedBeamSection(230, 450, bf, Df, m20, t_st, c_st, sh_st, 25)
+        ecu = 0.0035
+        xu = 160  # xu > Df
+        # Manual calculation of tension force
+        D = 450
+        D_xu = D - xu
+        es1 = ecu / xu * (D_xu - 35)
+        fs1 = tsec.t_steel.rebar.fs(es1)
+        ast1 = 3 * pi * 16**2 / 4
+        es2 = ecu / xu * (D_xu - 70)
+        fs2 = tsec.t_steel.rebar.fs(es2)
+        ast2 = 2 * pi * 16**2 / 4
+        T_manual = ast1 * fs1 + ast2 * fs2
+        T, _ = tsec.T(xu, ecu)
+        assert T == T_manual
+
+    # Moment capacity based on compression force
+    def test_flangedbeam08(self):
+        tsec = FlangedBeamSection(230, 450, bf, Df, m20, t_st, c_st, sh_st, 25)
+        D = 450
+        d = tsec.eff_d()
+        xu = 160  # xu > Df, assumed
+        fd = tsec.conc.fd
+        # Compression force in compression steel
+        dc = 35
+        x = xu - dc
+        esc = 0.0035 / xu * x
+        fsc = tsec.c_steel.rebar.fs(esc)
+        fcc = tsec.conc.fc(x / xu, tsec.conc.fd)
+        print(esc, fsc, fcc)
+        a0 = tsec.c_steel.area() * (fsc - fcc)
+        m0 = a0 * (xu - dc)
+        # Calculate compression force in concrete manually
+        # Web
+        a1 = 17 / 21 * tsec.conc.fd * tsec.bw * xu
+        m1 = (para_moment(0, xu, xu) + rect_moment(0, xu, xu))
+        # print(a1, m1, m1 * xu**2 * tsec.conc.fd * tsec.bw)
+        m1 *= xu**2 * tsec.conc.fd * tsec.bw
+        # Flange
+        x1 = xu - tsec.Df
+        x2 = xu
+
+        a2 = para_area(x1, x2, xu) * xu * fd * (tsec.bf - tsec.bw)
+        m2 = para_moment(x1, x2, xu) * xu**2 * fd * (tsec.bf - tsec.bw)
+        a3 = rect_area(x1, x2, xu) * fd * xu * (tsec.bf - tsec.bw)
+        m3 = rect_moment(x1, x2, xu) * xu**2 * fd * (tsec.bf - tsec.bw)
+        C = a0 + a1 + a2 + a3
+        M = m0 + m1 + m2 + m3
+        Mu_manual = M + C * (d - xu)
+        # Method
+        Mu = tsec.Mu(d, xu, 0.0035)
+        assert Mu == Mu_manual
+
+    # Moment capacity based on compression force
+    def test_flangedbeam09(self):
+        tsec = FlangedBeamSection(230, 450, bf, Df, m20, t_st, c_st, sh_st, 25)
+        ecu = 0.0035
+        D = 450
+        d = tsec.eff_d()
+        xu = 160  # xu > Df, assumed
+        fd = tsec.conc.fd
+        xu, Mu = tsec.analyse(0.0035)
+        # Manual calculation
+        C1, M1 = tsec.C(xu, ecu)
+        T2, M2 = tsec.T(xu, ecu)
+        assert isclose(C1, T2)
