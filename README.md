@@ -1,6 +1,32 @@
-# Python package for analysis and design of reinforced concrete sections as per IS 456:2000
+# `rcdesign` - A Python package for analysis and design of reinforced concrete sections as per IS 456:2000
 
 This is a Python package for analysis and design of reinforced concrete sections as per IS 456:2000, the Indian Standard code of practice for plain and reinforced concrete. All units are Netwon and millimeter.
+
+## Installation
+`rcdesign` is still under development and can be installed by cloning this repository with `git`
+
+`git clone https://github.com/satish-annigeri/rcdesign.git`
+
+## Quickstart
+After cloning the `rcdesign` repository from github, change into the newly created `rcdesign` directory and create a virtual environment with the command
+
+`python -m venv env`
+
+This will create a directory `env` inside the `rcdesign` directory and this will be the directory structure starting with the directory `rcdesign` where the repository was cloned.
+
+Install a virtual environment to work on the repository and install the necessary packages and you are good to go. If you are using `poetry`, there is the `pyproject.toml` file and if you are using `pip`, there is the `requirements.txt` file that can be used. With poetry, do
+
+`poetry install`
+
+and with `pip` do
+
+`pip install -r requirements.txt`
+
+With the required packages installed, you can run the `main.py` script in the root directory of the repository with
+
+`python main.py`
+
+and you must see the resuls output to the screen.
 
 ## Objective
 
@@ -52,12 +78,10 @@ Testing  has been implemented using pytest and unit tests have been implemented 
 4. **ShearReinforcement** and **Stirrups**
 5. **RectBeamSection** and **FlangedBeamSection**
 
-Code coverage through tests is currently 96% and analysis of rectangular and flanged beam sections with and without compression reinforcement is almost complete.
-
-More tests are being implemented.
+Code coverage through tests is currently 100%. Analysis of rectangular and flanged beam sections with and without compression reinforcement is now complete.
 
 ### Documentation
-Documentation is currently not available, but is the immediate next task as soon as testing is complete.
+Documentation is currently not available, but is the current ongoing task.
 
 ## Future Plans
 
