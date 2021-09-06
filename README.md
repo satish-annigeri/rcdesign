@@ -8,13 +8,35 @@ This is a Python package for analysis and design of reinforced concrete sections
 `git clone https://github.com/satish-annigeri/rcdesign.git`
 
 ## Quickstart
-After cloning the `rcdesign` repository from github, change into the newly created `rcdesign` directory and create a virtual environment with the command
+After cloning the `rcdesign` repository from github, change into the newly created `rcdesign` directory. The directory will have the following structure (as of 2021-09-06):
 
-`python -m venv env`
+    rcdesign/
+    ├── LICENSE.md
+    ├── main.py
+    ├── poetry.lock
+    ├── pyproject.toml
+    ├── rcdesign
+    │   ├── __init__.py
+    │   ├── is456
+    │   │   ├── __init__.py
+    │   │   ├── material
+    │   │   │   ├── concrete.py
+    │   │   │   ├── __init__.py
+    │   │   │   └── rebar.py
+    │   │   └── section.py
+    │   └── utils.py
+    ├── README.md
+    └── tests
+        ├── __init__.py
+        ├── test_concrete.py
+        ├── test_rebargroup.py
+        ├── test_rebarlayer.py
+        ├── test_rebar.py
+        ├── test_section.py
+        ├── test_shear_rebar.py
+        └── test_utils.py
 
-This will create a directory `env` inside the `rcdesign` directory and this will be the directory structure starting with the directory `rcdesign` where the repository was cloned.
-
-Install a virtual environment to work on the repository and install the necessary packages and you are good to go. If you are using `poetry`, there is the `pyproject.toml` file and if you are using `pip`, there is the `requirements.txt` file that can be used. With poetry, do
+Install a virtual environment in your preferred way and install the necessary packages. If you are using `poetry`, there is the `pyproject.toml` file and if you are using `pip`, there is the `requirements.txt` file that can be used. With poetry, do
 
 `poetry install`
 
