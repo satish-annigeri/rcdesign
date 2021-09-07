@@ -10,7 +10,7 @@ class TestRebarGroup:
         l1 = RebarLayer(35, [16, 16, 16])
         l2 = RebarLayer(70, [16, 16])
         grup = RebarGroup(fe415, [l1, l2])
-        assert grup.area() == 5 * pi * 16**2 / 4
+        assert grup.area == 5 * pi * 16**2 / 4
 
     def test_rebargroup02(self):
         fe415 = RebarHYSD('Fe 415', 415)

@@ -62,7 +62,7 @@ class TestRectBeamSection:
         esc = ecu / xu * x
         fsc = rsec.c_steel.rebar.fs(esc)
         fcc = rsec.conc.fc(x / xu, fd)
-        C2 = rsec.c_steel.area() * (fsc - fcc)
+        C2 = rsec.c_steel.area * (fsc - fcc)
         assert isclose(C, C1 + C2)
 
     def test_rectbeam07(self):
@@ -109,7 +109,7 @@ class TestRectBeamSection:
         esc = ecu / xu * x
         fsc = rsec.c_steel.rebar.fs(esc)
         fcc = rsec.conc.fc(x / xu, fd)
-        C2 = rsec.c_steel.area() * (fsc - fcc)
+        C2 = rsec.c_steel.area * (fsc - fcc)
         C = C1 + C2
         # Manual calculation for tension force
         D = 450
@@ -302,7 +302,7 @@ class TestFlangedBeamSection:
         fsc = tsec.c_steel.rebar.fs(esc)
         fcc = tsec.conc.fc(x / xu, tsec.conc.fd)
         print(esc, fsc, fcc)
-        C_steel = tsec.c_steel.area() * (fsc - fcc)
+        C_steel = tsec.c_steel.area * (fsc - fcc)
         # Calculate compression force in concrete manually
         # Web
         C_web_conc = 17 / 21 * tsec.conc.fd * tsec.bw * xu
@@ -349,7 +349,7 @@ class TestFlangedBeamSection:
         fsc = tsec.c_steel.rebar.fs(esc)
         fcc = tsec.conc.fc(x / xu, tsec.conc.fd)
         print(esc, fsc, fcc)
-        a0 = tsec.c_steel.area() * (fsc - fcc)
+        a0 = tsec.c_steel.area * (fsc - fcc)
         m0 = a0 * (xu - dc)
         # Calculate compression force in concrete manually
         # Web

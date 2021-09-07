@@ -119,12 +119,17 @@ class RebarLayer:
     def max_dia(self):
         return max(self.dia)
 
+    @property
     def area(self):
-        return sum([pi * d**2 / 4 for d in self.dia])
+        return sum([d**2 for d in self.dia]) * pi / 4
 
     @property
     def dc(self):
         return self._dc
+
+    @dc.setter
+    def dc(self, _dc):
+        self._dc = _dc
 
     def x(self, xu: float):
         return xu - self._dc
@@ -135,7 +140,7 @@ class RebarLayer:
         for bardia in self.dia:
             b += f"{bardia}, "
         b = '[' + b[:-2] + ']'
-        s += f"{b} at {self.dc}. Area: {self.area():.2f}"
+        s += f"{b} at {self.dc}. Area: {self.area:.2f}"
         return s
 
     def fs(self, xu: float, rebar: Rebar, ecu: float):
@@ -147,7 +152,7 @@ class RebarLayer:
         es = ecu / xu * x
         fs = rebar.fs(es)
 
-        _f = self.area() * fs
+        _f = self.area * fs
         _m = _f * x
         return _f, _m
 
@@ -157,7 +162,7 @@ class RebarLayer:
         esc = ecu / xu * x
         fsc = rebar._fs(esc)            # Stress in compression steel
         fcc = conc.fc(x / xu, conc.fd)  # Stress in concrete
-        _f = self.area() * (fsc - fcc)
+        _f = self.area * (fsc - fcc)
         _m = _f * x
         return _f, _m
 
@@ -182,14 +187,15 @@ class RebarGroup:
     rebar: Rebar              # Rebar object
     layers: List[RebarLayer]  # List of layers of bars, in any order from edge
 
+    @property
     def area(self):
-        return sum([layer.area() for layer in self.layers])
+        return sum([layer.area for layer in self.layers])
 
     def _dc(self):
         a = 0
         m = 0
         for layer in self.layers:
-            _a = layer.area()
+            _a = layer.area
             a += _a
             m += _a * layer.dc
         return (m / a)
@@ -203,7 +209,7 @@ class RebarGroup:
         s = f"Rebar Group {self.rebar.label} in {len(self.layers)} {sl}\n"
         for layer in self.layers:
             s += '\t' + layer.__repr__() + '\n'
-        s += f"\tTotal Area: {self.area():.2f} "
+        s += f"\tTotal Area: {self.area:.2f} "
         s += f"centroid at {self.dc:.2f} from the edge"
         return s
 

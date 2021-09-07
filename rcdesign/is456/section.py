@@ -96,7 +96,7 @@ class RectBeamSection(Section):
 
     def pt(self):
         d = self.eff_d()
-        ast = self.t_steel.area()
+        ast = self.t_steel.area
         return ast / (self.b * d) * 100
 
     def tauc(self):
@@ -146,15 +146,15 @@ class RectBeamSection(Section):
                 esc = ecu / xu * x
                 fsc = self.c_steel.rebar.fs(esc)
                 fcc = self.conc.fc(x / xu, self.conc.fd)
-                Fsc = layer.area() * (fsc - fcc)
+                Fsc = layer.area * (fsc - fcc)
                 C += Fsc
                 Msc = Fsc * x
                 Mc += Msc
                 c1_table.add_row(
-                    f"{layer.dc:4.0f}", f"{layer.bar_list()}", f"{layer.area():8.2f}", f"{x:8.2f}", f"{esc:12.4e}",
+                    f"{layer.dc:4.0f}", f"{layer.bar_list()}", f"{layer.area:8.2f}", f"{x:8.2f}", f"{esc:12.4e}",
                     f"{fsc:8.2f}", f"{fcc:8.2f}", f"{Fsc/1e3:8.2f}", f"{Msc/1e6:8.2f}"
                 )
-            c1_table.add_row(" ", " ", f"{self.c_steel.area():8.2f}", " ", " ", "Mc", f"{C/1e3:8.2f}", f"{Mc/1e6:8.2f}")
+            c1_table.add_row(" ", " ", f"{self.c_steel.area:8.2f}", " ", " ", "Mc", f"{C/1e3:8.2f}", f"{Mc/1e6:8.2f}")
         else:
             c1_table.add_row("-", "-", "-", "-", "-", "-", "-", "-")
         console.print(c1_table)
@@ -175,14 +175,14 @@ class RectBeamSection(Section):
             x = self.D - xu - layer.dc
             est = ecu / xu * x
             fst = self.t_steel.rebar.fs(est)
-            Fst = layer.area() * fst
+            Fst = layer.area * fst
             T += Fst
             Mst = Fst * x
             Mt += Mst
             table.add_row(
-                f"{layer.dc:4.0f}", f"{layer.bar_list()}", f"{layer.area():8.2f}", f"{x:8.2f}", f"{est:12.4e}",
+                f"{layer.dc:4.0f}", f"{layer.bar_list()}", f"{layer.area:8.2f}", f"{x:8.2f}", f"{est:12.4e}",
                 f"{fst:8.2f}", f"{' ':8}", f"{Fst/1e3:8.2f}", f"{Mst/1e6:8.2f}")
-        table.add_row(" ", " ", f"{self.t_steel.area():8.2f}", " ", " ", "Total T", f"{T/1e3:8.2f}", f"{Mt/1e6:8.2f}")
+        table.add_row(" ", " ", f"{self.t_steel.area:8.2f}", " ", " ", "Total T", f"{T/1e3:8.2f}", f"{Mt/1e6:8.2f}")
         M = Mc + Mt
         table.add_row(" ", " ", " ", " ", " ", "C-T, Mu",
             f"[bold magenta]{(C - T)/1e3:8.4f}[/bold magenta]",
@@ -210,7 +210,7 @@ class RectBeamSection(Section):
             self.shear_steel.bar_dia = bar_dia
         if sv > 0:
             self.shear_steel.sv = sv
-        pt = self.t_steel.area() * 100 / (self.b * self.eff_d())
+        pt = self.t_steel.area * 100 / (self.b * self.eff_d())
         tauc = self.conc.tauc(pt)
         Vuc = tauc * self.b * self.eff_d()
         Vus = self.shear_steel.rebar.fd * self.shear_steel.Asv * self.eff_d() / self.shear_steel._sv
@@ -220,7 +220,7 @@ class RectBeamSection(Section):
         self.shear_steel.nlegs = nlegs
         self.shear_steel.bar_dia = bar_dia
 
-        pt = self.t_steel.area() * 100 / (self.b * self.eff_d())
+        pt = self.t_steel.area * 100 / (self.b * self.eff_d())
         tauc = self.conc.tauc(pt)
         Vuc = tauc * self.b * self.eff_d()
 
@@ -307,11 +307,12 @@ class FlangedBeamSection(RectBeamSection):
         console = Console()
         console.print(f"Flanged Beam Section {self.b} x {self.D}, bf = {self.bf}, Df = {self.Df}, (xu = {xu:.2f})", style="bold blue")
         print("Units: Distance in mm, Area in mm^2, Force in kN, Moment in kNm")
-        console.print("FLEXURE CAPACITY", style="bold blue")
-        C = self.conc.area(0, 1, self.conc.fd) * xu * self.b
-        Mc = self.conc.moment(0, 1, self.conc.fd) * xu**2 * self.b
+        console.print("Flexure Capacity", style="bold blue")
+        Cw = self.conc.area(0, 1, self.conc.fd) * xu * self.b
+        Mw = self.conc.moment(0, 1, self.conc.fd) * xu**2 * self.b
+
         print(f"{' ':54}{'C (kN)':>8} {'M (kNm)':>8}")
-        print(f"{'Concrete in Compression':54}{C/1e3:8.2f} {Mc/1e6:8.2f}")
+        print(f"{'Concrete in Compression':54}{Cw/1e3:8.2f} {Mw/1e6:8.2f}")
         console.print("Compression Reinforcement", style="bold red", end="")
         if self.c_steel:
             print()
@@ -321,15 +322,15 @@ class FlangedBeamSection(RectBeamSection):
                 esc = ecu / xu * x
                 fsc = self.c_steel.rebar.fs(esc)
                 fcc = self.conc.fc(x / xu, self.conc.fd)
-                Fsc = layer.area() * (fsc - fcc)
-                C += Fsc
+                Fsc = layer.area * (fsc - fcc)
+                Cw += Fsc
                 Msc = Fsc * x
-                Mc += Msc
-                print(f"{layer.dc:4.0f} {layer.area():8.2f} {x:8.2f} {esc:12.4e} {fsc:8.2f} {fcc:8.2f} {Fsc/1e3:8.2f} {Msc/1e6:8.2f}")
+                Mw += Msc
+                print(f"{layer.dc:4.0f} {layer.area:8.2f} {x:8.2f} {esc:12.4e} {fsc:8.2f} {fcc:8.2f} {Fsc/1e3:8.2f} {Msc/1e6:8.2f}")
         else:
             print(f"{'-':>37} {'-':>8}")
         print('-'*71)
-        print(f"{' '*54}{C/1e3:8.2f} {Mc/1e6:8.2f}")
+        print(f"{' '*54}{Cw/1e3:8.2f} {Mw/1e6:8.2f}")
         console.print("Tension Reinforcement", style="bold red")
         T = 0
         Mt = 0
@@ -338,16 +339,16 @@ class FlangedBeamSection(RectBeamSection):
             x = self.D - xu - layer.dc
             est = ecu / xu * x
             fst = self.t_steel.rebar.fs(est)
-            Fst = layer.area() * fst
+            Fst = layer.area * fst
             T += Fst
             Mst = Fst * x
             Mt += Mst
-            print(f"{layer.dc:4.0f} {layer.area():8.2f} {x:8.2f} {est:12.4e} {fst:8.2f} {' ':8} {Fst/1e3:8.2f} {Mst/1e6:8.2f}")
+            print(f"{layer.dc:4.0f} {layer.area:8.2f} {x:8.2f} {est:12.4e} {fst:8.2f} {' ':8} {Fst/1e3:8.2f} {Mst/1e6:8.2f}")
         print(f"{' '*54}{T/1e3:8.2f} {Mt/1e6:8.2f}")
-        M = Mc + Mt
+        M = Mw + Mt
         print('-'*71)
-        print(f"{' '*54}{(C - T)/1e3:8.4f} {M/1e6:8.2f}")
-        console.print("SHEAR CAPACITY", style="bold blue")
+        print(f"{' '*54}{(Cw - T)/1e3:8.4f} {M/1e6:8.2f}")
+        console.print("Shear Capacity", style="bold blue")
         print(self.shear_steel.__repr__())
         Vu = self.Vu()
         print(f'Ultimate shear capacity (kN): {Vu/1e3:.2f}')
