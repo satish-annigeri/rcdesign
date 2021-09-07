@@ -132,10 +132,10 @@ Testing  has been implemented using pytest and unit tests have been implemented 
 4. **ShearReinforcement** and **Stirrups**
 5. **RectBeamSection** and **FlangedBeamSection**
 
-Code coverage through tests is currently 100%. Analysis of rectangular and flanged beam sections with and without compression reinforcement is now complete.
+Code coverage through tests using `pytest-cov` is 100%. Analysis of rectangular and flanged beam sections with and without compression reinforcement, for flexure and shear, has been completed. More examples will be verified to consider different cases.
 
 ### Documentation
-Documentation is currently not available, but is the current ongoing task.
+Documentation is presently not available, but is the current ongoing task.
 
 ## Future Plans
 
@@ -147,8 +147,12 @@ Immediate plans include the analysis and design at the *section* level:
 4. Detailing of *sections* subjected to bending, shear and torsion.
 5. Implementing a stress block to represent working stress method.
 
-Long term plans include design and detailing of elements:
+Long term plans include:
 
-1. Reinforced concrete elements such as beams and columns.
-2. Reinforced concrete structures including detailing of joints (very far into the future, if at all).
+1. Design and detailing of reinforced concrete elements such as beams, columns, slabs, footings, retaining walls etc.
+2. Calculation of deflections of elements.
+3. Design and detailing of reinforced concrete structures, including detailing of joints (very far into the future, if at all).
 
+## References
+1. IS 456:2000 Indian Standard Code of Practice for Plain and Reinforced Concrete (Fourth Revision), Bureau of Indian Standards, New Delhi, 2000.
+2. SP:24 Explanatory Handbook on Indian Standard Code of Practice for Plain and Reinforced Concrete (IS 456:1978), , Bureau of Indian Standards, New Delhi, 1984.
