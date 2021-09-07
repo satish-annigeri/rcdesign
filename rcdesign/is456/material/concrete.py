@@ -27,8 +27,8 @@ class StressBlock(ABC):  # pragma: no cover
 # Concrete Stress Block for flexure as per IS456:2000 Limit State Method
 @dataclass
 class ConcreteStressBlock(StressBlock):
-    z = symbols('z')
-    expr = 2 * z - z**2
+    z = symbols("z")
+    expr = 2 * z - z ** 2
 
     def __init__(self, label, ecy: float, ecu: float):
         super().__init__(label)
@@ -44,7 +44,7 @@ class ConcreteStressBlock(StressBlock):
         k = self.ecy / ecmax
 
         if x <= k:
-            r = self.expr.evalf(subs={'z': x / k})
+            r = self.expr.evalf(subs={"z": x / k})
         else:
             r = 1.0
         return r
@@ -57,13 +57,13 @@ class ConcreteStressBlock(StressBlock):
         k = nsimplify(self.ecy / ecmax)
 
         if x2 <= k:
-            a1 = integrate(self.expr, (self.z, x1/k, x2/k)) * k
+            a1 = integrate(self.expr, (self.z, x1 / k, x2 / k)) * k
             a2 = 0.0
         elif x1 >= k:
             a1 = 0.0
             a2 = integrate(1, (self.z, x1, x2))
         else:
-            a1 = integrate(self.expr, (self.z, x1/k, 1)) * k
+            a1 = integrate(self.expr, (self.z, x1 / k, 1)) * k
             a2 = integrate(1, (self.z, k, x2))
         return a1 + a2
 
@@ -75,13 +75,13 @@ class ConcreteStressBlock(StressBlock):
         k = nsimplify(self.ecy / ecmax)
 
         if x2 <= k:
-            m1 = integrate(self.expr * self.z, (self.z, x1/k, x2/k)) * k**2
+            m1 = integrate(self.expr * self.z, (self.z, x1 / k, x2 / k)) * k ** 2
             m2 = 0.0
         elif x1 >= k:
             m1 = 0.0
             m2 = integrate(self.z, (self.z, x1, x2))
         else:
-            m1 = integrate(self.expr * self.z, (self.z, x1/k, 1)) * k**2
+            m1 = integrate(self.expr * self.z, (self.z, x1 / k, 1)) * k ** 2
             m2 = integrate(self.z, (self.z, k, x2))
         return m1 + m2
 
@@ -115,11 +115,11 @@ class Concrete:
         return 0.67 * self.fck / self.gamma_m
 
     def fc(self, x_xu: float, fd: float = 1.0):
-        if (0 <= x_xu <= 1):
+        if 0 <= x_xu <= 1:
             __fc = self.stress_block.stress(x_xu)
             return __fc * fd
         else:
-            raise ValueError('x/xu = %.4f. Must be between 0 and 1' % (x_xu))
+            raise ValueError("x/xu = %.4f. Must be between 0 and 1" % (x_xu))
 
     def area(self, x1_xu: float, x2_xu: float, fd: float = 1.0) -> float:
         factor = self.stress_block.area(x1_xu, x2_xu)
@@ -139,9 +139,7 @@ class Concrete:
         return self.moment(x1_xu, x2_xu) / self.area(x1_xu, x2_xu)
 
     def tauc_max(self):
-        tauc = np.array(
-            [[15, 20, 25, 30, 35, 40], [2.5, 2.8, 3.1, 3.5, 3.7, 4.0]]
-        )
+        tauc = np.array([[15, 20, 25, 30, 35, 40], [2.5, 2.8, 3.1, 3.5, 3.7, 4.0]])
         if self.fck < 15:
             return 0.0
         elif self.fck >= tauc[0, -1]:
@@ -149,8 +147,8 @@ class Concrete:
         else:
             for i in range(1, len(tauc)):
                 if self.fck <= tauc[0, i]:
-                    x1 = tauc[0, i-1]
-                    y1 = tauc[1, i-1]
+                    x1 = tauc[0, i - 1]
+                    y1 = tauc[1, i - 1]
                     x2 = tauc[0, i]
                     y2 = tauc[1, i]
                     return y1 + (y2 - y1) / (x2 - x1) * (self.fck - x1)
@@ -162,10 +160,10 @@ class Concrete:
             pt = 3.0
         beta = max(1.0, (0.8 * self.fck) / (6.89 * pt))
         num = 0.85 * np.sqrt(0.8 * self.fck) * (np.sqrt(1 + 5 * beta) - 1)
-        den = (6 * beta)
+        den = 6 * beta
         return num / den
 
     def __repr__(self):  # pragma: no cover
         s = f"Stress Block {self.stress_block.label} - {self.label}: "
-        s += f'{self.fck} {self.fd:.2f} {self.density}'
+        s += f"{self.fck} {self.fd:.2f} {self.density}"
         return s

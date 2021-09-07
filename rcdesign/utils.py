@@ -1,5 +1,6 @@
 # import numpy as np
 from numpy import sign
+
 # from scipy.optimize import brentq
 from typing import Callable
 
@@ -7,11 +8,10 @@ from typing import Callable
 def func(x: float, *args) -> float:
     # return a*x**2 + c*x - 4
     # return x**3 - 10*x**2 + 5
-    return args[0]**3 + args[1]*x**2 + args[2]*x + args[3]
+    return args[0] ** 3 + args[1] * x ** 2 + args[2] * x + args[3]
 
 
-def rootsearch(func: Callable, xstart: float, xstop: float,
-               numint: int, *args):
+def rootsearch(func: Callable, xstart: float, xstop: float, numint: int, *args):
     dx = (xstop - xstart) / (numint)
 
     x1 = xstart

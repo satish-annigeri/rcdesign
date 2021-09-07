@@ -7,7 +7,7 @@ from rcdesign.is456.material.concrete import ConcreteStressBlock, Concrete
 class Test_RebarLayer:
     def test_rebarlayer01(self):
         l1 = RebarLayer(35, [16, 16, 16])
-        assert l1.area == pi / 4 * (3 * 16**2)
+        assert l1.area == pi / 4 * (3 * 16 ** 2)
 
     def test_rebarlayer02(self):
         l1 = RebarLayer(35, [16, 16, 16])
@@ -23,7 +23,7 @@ class Test_RebarLayer:
 
     def test_rebarlayer05(self):
         l1 = RebarLayer(35, [16, 16, 16])
-        rebar = RebarHYSD('Fe 415', 415)
+        rebar = RebarHYSD("Fe 415", 415)
         xu = 190
         ecu = 0.0035
         es = ecu / xu * l1.x(xu)
@@ -31,7 +31,7 @@ class Test_RebarLayer:
 
     def test_rebarlayer06(self):
         l1 = RebarLayer(35, [16, 16, 16])
-        rebar = RebarHYSD('Fe 415', 415)
+        rebar = RebarHYSD("Fe 415", 415)
         D = 450
         xu = 190
         D_xu = D - xu
@@ -42,15 +42,15 @@ class Test_RebarLayer:
 
     def test_rebarlayer07(self):
         l1 = RebarLayer(35, [16, 16, 16])
-        rebar = RebarHYSD('Fe 415', 415)
-        csb = ConcreteStressBlock('IS456 LSM', 0.002, 0.0035)
-        conc = Concrete('M20', 20, csb)
+        rebar = RebarHYSD("Fe 415", 415)
+        csb = ConcreteStressBlock("IS456 LSM", 0.002, 0.0035)
+        conc = Concrete("M20", 20, csb)
         xu = 190
         x = l1.x(xu)
         ecu = 0.0035
         es = ecu / xu * l1.x(xu)
         fsc = rebar.fs(es)
-        fcc = conc.fc(x/xu) * conc.fd
+        fcc = conc.fc(x / xu) * conc.fd
         print(es, fsc, fcc)
         f, m = l1.force_compression(xu, conc, rebar, ecu)
         ff = l1.area * (fsc - fcc)
