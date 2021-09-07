@@ -1,6 +1,6 @@
 """Class to represent reinforced concrete cross sections"""
 
-
+from math import isclose
 from enum import Enum
 
 # from typing import List
@@ -149,6 +149,7 @@ class RectBeamSection(Section):
         c_table.add_column("M (kNm)", width=8, justify="right")
         c_table.add_row(f"{C/1e3:8.2f}", f"{Mc/1e6:8.2f}")
         console.print(c_table)
+        # Compression steel
         c1_table = Table(
             show_header=True,
             header_style="magenta",
@@ -193,13 +194,15 @@ class RectBeamSection(Section):
                 f"{self.c_steel.area:8.2f}",
                 " ",
                 " ",
-                "Mc",
+                " ",
+                " ",
                 f"{C/1e3:8.2f}",
                 f"{Mc/1e6:8.2f}",
             )
         else:
-            c1_table.add_row("-", "-", "-", "-", "-", "-", "-", "-")
+            c1_table.add_row("-", "-", "-", "-", "-", "-", "-", "-", "-")
         console.print(c1_table)
+        # Tension reinforcement
         T = 0
         Mt = 0
         table = Table(
@@ -244,23 +247,30 @@ class RectBeamSection(Section):
             f"{self.t_steel.area:8.2f}",
             " ",
             " ",
-            "Total T",
+            " ",
+            "Total",
             f"{T/1e3:8.2f}",
             f"{Mt/1e6:8.2f}",
         )
         M = Mc + Mt
+        if isclose(C - T, 0.0, abs_tol=1e-4):
+            c_t = f"{0.00:>8}"
+        else:
+            c_t = f"{(C - T)/1e3:8.2}"
         table.add_row(
             " ",
             " ",
             " ",
             " ",
             " ",
+            " ",
             "C-T, Mu",
-            f"[bold magenta]{(C - T)/1e3:8.4f}[/bold magenta]",
+            f"[bold magenta]{c_t}[/bold magenta]",
             f"[bold magenta]{M/1e6:8.2f}[/bold magenta]",
         )
         console.print(table)
         console.print("Shear Capacity", style="bold blue")
+        # Shear reinforcement
         Vu = self.Vu()
         console.print(f"{self.shear_steel.__repr__()}, Vu (kN) = {Vu/1e3:.2f}")
 
@@ -397,21 +407,73 @@ class FlangedBeamSection(RectBeamSection):
         return xu, Mu
 
     def report(self, xu: float, ecu: float):  # pragma: no cover
+        from rich import box
         from rich.console import Console
+        from rich.table import Table
 
         console = Console()
         console.print(
             f"Flanged Beam Section {self.b} x {self.D}, bf = {self.bf}, Df = {self.Df}, (xu = {xu:.2f})",
             style="bold blue",
         )
-        print("Units: Distance in mm, Area in mm^2, Force in kN, Moment in kNm")
+        print(
+            f"Concrete: {self.conc.fck}, Tension Steel: {self.t_steel.rebar.fy}", end=""
+        )
+        if self.c_steel:
+            print(f", Compression Steel: {self.c_steel.rebar.fy}")
+        else:
+            print()
+        print(
+            "Units: Distance in mm, Area in mm^2, Force in kN, Moment about NA in kNm"
+        )
         console.print("Flexure Capacity", style="bold blue")
-        Cw = self.conc.area(0, 1, self.conc.fd) * xu * self.b
-        Mw = self.conc.moment(0, 1, self.conc.fd) * xu ** 2 * self.b
-
-        print(f"{' ':54}{'C (kN)':>8} {'M (kNm)':>8}")
-        print(f"{'Concrete in Compression':54}{Cw/1e3:8.2f} {Mw/1e6:8.2f}")
-        console.print("Compression Reinforcement", style="bold red", end="")
+        # Web of beam
+        Cw, Mw = self.Cw(xu, ecu)
+        # Flange of beam
+        Cf, Mf = self.Cf(xu)
+        C = Cw + Cf
+        Mc = Mw + Mf
+        c_table = Table(
+            show_header=True,
+            header_style="magenta",
+            title_justify="left",
+            box=box.SQUARE,
+            title_style="bold red",
+            title="Concrete in Compression",
+        )
+        c_table.add_column("Cw (kN)", width=8, justify="right")
+        c_table.add_column("Cf (kN)", width=8, justify="right")
+        c_table.add_column("C (kN)", width=8, justify="right")
+        c_table.add_column("Mw (kN)", width=8, justify="right")
+        c_table.add_column("Mf (kN)", width=8, justify="right")
+        c_table.add_column("M (kNm)", width=8, justify="right")
+        c_table.add_row(
+            f"{Cw/1e3:8.2f}",
+            f"{Cf/1e3:8.2f}",
+            f"{C/1e3:8.2f}",
+            f"{Mw/1e6:8.2f}",
+            f"{Mf/1e6:8.2f}",
+            f"{Mc/1e6:8.2f}",
+        )
+        console.print(c_table)
+        # Compression steel
+        c1_table = Table(
+            show_header=True,
+            header_style="magenta",
+            title_justify="left",
+            title_style="bold red",
+            box=box.SQUARE,
+            title="Compression Reinforcement",
+        )
+        c1_table.add_column("dc", width=4, justify="right")
+        c1_table.add_column("Bars", width=8, justify="right")
+        c1_table.add_column("Area", width=8, justify="right")
+        c1_table.add_column("x", width=8, justify="right")
+        c1_table.add_column("Strain", width=12, justify="right")
+        c1_table.add_column("f_sc", width=8, justify="right")
+        c1_table.add_column("f_cc", width=8, justify="right")
+        c1_table.add_column("C (kN)", width=8, justify="right")
+        c1_table.add_column("M (kNm)", width=8, justify="right")
         if self.c_steel:
             print()
             print(
@@ -423,22 +485,36 @@ class FlangedBeamSection(RectBeamSection):
                 fsc = self.c_steel.rebar.fs(esc)
                 fcc = self.conc.fc(x / xu, self.conc.fd)
                 Fsc = layer.area * (fsc - fcc)
-                Cw += Fsc
-                Msc = Fsc * x
-                Mw += Msc
+                C += Fsc
+                Mc += Fsc * x
                 print(
-                    f"{layer.dc:4.0f} {layer.area:8.2f} {x:8.2f} {esc:12.4e} {fsc:8.2f} {fcc:8.2f} {Fsc/1e3:8.2f} {Msc/1e6:8.2f}"
+                    f"{layer.dc:4.0f} {layer.area:8.2f} {x:8.2f} {esc:12.4e} {fsc:8.2f} {fcc:8.2f} {Fsc/1e3:8.2f} {Mc/1e6:8.2f}"
                 )
         else:
-            print(f"{'-':>37} {'-':>8}")
-        print("-" * 71)
-        print(f"{' '*54}{Cw/1e3:8.2f} {Mw/1e6:8.2f}")
-        console.print("Tension Reinforcement", style="bold red")
+            c1_table.add_row("-", "-", "-", "-", "-", "-", "-", "-", "-")
+        c1_table.add_row(
+            " ", " ", " ", " ", " ", " ", "Total", f"{C/1e3:8.2f}", f"{Mc/1e6:8.2f}"
+        )
+        console.print(c1_table)
         T = 0
         Mt = 0
-        print(
-            f"{'dc':>4} {'Area':>8} {'x':>8} {'Strain':>12} {'f_st':>8} {' ':8} {'T (kN)':>8} {'M (kNm)':>8}"
+        table = Table(
+            show_header=True,
+            header_style="magenta",
+            title_justify="left",
+            box=box.SQUARE,
+            title_style="bold red",
+            title="Tension Reinforcement",
         )
+        table.add_column("dc", width=4, justify="right")
+        table.add_column("Bars", width=8, justify="right")
+        table.add_column("Area", width=8, justify="right")
+        table.add_column("x", width=8, justify="right")
+        table.add_column("Strain", width=12, justify="right")
+        table.add_column("f_st", width=8, justify="right")
+        table.add_column(" ", width=8, justify="right")
+        table.add_column("T (kN)", width=8, justify="right")
+        table.add_column("M (kNm)", width=8, justify="right")
         for layer in self.t_steel.layers:
             x = self.D - xu - layer.dc
             est = ecu / xu * x
@@ -447,14 +523,46 @@ class FlangedBeamSection(RectBeamSection):
             T += Fst
             Mst = Fst * x
             Mt += Mst
-            print(
-                f"{layer.dc:4.0f} {layer.area:8.2f} {x:8.2f} {est:12.4e} {fst:8.2f} {' ':8} {Fst/1e3:8.2f} {Mst/1e6:8.2f}"
+            table.add_row(
+                f"{layer.dc:4.0f}",
+                f"{layer.bar_list()}",
+                f"{layer.area:8.2f}",
+                f"{x:8.2f}",
+                f"{est:12.4e}",
+                f"{fst:8.2f}",
+                f"{' ':8}",
+                f"{Fst/1e3:8.2f}",
+                f"{Mst/1e6:8.2f}",
             )
-        print(f"{' '*54}{T/1e3:8.2f} {Mt/1e6:8.2f}")
-        M = Mw + Mt
-        print("-" * 71)
-        print(f"{' '*54}{(Cw - T)/1e3:8.4f} {M/1e6:8.2f}")
+        table.add_row(
+            " ",
+            " ",
+            f"{self.t_steel.area:8.2f}",
+            " ",
+            " ",
+            " ",
+            "Total",
+            f"{T/1e3:8.2f}",
+            f"{Mt/1e6:8.2f}",
+        )
+        M = Mc + Mt
+        if isclose(C - T, 0.0, abs_tol=1e-4):
+            c_t = f"{0.00:>8}"
+        else:
+            c_t = f"{(C - T)/1e3:8.2}"
+        table.add_row(
+            " ",
+            " ",
+            " ",
+            " ",
+            " ",
+            " ",
+            "C-T, Mu",
+            f"[bold magenta]{c_t}[/bold magenta]",
+            f"[bold magenta]{M/1e6:8.2f}[/bold magenta]",
+        )
+        console.print(table)
+        # Shear reinforcement
         console.print("Shear Capacity", style="bold blue")
-        print(self.shear_steel.__repr__())
         Vu = self.Vu()
-        print(f"Ultimate shear capacity (kN): {Vu/1e3:.2f}")
+        console.print(f"{self.shear_steel.__repr__()}, Vu (kN) = {Vu/1e3:.2f}")
