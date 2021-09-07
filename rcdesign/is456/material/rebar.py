@@ -161,6 +161,18 @@ class RebarLayer:
         _m = _f * x
         return _f, _m
 
+    def bar_list(self, sep=';'):
+        d = dict()
+        for bar_dia in self.dia:
+            if bar_dia in d.keys():
+                d[bar_dia] += 1
+            else:
+                d[bar_dia] = 1
+        s = ''
+        for bar_dia in sorted(d.keys()):
+            s += f"{d[bar_dia]}-{bar_dia} "
+        s = s.rstrip().replace(' ', sep)
+        return s
 
 """Group of reinforcement bars"""
 

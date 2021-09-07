@@ -57,6 +57,8 @@ rect_sec.report(xu, rect_sec.conc.ecu)
 
 # Flanged section
 t_sec = FlangedBeamSection(230, 450, 1000, 150, m20, t_st, None, shear_st, 25)
-print("\nFlanged Section")
+print("\n\n")
 xu, Mu = t_sec.analyse(0.0035)
-print(f"xu = {xu:.2f} Mu = {Mu/1e6:.2f}")
+# print(f"xu = {xu:.2f} Mu = {Mu/1e6:.2f}")
+t_sec.report(xu, 0.0035)
+

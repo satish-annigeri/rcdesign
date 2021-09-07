@@ -13,6 +13,7 @@ coverage = "^5.5"
 pylint = "^2.10.2"
 flake8 = "^3.9.2"
 pytest-cov = "^2.12.1"
+rich = "^10.9.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

@@ -64,7 +64,7 @@ and you must see the resuls output to the screen.
     Analysis of section for xu = 150
     Compression (C):     386.59 kN
         Tension (T):     362.79 kN
-            C - T:      23.81 kN
+              C - T:      23.81 kN
 
     Location of neutral axis for equilibrium
     Neutral axis lies between 120.00 and 155.00 from compression edge
