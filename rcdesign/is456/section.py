@@ -88,12 +88,12 @@ class RectBeamSection(Section):
         return C - T
 
     def xu(self, ecu: float):
+        dc_max = 10
         if self.c_steel:
-            dc_max = self.c_steel.dc_max() + 10
-        else:
-            dc_max = 10
+            dc_max += self.c_steel.dc_max()
+
         x1, x2 = rootsearch(self.C_T, dc_max, self.D, 10, ecu)
-        print("***", x1, x2)
+        # print("***", x1, x2)
         x = brentq(self.C_T, x1, x2, args=(ecu,))
         # x = brentq(self.C_T, dc_max, self.D, args=(ecu,))
         return x

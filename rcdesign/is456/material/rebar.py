@@ -252,7 +252,8 @@ class RebarGroup:
         return _f, _m
 
     def dc_max(self):
-        return max(self.layers)._dc
+        if self:
+            return max(self.layers)._dc
 
 
 """Shear reinforcement"""

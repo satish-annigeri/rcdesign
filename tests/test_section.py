@@ -1,9 +1,10 @@
 from math import isclose, pi, sin
+from scipy.optimize import brentq
 
 from rcdesign.is456.material.rebar import RebarHYSD, RebarLayer, RebarGroup, Stirrups
 from rcdesign.is456.material.concrete import ConcreteStressBlock, Concrete
 from rcdesign.is456.section import RectBeamSection, FlangedBeamSection
-from rcdesign.utils import floor
+from rcdesign.utils import floor, rootsearch
 
 
 fe415 = RebarHYSD("Fe 415", 415)
@@ -193,6 +194,14 @@ class TestRectBeamSection:
     def test_rectbeam15(self):
         rsec = RectBeamSection(230, 450, m20, t_st, c_st, sh_st, 25)
         assert rsec.t_steel.dc_max() == 70
+
+    def test_rectbeam16(self):
+        rsec = RectBeamSection(230, 450, m20, t_st, None, sh_st, 25)
+        ecu = 0.0035
+        x1, x2 = rootsearch(rsec.C_T, 10, rsec.D, 10, ecu)
+        # print("***", x1, x2)
+        x = brentq(rsec.C_T, x1, x2, args=(ecu,))
+        assert rsec.xu(0.0035) == x
 
 
 bw = 230

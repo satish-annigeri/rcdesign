@@ -65,3 +65,18 @@ class Test_RebarLayer:
         l1 = RebarLayer(35, [20, 16, 20])
         l1.dc = 45
         assert l1.dc == 45
+
+    def test_rebarlayer10(self):
+        l1 = RebarLayer(70, [20, 16, 20])
+        l2 = RebarLayer(35, [20, 16, 20])
+        l3 = RebarLayer(100, [20, 16, 20])
+        l4 = RebarLayer(35, [20, 16, 20])
+        assert (
+            (l1 > l2)
+            and (l2 < l3)
+            and (l2 == l4)
+            and (l2 <= l1)
+            and (l2 <= l4)
+            and (l4 >= l2)
+            and (l2 != l3)
+        )
