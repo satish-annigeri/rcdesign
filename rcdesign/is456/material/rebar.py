@@ -180,6 +180,24 @@ class RebarLayer:
         s = s.rstrip().replace(" ", sep)
         return s
 
+    def __lt__(self, b):
+        return self._dc < b._dc
+
+    def __le__(self, b):
+        return self._dc <= b._dc
+
+    def __eq__(self, b):
+        return self._dc == b._dc
+
+    def __ne__(self, b):
+        return self._dc != b._dc
+
+    def __gt__(self, b):
+        return self._dc > b._dc
+
+    def __ge__(self, b):
+        return self._dc >= b._dc
+
 
 """Group of reinforcement bars"""
 
@@ -232,6 +250,9 @@ class RebarGroup:
             _f += __f
             _m += __m
         return _f, _m
+
+    def dc_max(self):
+        return max(self.layers)._dc
 
 
 """Shear reinforcement"""

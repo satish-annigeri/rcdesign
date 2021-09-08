@@ -190,6 +190,10 @@ class TestRectBeamSection:
         sv = floor(fd * Asv * d / Vus, mof)
         assert isclose(rsec.sv(Vu, nlegs, bar_dia, mof), sv)
 
+    def test_rectbeam15(self):
+        rsec = RectBeamSection(230, 450, m20, t_st, c_st, sh_st, 25)
+        assert rsec.t_steel.dc_max() == 70
+
 
 bw = 230
 bf = 1000
