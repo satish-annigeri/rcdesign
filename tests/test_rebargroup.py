@@ -70,9 +70,8 @@ class TestRebarGroup:
         xu = 70
         group.calc_xc(D)
         group.calc_stress_type(xu)
-        print(group)
         assert group.layers[0].stress_type == "compression"
-        # assert group.layers[1].stress_type == "neutral"
+        assert group.layers[1].stress_type == "neutral"
         assert group.layers[2].stress_type == "tension"
 
     def test_rebargroup07(self):
@@ -96,3 +95,12 @@ class TestRebarGroup:
         xu = 100
         group.calc_xc(D)
         assert group.dc_max(D) == (78, 450)
+
+    def test_rebargroup09(self):
+        fe415 = RebarHYSD("Fe 415", 415)
+        c1 = RebarLayer([16, 16, 16], 35)
+        c2 = RebarLayer([16, 16], 70)
+        group = RebarGroup(fe415, [c1, c2])
+        group.calc_xc(450)
+        xbar = (3 * 35 + 2 * 70) / (3 + 2)
+        assert group.centroid == xbar

@@ -54,7 +54,6 @@ class TestRebarLayer:
         es = ecu / xu * l1.x(xu)
         fsc = rebar.fs(es)
         fcc = conc.fc(x / xu) * conc.fd
-        print(es, fsc, fcc)
         f, m, _ = l1.force_compression(xu, conc, rebar, ecu)
         ff = l1.area * (fsc - fcc)
         assert (f == ff) and (m == ff * (xu - 35))

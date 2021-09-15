@@ -145,7 +145,6 @@ class RebarLayer:
             self._xc = D + self.dc
 
     def calc_stress_type(self, xu: float):
-        print("***", self._xc, isclose(self._xc, xu))
         if isclose(self._xc, xu):
             self.stress_type = "neutral"
         elif self._xc < xu:
@@ -184,7 +183,6 @@ class RebarLayer:
     def force_compression(self, xu: float, conc: Concrete, rebar: Rebar, ecu: float):
         x = xu - self._xc
         esc = ecu / xu * x
-        print(xu, x, esc)
         fsc = rebar._fs(esc)  # Stress in compression steel
         fcc = conc.fc(x / xu, conc.fd)  # Stress in concrete
         _f = self.area * (fsc - fcc)
@@ -286,19 +284,15 @@ class RebarGroup:
 
     def force_moment(self, xu: float, conc: Concrete, ecu: float):
         fc = ft = mc = mt = 0.0
-        print("***", len(self.layers), self.__repr__())
         for L in self.layers:
-            print("***", L.dc, L._xc, end=" ")
             if L._xc < xu:  # in compression
                 _fc, _mc, _ = L.force_compression(xu, conc, self.rebar, ecu)
-                print("compression", _fc, _mc)
                 fc += _fc
                 mc += _mc
             else:
                 x = L._xc - xu
                 _ft, _mt, _ = L.force_tension(xu, self.rebar, ecu)
                 _ft = abs(_ft)
-                print("tension", _ft, _mt)
                 ft += _ft
                 mt += _mt
         return fc, mc, ft, mt

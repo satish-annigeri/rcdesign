@@ -105,8 +105,6 @@ class RectBeamSection(Section):
         Mc += Msc
         Ft += Fst
         Mt += Mst
-        # print(xu, Fcc / 1e3, Fsc / 1e3, Fst / 1e3, Fc / 1e3, Ft / 1e3, Fc - Ft)
-        # print(Mcc / 1e6, Msc / 1e6, Mst / 1e6, (Mc + Mt) / 1e6)
         return Fc, Ft, Mc, Mt
 
     def T(self, xu: float, ecu: float):
@@ -127,9 +125,7 @@ class RectBeamSection(Section):
         #     dc_max += self.c_steel.dc_max()
 
         x1, x2 = rootsearch(self.C_T, dc_max, self.D, 10, ecu)
-        # print("***", x1, x2)
         x = brentq(self.C_T, x1, x2, args=(ecu,))
-        # x = brentq(self.C_T, dc_max, self.D, args=(ecu,))
         return x
 
     def Mu(self, xu: float, ecu: float):
@@ -187,7 +183,6 @@ class RectBeamSection(Section):
                 x = xu - L._xc
                 esc = ecu / xu * x
                 fsc = self.long_steel.rebar.fs(esc)
-                # print("===", xu, L._xc, x, esc, fsc)
                 fcc = self.conc.fc(x / xu, self.conc.fd)
                 _Fsc = L.area * (fsc - fcc)
                 _Msc = _Fsc * x
@@ -206,7 +201,6 @@ class RectBeamSection(Section):
                 _Mst = _Fst * x
                 Fst += _Fst
                 Mst += _Mst
-                # print("***", L.dc, L.bar_list(), L.area, x, est)
                 st += (
                     f"{abs(L.dc):4.0f}{L.bar_list():>8}{L.area:8.2f}{x:8.2f}{est:12.4e}"
                 )
@@ -231,7 +225,7 @@ class RectBeamSection(Section):
         s += f"{M/1e6:8.2f}\n"
         # Shear reinforcement
         s += f"Shear Capacity\n"
-        s += f"{'==='}{self.pt(xu):.2f} d = {self.eff_d(xu):.2f}\n"
+        s += f"{self.pt(xu):.2f} d = {self.eff_d(xu):.2f}\n"
         Vu = self.Vu(xu)
         s += f"{self.shear_steel.__repr__()}, Vu (kN) = {Vu/1e3:.2f}"
         return s
@@ -253,7 +247,6 @@ class RectBeamSection(Section):
                 _m = _a * L._xc
                 a += _a
                 m += _m
-                # print("***", L.dc, L._xc, _a, _m)
         return m / a
 
     def pt(self, xu: float):

@@ -142,7 +142,6 @@ class TestRectBeamSection:
         pt = 5 * pi * 16 ** 2 / 4 * 100 / (230 * d)
         tauc = rsec.conc.tauc(pt)
         Vuc = tauc * 230 * d
-        print(Vus)
         assert isclose(rsec.Vu(xu), Vus + Vuc)
 
     def test_rectbeam13(self):
@@ -193,7 +192,6 @@ class TestRectBeamSection:
     def test_rectbeam16(self):
         ecu = 0.0035
         x1, x2 = rootsearch(rsec.C_T, 10, rsec.D, 10, ecu)
-        # print("***", x1, x2)
         x = brentq(rsec.C_T, x1, x2, args=(ecu,))
         assert rsec.xu(0.0035) == x
 
@@ -269,12 +267,10 @@ class TestFlangedBeamSection:
         x1 = xu - tsec.Df
         x2 = xu
         a1 = para_area(x1, x2, xu)
-        # print("***", a1)
         a1 *= fd * xu * (tsec.bf - tsec.bw)
         a2 = rect_area(x1, x2, xu) * fd * xu * (tsec.bf - tsec.bw)
         C = C_web_conc + a1 + a2
         CC, _ = tsec.C(xu, 0.0035)
-        print(C_web_conc, a1, a2, C, CC)
         assert CC == C
 
     def test_flangedbeam04(self):
@@ -320,7 +316,6 @@ class TestFlangedBeamSection:
         esc = 0.0035 / xu * x
         fsc = tsec.long_steel.rebar.fs(esc)
         fcc = tsec.conc.fc(x / xu, tsec.conc.fd)
-        print(esc, fsc, fcc)
         C_steel = tsec.long_steel.area_comp(xu) * (fsc - fcc)
         # Calculate compression force in concrete manually
         # Web
@@ -333,7 +328,6 @@ class TestFlangedBeamSection:
         C = C_steel + C_web_conc + a1 + a2
         # Method
         CC, _ = tsec.C(xu, 0.0035)
-        print(C_steel, C_web_conc, a1, a2, C, CC)
         assert CC == C
 
     # Tension force. Method inherited from RectBeamSection
@@ -365,14 +359,12 @@ class TestFlangedBeamSection:
         esc = 0.0035 / xu * x
         fsc = tsec.long_steel.rebar.fs(esc)
         fcc = tsec.conc.fc(x / xu, tsec.conc.fd)
-        print(esc, fsc, fcc)
         a0 = tsec.long_steel.area_comp(xu) * (fsc - fcc)
         m0 = a0 * (xu - dc)
         # Calculate compression force in concrete manually
         # Web
         a1 = 17 / 21 * tsec.conc.fd * tsec.bw * xu
         m1 = para_moment(0, xu, xu) + rect_moment(0, xu, xu)
-        # print(a1, m1, m1 * xu**2 * tsec.conc.fd * tsec.bw)
         m1 *= xu ** 2 * tsec.conc.fd * tsec.bw
         # Flange
         x1 = xu - tsec.Df

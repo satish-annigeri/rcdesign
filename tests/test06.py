@@ -31,7 +31,7 @@ long_st = RebarGroup(fe415, [t2, c1, t1, c2])
 sec = RectBeamSection(230, 500, m20, long_st, sh_st, 25)
 # xu = 110
 xu = sec.xu(0.0035)
-print("x_u =", xu)
+# print("x_u =", xu)
 # Fc, Ft, Mc, Mt = sec.force_moment(xu, 0.0035)
 # print(f"Fc = {Fc:.2f} Ft = {Ft:.2f} Mc = {Mc:.2f} Mt = {Mt:.2f}")
 # print(sec)
