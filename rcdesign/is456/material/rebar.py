@@ -1,12 +1,11 @@
 """Classes to represent reinforcement bars, layers of reinforcement bars
 and groups of reinforcement layers"""
 
+import numpy as np
+from math import pi, sin, isclose
 from typing import List
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
-
-import numpy as np
-from math import pi, sin
 
 from .concrete import Concrete
 
@@ -115,8 +114,10 @@ class RebarHYSD(Rebar):
 
 @dataclass
 class RebarLayer:
-    _dc: float  # Distance of centre of layer from edge of section
     dia: List[int]  # List of bar diameters, left to right, all of same type
+    _dc: float  # Distance of centre of layer from edge of section
+    _xc: float = 0.0  # Distance from compression edge
+    stress_type: str = ""  # Type of stress, C (compression) or T (tension)
 
     def max_dia(self):
         return max(self.dia)
@@ -133,8 +134,28 @@ class RebarLayer:
     def dc(self, _dc):
         self._dc = _dc
 
+    @property
+    def xc(self):
+        return self._xc
+
+    def calc_xc(self, D: float):
+        if self.dc > 0:
+            self._xc = self.dc
+        else:
+            self._xc = D + self.dc
+
+    def calc_stress_type(self, xu: float):
+        print("***", self._xc, isclose(self._xc, xu))
+        if isclose(self._xc, xu):
+            self.stress_type = "neutral"
+        elif self._xc < xu:
+            self.stress_type = "compression"
+        elif self._xc > 0:
+            self.stress_type = "tension"
+        return self.stress_type
+
     def x(self, xu: float):
-        return xu - self._dc
+        return xu - self._xc
 
     def __repr__(self):  # pragma: no cover
         s = "Dia: "
@@ -142,21 +163,23 @@ class RebarLayer:
         for bardia in self.dia:
             b += f"{bardia}, "
         b = "[" + b[:-2] + "]"
-        s += f"{b} at {self.dc}. Area: {self.area:.2f}"
+        s += f"{b} at {self.dc}. Area: {self.area:.2f} (xc = {self._xc:.2f})"
         return s
 
     def fs(self, xu: float, rebar: Rebar, ecu: float):
         es = ecu / xu * self.x(xu)
         return rebar._fs(es)
 
-    def force_tension(self, xu: float, D_xu: float, rebar: Rebar, ecu: float):
-        x = D_xu - self._dc
+    def force_tension(self, xu: float, rebar: Rebar, ecu: float):
+        # x = D_xu - self._dc
+        x = self.x(xu)
         es = ecu / xu * x
         fs = rebar.fs(es)
 
         _f = self.area * fs
         _m = _f * x
-        return _f, _m
+        result = {"x": x, "es": es, "f_st": fs, "T": _f, "M": _m}
+        return _f, _m, result
 
     def force_compression(self, xu: float, conc: Concrete, rebar: Rebar, ecu: float):
         x = xu - self._dc
@@ -165,7 +188,8 @@ class RebarLayer:
         fcc = conc.fc(x / xu, conc.fd)  # Stress in concrete
         _f = self.area * (fsc - fcc)
         _m = _f * x
-        return _f, _m
+        result = {"x": x, "esc": esc, "f_sc": fsc, "f_cc": fcc, "C": _f, "M": _m}
+        return _f, _m, result
 
     def bar_list(self, sep=";"):
         d = dict()
@@ -181,22 +205,22 @@ class RebarLayer:
         return s
 
     def __lt__(self, b):
-        return self._dc < b._dc
+        return self._xc < b._xc
 
     def __le__(self, b):
-        return self._dc <= b._dc
+        return self._xc <= b._xc
 
     def __eq__(self, b):
-        return self._dc == b._dc
+        return self._xc == b._xc
 
     def __ne__(self, b):
-        return self._dc != b._dc
+        return self._xc != b._xc
 
     def __gt__(self, b):
-        return self._dc > b._dc
+        return self._xc > b._xc
 
     def __ge__(self, b):
-        return self._dc >= b._dc
+        return self._xc >= b._xc
 
 
 """Group of reinforcement bars"""
@@ -211,18 +235,110 @@ class RebarGroup:
     def area(self):
         return sum([layer.area for layer in self.layers])
 
-    def _dc(self):
-        a = 0
-        m = 0
-        for layer in self.layers:
-            _a = layer.area
+    def calc_xc(self, D: float):
+        for L in self.layers:
+            L.calc_xc(D)
+
+    @property
+    def centroid(self):
+        a = 0.0
+        m = 0.0
+        for L in self.layers:
+            _a = L.area
             a += _a
-            m += _a * layer.dc
+            m += _a * L._xc
         return m / a
 
     @property
     def dc(self):
-        return self._dc()
+        a = 0.0
+        m = 0.0
+        for L in self.layers:
+            _a = L.area
+            a += _a
+            m += _a * L.dc
+        return m / a
+
+    def has_comp_steel(self, xu: float):
+        for L in self.layers:
+            if L._xc < xu:
+                return True
+        return False
+
+    def area_comp(self, xu: float) -> float:
+        a = 0.0
+        for L in self.layers:
+            if L._xc < xu:
+                a += L.area
+        return a
+
+    def area_tension(self, xu: float) -> float:
+        a = 0.0
+        for L in self.layers:
+            if L._xc > xu:
+                a += L.area
+        return a
+
+    def calc_stress_type(self, xu: float):
+        for L in self.layers:
+            L.calc_stress_type(xu)
+
+    def force_moment(self, xu: float, conc: Concrete, ecu: float):
+        fc = ft = mc = mt = 0.0
+        # print("***", len(self.layers), self.__repr__())
+        for L in self.layers:
+            # print("***", L.dc, L._xc, end=" ")
+            if L._xc < xu:  # in compression
+                _fc, _mc, _ = L.force_compression(xu, conc, self.rebar, ecu)
+                # print("compression", _fc, _mc)
+                fc += _fc
+                mc += _mc
+            else:
+                x = L._xc - xu
+                _ft, _mt, _ = L.force_tension(xu, self.rebar, ecu)
+                _ft = abs(_ft)
+                # print("tension", _ft, _mt)
+                ft += _ft
+                mt += _mt
+        return fc, mc, ft, mt
+
+    def force_tension(self, xu: float, ecu: float):
+        f = m = 0.0
+        for L in self.layers:
+            if L._xc > xu:
+                D_xu = L._xc - xu
+                _f, _m, _ = L.force_tension(xu, self.rebar, ecu)
+                f += _f
+                m += _m
+        return f, m
+
+    def force_compression(self, xu: float, conc: Concrete, ecu: float):
+        _f = 0.0
+        _m = 0.0
+        for layer in self.layers:
+            __f, __m, _ = layer.force_compression(xu, conc, self.rebar, ecu)
+            _f += __f
+            _m += __m
+        return _f, _m
+
+    def dc_max(self, D: float):
+        x1 = 0
+        dx_max = 0
+        for L in sorted(self.layers):
+            d = L.max_dia()
+            x2 = L._xc - d / 2
+            dx = x2 - x1
+            if dx > dx_max:
+                dx_max = dx
+                xmin = x1
+                xmax = x2
+            x1 = x2 + d
+        dx = D - x1
+        if dx > dx_max:
+            dx_max = dx
+            xmin = x1
+            xmax = D
+        return (xmin, xmax)
 
     def __repr__(self):  # pragma: no cover
         sl = "layers" if len(self.layers) > 1 else "layer"
@@ -230,30 +346,8 @@ class RebarGroup:
         for layer in self.layers:
             s += "\t" + layer.__repr__() + "\n"
         s += f"\tTotal Area: {self.area:.2f} "
-        s += f"centroid at {self.dc:.2f} from the edge"
+        s += f"centroid at {self.centroid:.2f} from the edge"
         return s
-
-    def force_tension(self, xu: float, D_xu: float, ecu: float):
-        _f = 0.0
-        _m = 0.0
-        for layer in self.layers:
-            __f, __m = layer.force_tension(xu, D_xu, self.rebar, ecu)
-            _f += __f
-            _m += __m
-        return _f, _m
-
-    def force_compression(self, xu: float, conc: Concrete, ecu: float):
-        _f = 0.0
-        _m = 0.0
-        for layer in self.layers:
-            __f, __m = layer.force_compression(xu, conc, self.rebar, ecu)
-            _f += __f
-            _m += __m
-        return _f, _m
-
-    def dc_max(self):
-        if self:
-            return max(self.layers)._dc
 
 
 """Shear reinforcement"""
@@ -332,6 +426,7 @@ class Stirrups(ShearReinforcement):
         sh_rein = "Vertical" if self._alpha_deg == 90 else "Inclined"
         s = f"Shear reinforcement: {sh_rein} Stirrups "
         s += f"{self._nlegs}-{self._bar_dia} @ {self._sv} c/c"
+        s += f" (Asv = {self.Asv:.2f})"
         if self._alpha_deg != 90:
             s += " inclined at {self._alpha_deg} degrees"
         return s

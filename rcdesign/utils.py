@@ -13,13 +13,13 @@ def func(x: float, *args) -> float:
 
 def rootsearch(func: Callable, xstart: float, xstop: float, numint: int, *args):
     dx = (xstop - xstart) / (numint)
-    print(xstart, xstop, numint)
+    # print(xstart, xstop, numint)
     x1 = xstart
     y1 = func(x1, *args)
     while x1 < xstop:
         x2 = x1 + dx
         y2 = func(x2, *args)
-        print(x1, y1, x2, y2)
+        # print(x1, y1, x2, y2)
         if sign(y1) != sign(y2):
             return (x1, x2)
         else:
