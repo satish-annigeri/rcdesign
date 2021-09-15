@@ -390,16 +390,16 @@ class TestFlangedBeamSection:
         assert Mu == Mu_manual
 
     # Moment capacity based on compression force
-    # def test_flangedbeam09(self):
-    #     long_st = RebarGroup(fe415, [c1, t1, t2])
-    #     tsec = FlangedBeamSection(230, 450, bf, Df, m20, long_st, sh_st, 25)
-    #     ecu = 0.0035
-    #     D = 450
-    #     xu = 160  # xu > Df, assumed
-    #     d = tsec.eff_d(xu)
-    #     fd = tsec.conc.fd
-    #     xu, Mu = tsec.analyse(0.0035)
-    #     # Manual calculation
-    #     C1, _ = tsec.C(xu, ecu)
-    #     T2, _ = tsec.T(xu, ecu)
-    #     assert isclose(C1, T2)
+    def test_flangedbeam09(self):
+        long_st = RebarGroup(fe415, [c1, t1, t2])
+        tsec = FlangedBeamSection(230, 450, bf, Df, m20, long_st, sh_st, 25)
+        ecu = 0.0035
+        D = 450
+        xu = 160  # xu > Df, assumed
+        d = tsec.eff_d(xu)
+        fd = tsec.conc.fd
+        xu, Mu = tsec.analyse(0.0035)
+        # Manual calculation
+        C1, _ = tsec.C(xu, ecu)
+        T2, _ = tsec.T(xu, ecu)
+        assert isclose(C1, T2)

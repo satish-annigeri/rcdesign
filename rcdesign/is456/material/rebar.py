@@ -182,8 +182,9 @@ class RebarLayer:
         return _f, _m, result
 
     def force_compression(self, xu: float, conc: Concrete, rebar: Rebar, ecu: float):
-        x = xu - self._dc
+        x = xu - self._xc
         esc = ecu / xu * x
+        print(xu, x, esc)
         fsc = rebar._fs(esc)  # Stress in compression steel
         fcc = conc.fc(x / xu, conc.fd)  # Stress in concrete
         _f = self.area * (fsc - fcc)
@@ -285,19 +286,19 @@ class RebarGroup:
 
     def force_moment(self, xu: float, conc: Concrete, ecu: float):
         fc = ft = mc = mt = 0.0
-        # print("***", len(self.layers), self.__repr__())
+        print("***", len(self.layers), self.__repr__())
         for L in self.layers:
-            # print("***", L.dc, L._xc, end=" ")
+            print("***", L.dc, L._xc, end=" ")
             if L._xc < xu:  # in compression
                 _fc, _mc, _ = L.force_compression(xu, conc, self.rebar, ecu)
-                # print("compression", _fc, _mc)
+                print("compression", _fc, _mc)
                 fc += _fc
                 mc += _mc
             else:
                 x = L._xc - xu
                 _ft, _mt, _ = L.force_tension(xu, self.rebar, ecu)
                 _ft = abs(_ft)
-                # print("tension", _ft, _mt)
+                print("tension", _ft, _mt)
                 ft += _ft
                 mt += _mt
         return fc, mc, ft, mt
@@ -313,12 +314,12 @@ class RebarGroup:
         return f, m
 
     def force_compression(self, xu: float, conc: Concrete, ecu: float):
-        _f = 0.0
-        _m = 0.0
-        for layer in self.layers:
-            __f, __m, _ = layer.force_compression(xu, conc, self.rebar, ecu)
-            _f += __f
-            _m += __m
+        _f = _m = 0.0
+        for L in self.layers:
+            if L._xc < xu:
+                __f, __m, _ = L.force_compression(xu, conc, self.rebar, ecu)
+                _f += __f
+                _m += __m
         return _f, _m
 
     def dc_max(self, D: float):
