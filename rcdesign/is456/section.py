@@ -3,9 +3,10 @@
 from math import isclose
 from enum import Enum
 
-# from typing import List
+from typing import Tuple, List, Union
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
+from os import sep
 from scipy.optimize import brentq
 
 
@@ -62,10 +63,10 @@ class RectBeamSection(Section):
         self.long_steel = long_steel
         self.calc_xc()
 
-    def calc_xc(self):
+    def calc_xc(self) -> float:
         self.long_steel.calc_xc(self.D)
 
-    def adjust_x(self, xu: float):
+    def adjust_x(self, xu: float) -> None:
         for layer in self.long_steel.layers:
             # Calculate _xc from _dc
             if layer._dc < 0:
@@ -80,19 +81,19 @@ class RectBeamSection(Section):
             elif layer._xc == xu:
                 layer.stress_type = "neutral"
 
-    def xumax(self, d: float = 1):
+    def xumax(self, d: float = 1) -> float:
         es_min = self.long_steel.rebar.es_min()
         return 0.0035 / (es_min + 0.0035) * d
 
-    def mulim(self, d: float):
+    def mulim(self, d: float) -> float:
         xumax = self.xumax() * d
         return (17 / 21) * self.conc.fd * self.b * xumax * (d - (99 / 238) * xumax)
 
-    def C(self, xu: float, ecu: float):
+    def C(self, xu: float, ecu: float) -> float:
         C, _, M, _ = self.force_moment(xu, ecu)
         return C, M
 
-    def force_moment(self, xu: float, ecu: float):
+    def force_moment(self, xu: float, ecu: float) -> Tuple[float, float, float, float]:
         self.adjust_x(xu)
         Fc = Mc = Ft = Mt = 0.0
         Fcc = self.conc.area(0, 1, self.conc.fd) * xu * self.b
@@ -107,52 +108,49 @@ class RectBeamSection(Section):
         Mt += Mst
         return Fc, Ft, Mc, Mt
 
-    def T(self, xu: float, ecu: float):
-        # _T, _M = self.t_steel.force_tension(xu, self.D - xu, ecu)
+    def T(self, xu: float, ecu: float) -> Tuple[float, float]:
         _, _T, _, _M = self.force_moment(xu, ecu)
         return _T, _M
 
-    def C_T(self, x: float, ecu: float):
+    def C_T(self, x: float, ecu: float) -> float:
         # C, _ = self.C(x, ecu)
         # T, _ = self.T(x, ecu)
         self.adjust_x(x)
         C, T, _, _ = self.force_moment(x, ecu)
         return C - T
 
-    def xu(self, ecu: float):
+    def xu(self, ecu: float) -> float:
         dc_max = 10
-        # if self.c_steel:
-        #     dc_max += self.c_steel.dc_max()
 
         x1, x2 = rootsearch(self.C_T, dc_max, self.D, 10, ecu)
         x = brentq(self.C_T, x1, x2, args=(ecu,))
         return x
 
-    def Mu(self, xu: float, ecu: float):
+    def Mu(self, xu: float, ecu: float) -> float:
         # Assuming tension steel to produce an equal tension force as C
         C, M = self.C(xu, ecu)
         return M + C * (self.eff_d(xu) - xu)
 
-    def analyse(self, ecu: float):
+    def analyse(self, ecu: float) -> Tuple[float, float]:
         xu = self.xu(ecu)
         Mu = self.Mu(xu, ecu)
         return xu, Mu
 
-    def tauc(self, xu: float):
+    def tauc(self, xu: float) -> float:
         return self.conc.tauc(self.pt(xu))
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         s = f"Size: {self.b} x {self.D}\nTension Steel: {self.long_steel}\n"
         # s += f"Compression Steel: {self.c_steel}"
         return s
 
-    def has_compr_steel(self, xu: float):
+    def has_compr_steel(self, xu: float) -> bool:
         for L in self.long_steel.layers:
             if L._xc < xu:
                 return True
         return False
 
-    def report(self, xu: float, ecu: float):  # pragma: no cover
+    def report(self, xu: float, ecu: float) -> str:  # pragma: no cover
         self.adjust_x(xu)
         s = f"Rectangular Beam Section {self.b} x {self.D}  (xu = {xu:.2f})\n"
         s += f"Concrete: {self.conc.fck}, Tension Steel: {self.long_steel.rebar.fy:.2f}"
@@ -225,20 +223,15 @@ class RectBeamSection(Section):
         s += f"{M/1e6:8.2f}\n"
         # Shear reinforcement
         s += f"Shear Capacity\n"
-        s += f"{self.pt(xu):.2f} d = {self.eff_d(xu):.2f}\n"
-        Vu = self.Vu(xu)
-        s += f"{self.shear_steel.__repr__()}, Vu (kN) = {Vu/1e3:.2f}"
+        s += f"{self.shear_steel.__repr__()}\n"
+        tauc, Vus, Vuc = self.Vu(xu, separate_output=True)
+        s += f"pst = {self.pt(xu):.2f}%, d = {self.eff_d(xu):.2f}, "
+        s += f"tau_c (N/mm^2) = {tauc:.2f}\n"
+        Vu = Vuc + Vus
+        s += f"Vuc (kN) = {Vuc/1e3:.2f}, Vus = {Vus/1e3:.2f}, Vu (kN) = {Vu/1e3:.2f}"
         return s
 
-    # def design(self, Mu: float, Vu: float = 0, Tu: float = 0):
-    #     d = self.D - self.clear_cover - 25.0
-    #     mulim = self.mulim(d) * self.conc.fck * self.b * d**2
-    #     if abs(Mu) > mulim:
-    #         print(f'Doubly reinforced section (Mu,lim = {mulim / 1e6}')
-    #     else:
-    #         print(f'Singly reinforced section (Mu,lim = {mulim / 1e6})')
-
-    def eff_d(self, xu: float):
+    def eff_d(self, xu: float) -> float:
         a = 0.0
         m = 0.0
         for L in sorted(self.long_steel.layers):
@@ -249,7 +242,7 @@ class RectBeamSection(Section):
                 m += _m
         return m / a
 
-    def pt(self, xu: float):
+    def pt(self, xu: float) -> float:
         d = self.eff_d(xu)
         ast = 0.0
         for L in sorted(self.long_steel.layers):
@@ -258,7 +251,14 @@ class RectBeamSection(Section):
         pt = ast / (self.b * d) * 100
         return pt
 
-    def Vu(self, xu: float, nlegs: int = 0, bar_dia: int = 0, sv: float = 0):
+    def Vu(
+        self,
+        xu: float,
+        nlegs: int = 0,
+        bar_dia: int = 0,
+        sv: float = 0,
+        separate_output=False,
+    ) -> Union[Tuple[float, float], Tuple[float, float, float]]:
         if nlegs > 0:
             self.shear_steel.nlegs = nlegs
         if bar_dia > 0:
@@ -275,9 +275,14 @@ class RectBeamSection(Section):
             * self.eff_d(xu)
             / self.shear_steel._sv
         )
-        return Vuc + Vus
+        if separate_output:
+            return tauc, Vuc, Vus
+        else:
+            return Vuc + Vus
 
-    def sv(self, xu: float, Vu: float, nlegs: int, bar_dia: int, mof: float = 25):
+    def sv(
+        self, xu: float, Vu: float, nlegs: int, bar_dia: int, mof: float = 25
+    ) -> float:
         self.shear_steel.nlegs = nlegs
         self.shear_steel.bar_dia = bar_dia
 
@@ -317,26 +322,26 @@ class FlangedBeamSection(RectBeamSection):
         self.Df = Df
 
     @property
-    def bw(self):
+    def bw(self) -> float:
         return self.b
 
     @bw.setter
-    def bw(self, _bw):
+    def bw(self, _bw) -> None:
         self.b = _bw
 
-    def Cw(self, xu: float, ecu: float):
+    def Cw(self, xu: float, ecu: float) -> Tuple[float, float]:
         C = self.conc.area(0, 1, self.conc.fd) * xu * self.bw
         M = self.conc.moment(0, 1, self.conc.fd) * xu ** 2 * self.bw
         return C, M
 
-    def Cf(self, xu: float):
+    def Cf(self, xu: float) -> Tuple[float, float]:
         df = xu if xu <= self.Df else self.Df
         x1 = xu - df
         C = self.conc.area(x1 / xu, 1, self.conc.fd) * xu * (self.bf - self.bw)
         M = self.conc.moment(x1 / xu, 1, self.conc.fd) * xu ** 2 * (self.bf - self.bw)
         return C, M
 
-    def C(self, xu: float, ecu: float):
+    def C(self, xu: float, ecu: float) -> Tuple[float, float]:
         # Compression force and moment due to concrete of web
         C1, M1 = self.Cw(xu, ecu)
         # Compression force and moment due to compression reinforcement bars
@@ -353,35 +358,35 @@ class FlangedBeamSection(RectBeamSection):
         M = M1 + M2 + M3
         return C, M
 
-    def Mu(self, d: float, xu: float, ecu: float):
+    def Mu(self, d: float, xu: float, ecu: float) -> float:
         # Based on compression force C, assuming the right amount of tension steel
         C, M = self.C(xu, ecu)
         Mu = M + C * (d - xu)
         return Mu
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         s = f"Flanged Beam Section {self.bw}x{self.D} {self.bf}x{self.Df}\n"
         s += self.conc.__repr__() + "\n"
         s += f"{self.c_steel.layers[0]}\n"
         return s
 
-    def C_T(self, x: float, ecu: float):
+    def C_T(self, x: float, ecu: float) -> float:
         C, _ = self.C(x, ecu)
         T, _ = self.T(x, ecu)
         return C - T
 
-    def xu(self, ecu: float):
+    def xu(self, ecu: float) -> float:
         # x1, x2 = rootsearch(self.C_T, self.t_steel.layers[0].dc, self.D, 10, ecu)
         x1, x2 = rootsearch(self.C_T, 10, self.D, 10, ecu)
         x = brentq(self.C_T, x1, x2, args=(ecu,))
         return x
 
-    def analyse(self, ecu: float):
+    def analyse(self, ecu: float) -> Tuple[float, float]:
         xu = self.xu(ecu)
         Mu = self.Mu(self.eff_d(xu), xu, ecu)
         return xu, Mu
 
-    def report(self, xu: float, ecu: float):  # pragma: no cover
+    def report(self, xu: float, ecu: float) -> str:  # pragma: no cover
         from rich import box
         from rich.console import Console
         from rich.table import Table

@@ -1,6 +1,6 @@
 # `rcdesign` - A Python package for analysis and design of reinforced concrete sections as per IS 456:2000
 
-This is a Python package for analysis and design of reinforced concrete sections as per IS 456:2000, the Indian Standard code of practice for plain and reinforced concrete. All units are Netwon and millimeter.
+`rcdesign` is a Python package for analysis and design of reinforced concrete sections as per IS 456:2000, the Indian Standard code of practice for plain and reinforced concrete. All units are Netwon and millimeter.
 
 ## Installation
 `rcdesign` is still under development and can be installed by cloning this repository with `git`

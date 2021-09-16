@@ -3,7 +3,7 @@ and groups of reinforcement layers"""
 
 import numpy as np
 from math import pi, sin, isclose
-from typing import List
+from typing import Tuple, List, Union
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
 
@@ -44,7 +44,7 @@ class RebarMS(Rebar):
     def __repr__(self):  # pragma: no cover
         return f"{self.label:>6}: Type={'MS':4} fy={self.fy} fd={self.fd:.2f}"
 
-    def _fs(self, es: float):
+    def _fs(self, es: float) -> float:
         _es = abs(es)
         _esy = self.fd / self.Es
 
@@ -53,7 +53,7 @@ class RebarMS(Rebar):
         else:
             return self.fd
 
-    def fs(self, es: float):
+    def fs(self, es: float) -> float:
         if isinstance(es, np.ndarray):
             return np.array([self._fs(x) for x in es])
         else:
@@ -78,10 +78,10 @@ class RebarHYSD(Rebar):
         self.es[:, 0] = self.es[:, 0] * self.fy / self.gamma_m
         self.es[:, 1] = self.es[:, 0] / self.Es + self.es[:, 1]
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         return f"{self.label:>6}: Type={'HYSD'} fy={self.fy} fd={self.fd:.2f}"
 
-    def _fs(self, es: float):
+    def _fs(self, es: float) -> float:
         _es = abs(es)
         i = 0
         fd1 = self.es[i, 0]
@@ -102,7 +102,7 @@ class RebarHYSD(Rebar):
                 fs = fd2
             return np.sign(es) * fs
 
-    def fs(self, es: float):
+    def fs(self, es: float) -> Union[float, np.ndarray]:
         if isinstance(es, np.ndarray):
             return np.array([self._fs(x) for x in es])
         else:
@@ -119,32 +119,32 @@ class RebarLayer:
     _xc: float = 0.0  # Distance from compression edge
     stress_type: str = ""  # Type of stress, C (compression) or T (tension)
 
-    def max_dia(self):
+    def max_dia(self) -> int:
         return max(self.dia)
 
     @property
-    def area(self):
+    def area(self) -> float:
         return sum([d ** 2 for d in self.dia]) * pi / 4
 
     @property
-    def dc(self):
+    def dc(self) -> float:
         return self._dc
 
     @dc.setter
-    def dc(self, _dc):
+    def dc(self, _dc) -> None:
         self._dc = _dc
 
     @property
-    def xc(self):
+    def xc(self) -> float:
         return self._xc
 
-    def calc_xc(self, D: float):
+    def calc_xc(self, D: float) -> float:
         if self.dc > 0:
             self._xc = self.dc
         else:
             self._xc = D + self.dc
 
-    def calc_stress_type(self, xu: float):
+    def calc_stress_type(self, xu: float) -> str:
         if isclose(self._xc, xu):
             self.stress_type = "neutral"
         elif self._xc < xu:
@@ -153,10 +153,10 @@ class RebarLayer:
             self.stress_type = "tension"
         return self.stress_type
 
-    def x(self, xu: float):
+    def x(self, xu: float) -> float:
         return xu - self._xc
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         s = "Dia: "
         b = ""
         for bardia in self.dia:
@@ -165,12 +165,13 @@ class RebarLayer:
         s += f"{b} at {self.dc}. Area: {self.area:.2f} (xc = {self._xc:.2f})"
         return s
 
-    def fs(self, xu: float, rebar: Rebar, ecu: float):
+    def fs(self, xu: float, rebar: Rebar, ecu: float) -> float:
         es = ecu / xu * self.x(xu)
         return rebar._fs(es)
 
-    def force_tension(self, xu: float, rebar: Rebar, ecu: float):
-        # x = D_xu - self._dc
+    def force_tension(
+        self, xu: float, rebar: Rebar, ecu: float
+    ) -> Tuple[float, float, str]:
         x = self.x(xu)
         es = ecu / xu * x
         fs = rebar.fs(es)
@@ -180,7 +181,9 @@ class RebarLayer:
         result = {"x": x, "es": es, "f_st": fs, "T": _f, "M": _m}
         return _f, _m, result
 
-    def force_compression(self, xu: float, conc: Concrete, rebar: Rebar, ecu: float):
+    def force_compression(
+        self, xu: float, conc: Concrete, rebar: Rebar, ecu: float
+    ) -> Tuple[float, float, str]:
         x = xu - self._xc
         esc = ecu / xu * x
         fsc = rebar._fs(esc)  # Stress in compression steel
@@ -190,7 +193,7 @@ class RebarLayer:
         result = {"x": x, "esc": esc, "f_sc": fsc, "f_cc": fcc, "C": _f, "M": _m}
         return _f, _m, result
 
-    def bar_list(self, sep=";"):
+    def bar_list(self, sep=";") -> str:
         d = dict()
         for bar_dia in self.dia:
             if bar_dia in d.keys():
@@ -203,22 +206,22 @@ class RebarLayer:
         s = s.rstrip().replace(" ", sep)
         return s
 
-    def __lt__(self, b):
+    def __lt__(self, b) -> bool:
         return self._xc < b._xc
 
-    def __le__(self, b):
+    def __le__(self, b) -> bool:
         return self._xc <= b._xc
 
-    def __eq__(self, b):
+    def __eq__(self, b) -> bool:
         return self._xc == b._xc
 
-    def __ne__(self, b):
+    def __ne__(self, b) -> bool:
         return self._xc != b._xc
 
-    def __gt__(self, b):
+    def __gt__(self, b) -> bool:
         return self._xc > b._xc
 
-    def __ge__(self, b):
+    def __ge__(self, b) -> bool:
         return self._xc >= b._xc
 
 
@@ -231,15 +234,15 @@ class RebarGroup:
     layers: List[RebarLayer]  # List of layers of bars, in any order from edge
 
     @property
-    def area(self):
+    def area(self) -> float:
         return sum([layer.area for layer in self.layers])
 
-    def calc_xc(self, D: float):
+    def calc_xc(self, D: float) -> float:
         for L in self.layers:
             L.calc_xc(D)
 
     @property
-    def centroid(self):
+    def centroid(self) -> float:
         a = 0.0
         m = 0.0
         for L in self.layers:
@@ -249,7 +252,7 @@ class RebarGroup:
         return m / a
 
     @property
-    def dc(self):
+    def dc(self) -> float:
         a = 0.0
         m = 0.0
         for L in self.layers:
@@ -258,7 +261,7 @@ class RebarGroup:
             m += _a * L.dc
         return m / a
 
-    def has_comp_steel(self, xu: float):
+    def has_comp_steel(self, xu: float) -> bool:
         for L in self.layers:
             if L._xc < xu:
                 return True
@@ -278,11 +281,13 @@ class RebarGroup:
                 a += L.area
         return a
 
-    def calc_stress_type(self, xu: float):
+    def calc_stress_type(self, xu: float) -> None:
         for L in self.layers:
             L.calc_stress_type(xu)
 
-    def force_moment(self, xu: float, conc: Concrete, ecu: float):
+    def force_moment(
+        self, xu: float, conc: Concrete, ecu: float
+    ) -> Tuple[float, float, float, float]:
         fc = ft = mc = mt = 0.0
         for L in self.layers:
             if L._xc < xu:  # in compression
@@ -297,7 +302,7 @@ class RebarGroup:
                 mt += _mt
         return fc, mc, ft, mt
 
-    def force_tension(self, xu: float, ecu: float):
+    def force_tension(self, xu: float, ecu: float) -> Tuple[float, float]:
         f = m = 0.0
         for L in self.layers:
             if L._xc > xu:
@@ -307,7 +312,9 @@ class RebarGroup:
                 m += _m
         return f, m
 
-    def force_compression(self, xu: float, conc: Concrete, ecu: float):
+    def force_compression(
+        self, xu: float, conc: Concrete, ecu: float
+    ) -> Tuple[float, float]:
         _f = _m = 0.0
         for L in self.layers:
             if L._xc < xu:
@@ -316,7 +323,7 @@ class RebarGroup:
                 _m += __m
         return _f, _m
 
-    def dc_max(self, D: float):
+    def dc_max(self, D: float) -> Tuple[float, float]:
         x1 = 0
         dx_max = 0
         for L in sorted(self.layers):
@@ -335,7 +342,7 @@ class RebarGroup:
             xmax = D
         return (xmin, xmax)
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         sl = "layers" if len(self.layers) > 1 else "layer"
         s = f"Rebar Group {self.rebar.label} in {len(self.layers)} {sl}\n"
         for layer in self.layers:
@@ -379,45 +386,46 @@ class Stirrups(ShearReinforcement):
         self._sv = _sv
 
     @property
-    def Asv(self):
+    def Asv(self) -> float:
         self._Asv = self.nlegs * pi * self.bar_dia ** 2 / 4
         return self._Asv
 
     @property
-    def nlegs(self):
+    def nlegs(self) -> int:
         return self._nlegs
 
     @nlegs.setter
-    def nlegs(self, n):
+    def nlegs(self, n) -> None:
         self._nlegs = n
         self._Asv = self.nlegs * pi * self.bar_dia ** 2 / 4
 
     @property
-    def bar_dia(self):
+    def bar_dia(self) -> int:
         return self._bar_dia
 
     @bar_dia.setter
-    def bar_dia(self, dia):
+    def bar_dia(self, dia) -> None:
         self._bar_dia = dia
         self._Asv = self.nlegs * pi * self.bar_dia ** 2 / 4
 
     @property
-    def sv(self):
+    def sv(self) -> float:
         return self._sv
 
     @sv.setter
-    def sv(self, _sv: float):
+    def sv(self, _sv: float) -> float:
         self._sv = _sv
         self._Asv = self.nlegs * pi * self.bar_dia ** 2 / 4
+        return self._Asv
 
-    def calc_sv(self, Vus: float, d: float):
+    def calc_sv(self, Vus: float, d: float) -> float:
         if (self._alpha_deg < 45) or (self._alpha_deg > 90):
             return
         alpha_rad = self._alpha_deg * pi / 180
         self._sv = self.rebar.fd * self.Asv * d * sin(alpha_rad) / Vus
         return self._sv
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         sh_rein = "Vertical" if self._alpha_deg == 90 else "Inclined"
         s = f"Shear reinforcement: {sh_rein} Stirrups "
         s += f"{self._nlegs}-{self._bar_dia} @ {self._sv} c/c"
@@ -441,7 +449,7 @@ class BentupBars(Stirrups):
         self._sv = _sv
 
     @property
-    def Asv(self):
+    def Asv(self) -> float:
         area = 0.0
         for bar_dia in self.bars:
             area += bar_dia ** 2

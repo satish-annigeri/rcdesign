@@ -164,6 +164,30 @@ class TestRectBeamSection:
         V = Vus + Vuc
         assert isclose(rsec.Vu(xu, nlegs, bar_dia, sv), V)
 
+    def test_rectbeam13a(self):
+        xu = 100
+        b = 230
+        d = rsec.eff_d(xu)
+        # Modify stirrup details
+        nlegs = 4
+        bar_dia = 10
+        sv = 125
+        alpha = rsec.shear_steel._alpha_deg * pi / 180
+        # Manual calculation for shear reinforcement
+        Asv = nlegs * pi * bar_dia ** 2 / 4 * sin(alpha)
+        fd = 415 / 1.15
+        Vus = fd * Asv * d / sv
+        # Manual calculation for concrete
+        pt = 5 * pi * 16 ** 2 / 4 * 100 / (230 * d)
+        tauc = rsec.conc.tauc(pt)
+        Vuc = tauc * b * d
+        V = Vus + Vuc
+        # Method
+        tauc1, Vuc1, Vus1 = rsec.Vu(xu, nlegs, bar_dia, sv, separate_output=True)
+        assert isclose(tauc1, tauc)
+        assert isclose(Vuc1, Vuc)
+        assert isclose(Vus1, Vus)
+
     def test_rectbeam14(self):
         xu = 100
         d = rsec.eff_d(xu)

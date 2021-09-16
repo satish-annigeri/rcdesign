@@ -35,12 +35,12 @@ class ConcreteStressBlock(StressBlock):
         self.ecy = ecy
         self.ecu = ecu
 
-    def invalidx(self, x1: float, x2: float = 1):
+    def invalidx(self, x1: float, x2: float = 1) -> bool:
         if x1 > x2:
             x1, x2 = x2, x1
         return not ((0 <= x1 <= 1) and (0 <= x2 <= 1))
 
-    def stress(self, x: float, ecmax: float = 0.0035):
+    def stress(self, x: float, ecmax: float = 0.0035) -> float:
         k = self.ecy / ecmax
 
         if x <= k:
@@ -49,7 +49,7 @@ class ConcreteStressBlock(StressBlock):
             r = 1.0
         return r
 
-    def area(self, x1: float, x2: float, ecmax: float = 0.0035):
+    def area(self, x1: float, x2: float, ecmax: float = 0.0035) -> float:
         if self.invalidx(x1, x2):
             return None
         if x1 > x2:
@@ -67,7 +67,7 @@ class ConcreteStressBlock(StressBlock):
             a2 = integrate(1, (self.z, k, x2))
         return a1 + a2
 
-    def moment(self, x1: float, x2: float, ecmax: float = 0.0035):
+    def moment(self, x1: float, x2: float, ecmax: float = 0.0035) -> float:
         if self.invalidx(x1, x2):
             return
         if x1 > x2:
@@ -99,19 +99,19 @@ class Concrete:
     density: float = 25.0
 
     @property
-    def Ec(self):
+    def Ec(self) -> float:
         return 5000 * np.sqrt(self.fck)
 
     @property
-    def ecy(self):
+    def ecy(self) -> float:
         return self.stress_block.ecy
 
     @property
-    def ecu(self):
+    def ecu(self) -> float:
         return self.stress_block.ecu
 
     @property
-    def fd(self):
+    def fd(self) -> float:
         return 0.67 * self.fck / self.gamma_m
 
     def fc(self, x_xu: float, fd: float = 1.0):
@@ -153,7 +153,7 @@ class Concrete:
                     y2 = tauc[1, i]
                     return y1 + (y2 - y1) / (x2 - x1) * (self.fck - x1)
 
-    def tauc(self, pt):
+    def tauc(self, pt) -> float:
         if pt < 0.15:
             pt = 0.15
         if pt > 3:
@@ -163,7 +163,7 @@ class Concrete:
         den = 6 * beta
         return num / den
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         s = f"Stress Block {self.stress_block.label} - {self.label}: "
         s += f"{self.fck} {self.fd:.2f} {self.density}"
         return s
