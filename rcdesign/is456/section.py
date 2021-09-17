@@ -57,8 +57,6 @@ class RectBeamSection(Section):
         self.b = b
         self.D = D
         self.conc = conc
-        # self.t_steel = t_steel
-        # self.c_steel = c_steel
         self.shear_steel = shear_steel
         self.long_steel = long_steel
         self.calc_xc()
@@ -165,14 +163,17 @@ class RectBeamSection(Section):
         Fcc = self.conc.area(0, 1, self.conc.fd) * xu * self.b
         Mcc = self.conc.moment(0, 1, self.conc.fd) * xu ** 2 * self.b
         s += "Concrete in Compression\n"
-        s += f"{' ':56}{'C (kN)':>8}{'M (kNm)':>8}\n{' ':56}{Fcc/1e3:8.2f}{Mcc/1e6:8.2f}\n"
+        s += f"{' ':60}{'C (kN)':>8}{'M (kNm)':>8}\n{' ':60}{Fcc/1e3:8.2f}{Mcc/1e6:8.2f}\n"
 
         # Compression steel
-        sc = "Compression Steel\n"
-        sc += f"{'dc':>4}{'Bars':>8}{'Area':>8}{'x':>8}{'Strain':>12}{'f_sc':>8}"
-        sc += f"{'f_cc':>8}{'C (kN)':>8}{'M (kNm)':>8}\n"
+        if self.has_compr_steel(xu):
+            sc = "Compression Steel\n"
+            sc += f"{'dc':>8}{'Bars':>8}{'Area':>8}{'x':>8}{'Strain':>12}{'f_sc':>8}"
+            sc += f"{'f_cc':>8}{'C (kN)':>8}{'M (kNm)':>8}\n"
+        else:
+            sc = ""
         st = "Tension Steel\n"
-        st += f"{'dc':>4}{'Bars':>8}{'Area':>8}{'x':>8}{'Strain':>12}{'f_st':>8}{' ':8}"
+        st += f"{'dc':>8}{'Bars':>8}{'Area':>8}{'x':>8}{'Strain':>12}{'f_st':>8}{' ':8}"
         st += f"{'T (kN)':>8}{'M (kNm)':>8}\n"
         Fsc = Msc = 0.0
         Fst = Mst = 0.0
@@ -186,12 +187,9 @@ class RectBeamSection(Section):
                 _Msc = _Fsc * x
                 Fsc += _Fsc
                 Msc += _Msc
-                sc += (
-                    f"{abs(L.dc):4.0f}{L.bar_list():>8}{L.area:8.2f}{x:8.2f}{esc:12.4e}"
-                )
+                sc += f"{L.dc:8.1f}{L.bar_list():>8}{L.area:8.2f}{x:8.2f}{esc:12.4e}"
                 sc += f"{fsc:8.2f}{fcc:8.2f}{_Fsc/1e3:8.2f}{_Msc/1e6:8.2f}\n"
             else:
-                # D_xu = self.D - xu
                 x = L._xc - xu
                 est = ecu / xu * x
                 fst = self.long_steel.rebar.fs(est)
@@ -199,27 +197,25 @@ class RectBeamSection(Section):
                 _Mst = _Fst * x
                 Fst += _Fst
                 Mst += _Mst
-                st += (
-                    f"{abs(L.dc):4.0f}{L.bar_list():>8}{L.area:8.2f}{x:8.2f}{est:12.4e}"
-                )
+                st += f"{L.dc:8.1f}{L.bar_list():>8}{L.area:8.2f}{x:8.2f}{est:12.4e}"
                 st += f"{fst:8.2f}{' ':8}{_Fst/1e3:8.2f}{_Mst/1e6:8.2f}\n"
         Fc = Fcc + Fsc
         Ft = Fst
         Mc = Mcc + Msc
         Mt = Mst
-        sc += f"{' ':56}{'-'*16}\n"
-        sc += f"{' ':56}{Fc/1e3:8.2f}{Mc/1e6:8.2f}\n"
-        st += f"{' ':56}{'-'*16}\n"
-        st += f"{' ':56}{Ft/1e3:8.2f}{Mt/1e6:8.2f}\n"
+        sc += f"{' ':16}{'-'*8}{' ':36}{'-'*16}\n"
+        sc += f"{' ':16}{self.long_steel.area_comp(xu):8.2f}{' ':36}{Fc/1e3:8.2f}{Mc/1e6:8.2f}\n"
+        st += f"{' ':16}{'-'*8}{' ':36}{'-'*16}\n"
+        st += f"{' ':16}{self.long_steel.area_tension(xu):8.2f}{' ':36}{Ft/1e3:8.2f}{Mt/1e6:8.2f}\n"
         s += sc
         s += st
-        s += f"{' ':56}{'='*16}\n"
+        s += f"{' ':60}{'='*16}\n"
         F = Fc - Ft
         M = Mc + Mt
         if isclose(F, 0.0, abs_tol=1e-4):
-            s += f"{' ':56}{0.00:>8}"
+            s += f"{' ':60}{0.00:>8}"
         else:
-            s += f"{' ':56}{(Fc - Ft)/1e3:8.2}"
+            s += f"{' ':60}{(Fc - Ft)/1e3:8.2}"
         s += f"{M/1e6:8.2f}\n"
         # Shear reinforcement
         s += f"Shear Capacity\n"
@@ -407,11 +403,14 @@ class FlangedBeamSection(RectBeamSection):
         # Compression steel
         Fsc = Msc = 0.0
         Ft = Mt = 0.0
-
-        cst = f"{'dc':>4}{'Bars':>8}{'Area':>8}{'x':>8}{'Strain':>12}{'f_sc':>8}{'f_cc':>8}{'C (kN)':>8}{'M (kNm)':>8}\n"
-        cst += "-" * 72 + "\n"
-        tst = f"{'dc':>4}{'Bars':>8}{'Area':>8}{'x':>8}{'Strain':>12}{'f_st':>8}{' ':>8}{'C (kN)':>8}{'M (kNm)':>8}\n"
-        tst += "-" * 72 + "\n"
+        if self.has_compr_steel(xu):
+            sc = "Compression Reinforcement\n"
+            sc = f"{'dc':>4}{'Bars':>8}{'Area':>8}{'x':>8}{'Strain':>12}{'f_sc':>8}{'f_cc':>8}{'C (kN)':>8}{'M (kNm)':>8}\n"
+            sc += "-" * 72 + "\n"
+        else:
+            sc = ""
+        st = f"{'dc':>4}{'Bars':>8}{'Area':>8}{'x':>8}{'Strain':>12}{'f_st':>8}{' ':>8}{'C (kN)':>8}{'M (kNm)':>8}\n"
+        st += "-" * 72 + "\n"
         for L in self.long_steel.layers:
             if L._xc < xu:
                 # Compression steel
@@ -423,7 +422,7 @@ class FlangedBeamSection(RectBeamSection):
                 _Msc = Fsc * x
                 Fsc += _Fsc
                 Msc = _Msc
-                cst += f"{L.dc:4.0f} {L.area:8.2f} {x:8.2f} {esc:12.4e} {fsc:8.2f} {fcc:8.2f} {_Fsc/1e3:8.2f} {_Msc/1e6:8.2f}\n"
+                sc += f"{L.dc:4.0f} {L.area:8.2f} {x:8.2f} {esc:12.4e} {fsc:8.2f} {fcc:8.2f} {_Fsc/1e3:8.2f} {_Msc/1e6:8.2f}\n"
             else:
                 # Tension steel
                 x = L._xc - xu
@@ -433,15 +432,14 @@ class FlangedBeamSection(RectBeamSection):
                 _Mst = _Fst * x
                 Ft += _Fst
                 Mt += _Mst
-                tst += f"{abs(L.dc):4.0f}{L.bar_list():>8}{L.area:8.2f}{x:8.2f}{est:12.4e}{fst:8.2f}{' ':8}{_Fst/1e3:8.2f}{_Mst/1e6:8.2f}\n"
-        cst += f"{' ':56}{'-'*16}\n{' ':56}{Fc/1e3:8.2f}{Mc/1e6:8.2f}\n"
-        tst += f"{' ':56}{'-'*16}\n{' ':56}{Ft/1e3:8.2f}{Mt/1e6:8.2f}\n"
+                st += f"{abs(L.dc):4.0f}{L.bar_list():>8}{L.area:8.2f}{x:8.2f}{est:12.4e}{fst:8.2f}{' ':8}{_Fst/1e3:8.2f}{_Mst/1e6:8.2f}\n"
+        sc += f"{' ':56}{'-'*16}\n{' ':56}{Fc/1e3:8.2f}{Mc/1e6:8.2f}\n"
+        st += f"{' ':56}{'-'*16}\n{' ':56}{Ft/1e3:8.2f}{Mt/1e6:8.2f}\n"
         Fc += Fsc
         Mc += Msc
-        s += "Compression Reinforcement\n"
-        s += cst
+        s += sc
         s += "Tension Reinforcement\n"
-        s += tst
+        s += st
         if isclose(Fc, Ft):
             C_T = "0.00"
         else:

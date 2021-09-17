@@ -345,10 +345,10 @@ class RebarGroup:
     def __repr__(self) -> str:  # pragma: no cover
         sl = "layers" if len(self.layers) > 1 else "layer"
         s = f"Rebar Group {self.rebar.label} in {len(self.layers)} {sl}\n"
-        for layer in self.layers:
-            s += "\t" + layer.__repr__() + "\n"
-        s += f"\tTotal Area: {self.area:.2f} "
-        s += f"centroid at {self.centroid:.2f} from the edge"
+        s += f"{'dc':>10}{'xc':>10}{'Bars':>12}{'Area':>10}\n"
+        for L in self.layers:
+            s += f"{L.dc:10.2f}{L._xc:10.2f}{L.bar_list():>12}{L.area:10.2f}\n"
+        s += f"{' ':20}{'-'*22}\n{' ':20}{'Total':>12}{self.area:10.2f}"
         return s
 
 
@@ -429,7 +429,6 @@ class Stirrups(ShearReinforcement):
         sh_rein = "Vertical" if self._alpha_deg == 90 else "Inclined"
         s = f"Shear reinforcement: {sh_rein} Stirrups "
         s += f"{self._nlegs}-{self._bar_dia} @ {self._sv} c/c"
-        s += f" (Asv = {self.Asv:.2f})"
         if self._alpha_deg != 90:
             s += " inclined at {self._alpha_deg} degrees"
         return s
