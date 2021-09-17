@@ -432,7 +432,7 @@ class FlangedBeamSection(RectBeamSection):
                 _Mst = _Fst * x
                 Ft += _Fst
                 Mt += _Mst
-                st += f"{abs(L.dc):4.0f}{L.bar_list():>8}{L.area:8.2f}{x:8.2f}{est:12.4e}{fst:8.2f}{' ':8}{_Fst/1e3:8.2f}{_Mst/1e6:8.2f}\n"
+                st += f"{L.dc:4.0f}{L.bar_list():>8}{L.area:8.2f}{x:8.2f}{est:12.4e}{fst:8.2f}{' ':8}{_Fst/1e3:8.2f}{_Mst/1e6:8.2f}\n"
         sc += f"{' ':56}{'-'*16}\n{' ':56}{Fc/1e3:8.2f}{Mc/1e6:8.2f}\n"
         st += f"{' ':56}{'-'*16}\n{' ':56}{Ft/1e3:8.2f}{Mt/1e6:8.2f}\n"
         Fc += Fsc
