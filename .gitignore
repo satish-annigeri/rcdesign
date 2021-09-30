@@ -142,3 +142,7 @@ cython_debug/
 
 # Virtualenv activation batch file
 activate.bat
+
+# Backup directories and files
+bak/
+*.bak

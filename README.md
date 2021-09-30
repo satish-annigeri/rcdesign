@@ -30,7 +30,7 @@ $ git clone https://github.com/satish-annigeri/rcdesign.git
 
 Change over to the directory `rcdesign` that is created with the command
 ```bash
-cd rcdesign
+$ cd rcdesign
 ```
 List the directory contents and verify the directory structure.
 
@@ -72,7 +72,10 @@ Check code coverage.
 ```bash
 (env) $ pytest --cov=rcdesign tests/
 ```
-
+You can also use `nox` to run the tests.
+```bash
+(env) $ nox
+```
 When you are done using the virtual environment, you can deactivate with the command `deactivate` at the command prompt in all operating systems.
 
 ## A Simple Example
