@@ -1,100 +1,187 @@
-# `rcdesign` - A Python package for analysis and design of reinforced concrete sections as per IS 456:2000
+# `rcdesign`
 
-`rcdesign` is a Python package for analysis and design of reinforced concrete sections as per IS 456:2000, the Indian Standard code of practice for plain and reinforced concrete. All units are Netwon and millimeter.
+`rcdesign` is a package for analysis and design of reinforced concrete sections as per IS&nbsp;456:2000, the Indian Standard code of practice for plain and reinforced concrete.
+
+## Requirements
+* Python 3.7+
+* numpy
+* scipy
+* sympy
 
 ## Installation
-`rcdesign` is still under development and can be installed by cloning this repository with `git`
+At present `rcdesign` is in early stage of development and an installable PyPI package is not yet created. But you can clone the github repository and give it a try. If you are not familiar with the workflow for working with a source repository, you can follow the steps below.
+### Preliminary checks
+Check the version of Python you are using. You will require version 3.7 or later. To print the version of Python, use the command
+```bash
+$ python -V
+Python 3.9.7
+```
+On a *nix system, you may have to type
+```bash
+$ python3 -V
+Python 3.9.7
+```
 
-`git clone https://github.com/satish-annigeri/rcdesign.git`
+### Clone the repository
+When you clone the `rcdesign` repository from github, a new directory named `rcdesign` will be created in the current working directory. Therefore change over to the a suitable directory which will become the parent directory of the clone. Clone the repository using `git`
+```bash
+$ git clone https://github.com/satish-annigeri/rcdesign.git
+```
 
-## Quickstart
-After cloning the `rcdesign` repository from github, change into the newly created `rcdesign` directory. The directory will have the following structure (as of 2021-09-06):
+Change over to the directory `rcdesign` that is created with the command
+```bash
+cd rcdesign
+```
+List the directory contents and verify the directory structure.
 
-    rcdesign/
-    ├── LICENSE.md
-    ├── main.py
-    ├── poetry.lock
-    ├── pyproject.toml
-    ├── rcdesign
-    │   ├── __init__.py
-    │   ├── is456
-    │   │   ├── __init__.py
-    │   │   ├── material
-    │   │   │   ├── concrete.py
-    │   │   │   ├── __init__.py
-    │   │   │   └── rebar.py
-    │   │   └── section.py
-    │   └── utils.py
-    ├── README.md
-    └── tests
-        ├── __init__.py
-        ├── test_concrete.py
-        ├── test_rebargroup.py
-        ├── test_rebarlayer.py
-        ├── test_rebar.py
-        ├── test_section.py
-        ├── test_shear_rebar.py
-        └── test_utils.py
+### Create a virtual environment
+Create a virtual environment inside the `rcdesign` directory with the following command
+```bash
+$ python -m venv env
+```
+Activate the virtual environment with the command
+```bash
+$ source env/bin/activate
+(env) $_
+```
 
-Install a virtual environment in your preferred way and install the necessary packages. If you are using `poetry`, there is the `pyproject.toml` file and if you are using `pip`, there is the `requirements.txt` file that can be used. With poetry, do
+If you are using Windows operating system, the command is
+```bash
+> env\Scripts\activate
+(env) >_
+```
+Update `pip` with the command
+```bash
+(env) $ python -m pip install -U pip
+```
+### Install required packages
+Install required packages into the virtual environment with `pip`
+```bash
+(env) $ pip install -r requirements.txt
+```
+### Run tests
+Install additional packages required to run tests.
+```bash
+(env) pip install pytest pytest-cov nox
+```
+Run the tests with `pytest`
+```bash
+(env) $ pytest tests
+```
+Check code coverage.
+```bash
+(env) $ pytest --cov=rcdesign tests/
+```
 
-`poetry install`
+When you are done using the virtual environment, you can deactivate with the command `deactivate` at the command prompt in all operating systems.
 
-and with `pip` do
+## A Simple Example
+Run a built-in example with the following command.
+```bash
+(env) $ python -m rcdesign.example
+```
+Study the output.
 
-`pip install -r requirements.txt`
+After creating the virtual environment and installing the `rcdesign` package, create a Python script named `example.py`
 
-With the required packages installed, you can run the `main.py` script in the root directory of the repository with
-
-`python main.py`
-
-and you must see the resuls output to the screen.
-
-    Analysis of Reinforced Concrete Sections v0.1.0
-
-    Size: 230 x 450
-    Tension Steel: Rebar Group Fe 415 in 2 layers
-        Dia: [16, 16, 16] at 35. Area: 603.19
-        Dia: [16, 16] at 70. Area: 402.12
-        Total Area: 1005.31 centroid at 49.00 from the edge
-    Compression Steel: Rebar Group Fe 415 in 1 layer
-        Dia: [16, 16] at 35. Area: 402.12
-        Total Area: 402.12 centroid at 35.00 from the edge
-
-    Analysis of section for xu = 150
-    Compression (C):     386.59 kN
-        Tension (T):     362.79 kN
-              C - T:      23.81 kN
-
-    Location of neutral axis for equilibrium
-    Neutral axis lies between 120.00 and 155.00 from compression edge
-    Depth of neutral axis: 136.21
-
-    Rectangular Beam Section 230x450 (xu = 136.21)
-    Units: Distance in mm, Area in mm^2, Force in kN, Moment in kNm
-    FLEXURE CAPACITY
-    ... (lines omitted)
-    SHEAR CAPACITY
-    Shear reinforcement: Vertical Stirrups 2-8 @ 150 c/c
-    Ultimate shear capacity (kN): 156.19
-
-    Flanged Section
-    xu = 50.17 Mu = 137.91
+Alternately, you can create the following Python script and run it.
+```python
+from rcdesign.is456.material.concrete import ConcreteStressBlock, Concrete
+from rcdesign.is456.material.rebar import RebarHYSD, RebarLayer, RebarGroup, Stirrups
+from rcdesign.is456.section import RectBeamSection
 
 
-## Objective
+sb = ConcreteStressBlock("IS456 LSM", 0.002, 0.0035)
+m20 = Concrete("M20", 20, sb)
+fe415 = RebarHYSD("Fe 415", 415)
 
-The objective is to devlop a package to represent materials, stress blocks, rebars, sections, and other components essential to analyse and design reinforced concrete sections. It is initally planned to carry out analysis of sections before taking up design of sections as per the limit state method of IS 456:2000.
+t1 = RebarLayer([20, 16, 20], -35)
+steel = RebarGroup(fe415, [t1])
+sh_st = Stirrups(fe415, 2, 8, 150)
 
-Object oriented programming is particularly well suited to represent problems of this type as inheritance and composition are natural to the representation of structures, their components, and materials as well as their behaviours. Further, speed of execution is not a primary concern, as much as it is in the analysis of structures.
+sec = RectBeamSection(230, 450, m20, steel, sh_st, 25)
+print(sec)
+xu = sec.xu(0.0035)
+print(f"xu = {xu:.2f}")
+print(sec.report(xu, 0.0035))
+```
 
-In the beginning, analysis of beam sections - rectangular and flanged, will be taken up to compute capacity of the sections in flexure and shear. Analysis of rectangular column sections will be taken up subsequently. Design of sections will be taken up subsequently.
+Run the script:
+```bash
+$ python example.py
+```
 
-The package will consist of a classes hierarchy to implement analysis, design and detailing at the *section* level.
+In either case, you must see the result output to the screen.
+```term
+Size: 230 x 450
+Tension Steel: Rebar Group Fe 415 in 1 layer
+        dc        xc        Bars      Area
+    -35.00    415.00   1-16;2-20    829.38
+                    ----------------------
+                           Total    829.38
+
+xu = 179.94
+Rectangular Beam Section 230 x 450  (xu = 179.94)
+Concrete: 20, Tension Steel: 415.00
+Units: Distance in mm, Area in mm^2, Force in kN, Moment about NA in kNm
+Flexure Capacity
+Concrete in Compression
+                                                              C (kN) M (kNm)
+                                                              299.30   31.45
+                --------                                    ----------------
+                    0.00                                      299.30   31.45
+Tension Steel
+      dc    Bars    Area       x      Strain    f_st          T (kN) M (kNm)
+   -35.01-16;2-20  829.38  235.06  4.5720e-03  360.87          299.30   70.35
+                --------                                    ----------------
+                  829.38                                      299.30   70.35
+                                                            ================
+                                                                 0.0  101.81
+Shear Capacity
+Shear reinforcement: Vertical Stirrups 2-8 @ 150 c/c
+pst = 0.87%, d = 415.00, tau_c (N/mm^2) = 0.59
+Vuc (kN) = 100.37, Vus = 56.46, Vu (kN) = 156.83
+```
+
+## Contribute
+Contributions are welcome. Contributions can be in a variety of forms:
+
+1. Bug reports
+2. Additional features
+3. Documentation
+4. Additional examples
+
+## Links
+- Documentation: To Do
+- PyPI release: To Do
+- Github repository: https://github.com/satish-annigeri/rcdesign
+
+## What `rcdesign` can and cannot do
+
+At present `rcdesign` **can do** the following:
+
+1. Analyse reinforced concrete rectangular and flanged sections subjected to bending and shear as per the Limit State Method according to IS&nbsp;456:2000, the Indian standard code of practice for plain and reinforced concrete. This calculates the ultimate strength of the section in bending and shear depending on the materials, section size and main (longitudinal) and shear reinforcement.
+2. Model stress strain relationship of 
+    1. concrete in flexure as per IS&nbsp;456:2000&nbsp;(38.1), and 2. reinforcement bars with
+        - mild steel bars with well defined yield point
+        - cold worked deformed bars
+3. Model layers of reinforcement bars placed parallel to the edge of the section at a given distance from the compression (or tension edge). Bars can be of different diameters but must be of the same type.
+4. Model group of layers of reinforcement bars. All bars in agroup must be of the same type and layers of reinforcement must be placed parallel to the edge of the section.
+5. Model shear reinforcement in the form of vertical stirrups, inclined stirrups and bent-up bars.
+6. Model rectangular and flanged sections. Sections must be of a given concrete. Main (longitudinal) reinforcement to resist bending must be provided as a single group of reinforcement layers, possibly with one or more layers in the compression zone and one or more layers in the tension zone. However, note that the position of the neutral axis is dependent on the sectiion size and the amount and location of main reinforcement. Only after an analysis of the section will it be clear whether a given layer of reinforcement in the group lies in the compression or tension zone.
+
+At present, `rcdesign` **cannot do** the following:
+1. Does not analyse sections subjected to axial compression (with or without bending about an axis parallel to one of the edges). This is on the TO&nbsp;DO list.
+2. Does not design sections, either for bending, shear and torsion or for axial compression with or without bending about one or both axes.
+3. Does not verify whether the section meets the detailing requirements of IS&nbsp;456:2000&nbsp;(26).
+4. Does not analyse or design sections as per Working Stress Method of IS&nbsp;456:2000&nbsp;(Annexure&nbsp;N).
+5. Does not design reinforced concrete elements such as beams and columns. At present, the scope of the package is restricted to analysis and design of sections of beams and columns. This is a distant goal, but no promises.
+
+Some or all of the above features will be gradually included. Contributions in accomplishing these are welcome.
 
 ## Current Status
 
-The package is in early development and has undergone limited testing. No documentation is available at the current time.
+The package is in early development and has undergone testing of the current code base for coverage. Limited examples have been solved and verified by hand.
 
 ### Classes
 The following classes have been implemented:
@@ -124,7 +211,7 @@ Following funcationality has been implemented for the different classes:
     * Spacing of vertical or inclined stirrups for a given design shear force
 
 ### Testing
-Testing  has been implemented using pytest and unit tests have been implemented for the following classes:
+Testing  has been implemented using `pytest` and unit tests have been implemented for the following classes:
 
 1. **ConcreteStressBlock** and **Concrete**
 2. **RebarMS** and **RebarHYSD**
@@ -132,7 +219,7 @@ Testing  has been implemented using pytest and unit tests have been implemented 
 4. **ShearReinforcement** and **Stirrups**
 5. **RectBeamSection** and **FlangedBeamSection**
 
-Code coverage through tests using `pytest-cov` is 100%. Analysis of rectangular and flanged beam sections with and without compression reinforcement, for flexure and shear, has been completed. More examples will be verified to consider different cases.
+Code coverage through tests using `pytest-cov` at the current time is 100%. Analysis of rectangular and flanged beam sections with and without compression reinforcement, for flexure and shear, has been completed. Several examples have been solved and verified by hand to consider different cases.
 
 ### Documentation
 Documentation is presently not available, but is the current ongoing task.
@@ -141,11 +228,13 @@ Documentation is presently not available, but is the current ongoing task.
 
 Immediate plans include the analysis and design at the *section* level:
 
+1. Design sections subjected to bending, shear and torsion.
 1. Analysis of rectangular *sections* subjected to axial compression and bending about one axis.
+2. Write user and API documentation using Sphinx.
 2. Design of rectangular and flanged *sections* subjected to bending, shear and torsion.
 3. Design of column *sections*.
 4. Detailing of *sections* subjected to bending, shear and torsion.
-5. Implementing a stress block to represent working stress method.
+5. Implementing a stress block to represent *working stress method*.
 
 Long term plans include:
 
