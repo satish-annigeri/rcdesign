@@ -79,15 +79,13 @@ You can also use `nox` to run the tests.
 When you are done using the virtual environment, you can deactivate with the command `deactivate` at the command prompt in all operating systems.
 
 ## A Simple Example
-Run a built-in example with the following command.
+Run the built-in example with the following command.
 ```bash
 (env) $ python -m rcdesign.example
 ```
 Study the output.
 
-After creating the virtual environment and installing the `rcdesign` package, create a Python script named `example.py`
-
-Alternately, you can create the following Python script and run it.
+Alternately, you can create the following Python script `example.py` and run it.
 ```python
 from rcdesign.is456.material.concrete import ConcreteStressBlock, Concrete
 from rcdesign.is456.material.rebar import RebarHYSD, RebarLayer, RebarGroup, Stirrups
@@ -224,8 +222,14 @@ Testing  has been implemented using `pytest` and unit tests have been implemente
 
 Code coverage through tests using `pytest-cov` at the current time is 100%. Analysis of rectangular and flanged beam sections with and without compression reinforcement, for flexure and shear, has been completed. Several examples have been solved and verified by hand to consider different cases.
 
+Automated testing can be donw using. Verify that `nox` is installed with the command
+```bash
+(env) $ nox --version
+2021.6.12
+```
+
 ### Documentation
-Documentation is presently not available, but is the current ongoing task.
+Documentation is presently not available, but is the current ongoing task. I am figuring out how to prepare the API documentation. Any advise or help is welcome.
 
 ## Future Plans
 
