@@ -2,6 +2,8 @@
 
 `rcdesign` is a package for analysis and design of reinforced concrete sections as per IS&nbsp;456:2000, the Indian Standard code of practice for plain and reinforced concrete.
 
+[Documentation](https://rcdesign.readthedocs.io/en/latest/)
+
 ## Requirements
 * Python 3.7+
 * numpy
