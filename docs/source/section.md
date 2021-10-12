@@ -1,10 +1,12 @@
 # Sections
 Reinforced concrete structures are made of reinforced concrete structural members. They can be broadly classified into:
 
-1. **Beams** which are predominantly subjected to bending, shearand torsion, and
-2. **Columns** which are predominantly subjected to axial compression possibly with an accompanying bending that is small compared to the axial compressive force.
+1. **Beams** which are predominantly subjected to bending, shear and torsion, and
+2. **Columns** which are predominantly subjected to axial compression, possibly with an accompanying bending that is small compared to the axial compressive force.
 
-Strctural members where both bending and axial compression forces are equally dominant are called beam-columns. Analysis and design of beams is simpler and bending and shear actions can be treated independently. Analysis and design purely for axial compression is also simple and straight forward. Analysis of sections subjected to axial compression and bending about one axis is a coupled problem, in that, for a given section and reinforcement, there is a unique pair of axial compression and bending about one axis. Design of such sections is carried out as an inverse step of carrying out a large number of analyses and choosing the combination nearest to the given design forces. Usual practice is to construct interaction diagrams for different amounts of compression reinforcement and plotting an interaction diagram for each area of compression reinforcement.
+Strctural members where both bending and axial compression forces are equally dominant are called beam-columns. Analysis and design of beams is simpler and bending and shear actions can be treated independently. Analysis and design of sections subjected only to axial compression is also simple.
+
+Analysis of sections subjected to axial compression and bending about one axis is a coupled problem, in that, for a given section and reinforcement, there is a unique pair of axial compression and bending about one axis. Design of such sections is carried out as an inverse step of carrying out a large number of analyses and choosing the combination nearest to the given design forces. Usual practice is to construct interaction diagrams for different amounts of longitudinal reinforcement and plotting an interaction diagram for each value of area of longitudinal reinforcement.
 
 ## Beam Sections
 A beam section can have any shape but from the point of view of ease of fabrication and aesthetics, rectangular beam section is the most common. The attributes, required to repesent a section irrespective of whether it belongs to a beam or a column, are listed below:
