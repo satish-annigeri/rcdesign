@@ -5,7 +5,7 @@
 
 Welcome to rcdesign's documentation!
 ====================================
-|License Badge| |Version Badge| |Docs Badge|
+|License Badge| |Version Badge| |Docs Badge| |Download Badge|
 
 .. toctree::
    :caption: Table of Contents
@@ -32,3 +32,4 @@ Indices and tables
     :alt: PyPI
 .. |License Badge| image:: https://img.shields.io/pypi/l/rcdesign
     :alt: PyPI - License
+.. |Downloads Badge| image:: https://img.shields.io/pypi/dm/rcdesign   :alt: PyPI - Downloads
