@@ -1,8 +1,18 @@
 # `rcdesign`
+|License Badge| |Version Badge| |Docs Badge|
 
-`rcdesign` is a package for analysis and design of reinforced concrete sections as per IS&nbsp;456:2000, the Indian Standard code of practice for plain and reinforced concrete.
+`rcdesign` is a Python package for analysis and design of reinforced concrete sections as per IS&nbsp;456:2000, the Indian Standard code of practice for plain and reinforced concrete.
 
 [Documentation](https://rcdesign.readthedocs.io/en/latest/)
+
+.. |Docs Badge| image:: https://readthedocs.org/projects/rcdesign/badge/
+    :alt: Documentation Status
+    :scale: 100%
+    :target: http://rcdesign.readthedocs.io/
+.. |Version Badge| image:: https://img.shields.io/pypi/v/rcdesign
+    :alt: PyPI
+.. |License Badge| image:: https://img.shields.io/pypi/l/rcdesign
+    :alt: PyPI - License
 
 ## Requirements
 * Python 3.7+
