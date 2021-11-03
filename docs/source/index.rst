@@ -11,10 +11,9 @@ Welcome to rcdesign's documentation!
    :caption: Table of Contents
    :maxdepth: 1
 
-   intro.md
-   materials.md
-   section.md
-
+   installation.md
+   tutorial.md
+   theory.md
 
 
 Indices and tables
