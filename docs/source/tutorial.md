@@ -161,7 +161,14 @@ Vuc (kN) = 100.37, Vus = 50.07, Vu (kN) = 150.44
 
 ## Flanged Beam
 
+1. Web size: 230x450 mm overall with 25mm clear cover
+2. Flange size: Width=900 mm and depth = 150 mm
+2. Concrete: M20
+3. Steel: Fe415
+4. Main reinforcement: 3-16# of Fe415 with centre of the bars at a distance of 35mm from tension edge of the section
+4. Shear reinforcement: 2-8# @ 150mm c/c (2 legged 8mm dia. vertical stirrups made of Fe415)
 
+Let us determine the Limit State capacity of the section in bending and shear.
 
 Create a Python script named `flanged03.py` and type the following code in it.
 
