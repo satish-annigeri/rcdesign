@@ -1,6 +1,11 @@
 from math import pi, sin, cos
 
-from rcdesign.is456.material.rebar import RebarHYSD, Stirrups, BentupBars
+from rcdesign.is456.material.rebar import (
+    RebarHYSD,
+    ShearRebarGroup,
+    Stirrups,
+    BentupBars,
+)
 
 
 class TestStirrup:
@@ -93,7 +98,33 @@ class TestBentupBars:
 
     def test_bentupbars03(self):
         fe415 = RebarHYSD("Fe 415", 415)
+        d = 415.0
         bup = BentupBars(fe415, [16, 16], 45, 150)
         alpha = 45 * pi / 180
-        Vus = bup.rebar.fd * (pi / 4 * (2 * 16 ** 2)) * (sin(alpha) + cos(alpha))
-        assert bup.Vus() == Vus
+        asv = pi / 4 * (2 * 16 ** 2)
+        Vus = bup.rebar.fd * asv * d / bup._sv * (sin(alpha) + cos(alpha))
+        assert bup.Vus(d) == Vus
+
+
+class TestShearReinfGroup:
+    def test_sheargroup01(self):
+        fe415 = RebarHYSD("fe 415", 415)
+        d = 415.0
+        vst = Stirrups(fe415, 2, 8, 150)
+        asv1 = 2 * pi / 4 * 8 ** 2
+        vus1 = fe415.fd * asv1 * d / vst._sv
+        ist = Stirrups(fe415, 2, 8, 150, 45)
+        asv3 = asv1
+        vus3 = 0
+        bup = BentupBars(fe415, [16, 16], 45)
+        asv2 = pi / 4 * (2 * 16 ** 2)
+        vus2 = fe415.fd * asv2 * sin(bup._alpha_deg * pi / 180)
+        shear_gr = ShearRebarGroup([vst, bup])
+        assert shear_gr.Asv() == [asv1, asv2]
+        assert shear_gr.Vus(d) == [vus1, vus2]
+        assert shear_gr.get_type() == {
+            "vertical_stirrups": 1,
+            "inclined_stirrups": 0,
+            "single_bentup_bars": 1,
+            "series_bentup_bars": 0,
+        }

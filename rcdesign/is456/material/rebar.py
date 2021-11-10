@@ -360,11 +360,19 @@ class RebarGroup:
 class ShearReinforcement(ABC):  # pragma: no cover
     def __init__(self, rebar: Rebar, _Asv: float = 0.0, _sv: float = 0.0):
         self.rebar = rebar
-        self._Asv = _Asv
+        self.__Asv = _Asv
         self._sv = _sv
 
     @abstractmethod
-    def Asv(self):
+    def _Asv(self):
+        pass
+
+    @abstractmethod
+    def Vus(self, d: float) -> float:
+        pass
+
+    @abstractmethod
+    def get_type(self):
         pass
 
 
@@ -381,17 +389,17 @@ class Stirrups(ShearReinforcement):
         _alpha_deg: float = 90,
     ):
         super().__init__(rebar, _nlegs * pi * _bar_dia ** 2 / 4, _sv)
-        # self.rebar = rebar
         self._nlegs = _nlegs
         self._bar_dia = _bar_dia
         self._alpha_deg = _alpha_deg
-        # self._Asv = self.Asv
-        # self._sv = _sv
+
+    def _Asv(self) -> float:
+        self.__Asv = self.nlegs * pi * self.bar_dia ** 2 / 4
+        return self.__Asv
 
     @property
-    def Asv(self) -> float:
-        self._Asv = self.nlegs * pi * self.bar_dia ** 2 / 4
-        return self._Asv
+    def Asv(self):
+        return self._Asv()
 
     @property
     def nlegs(self) -> int:
@@ -400,8 +408,8 @@ class Stirrups(ShearReinforcement):
     @nlegs.setter
     def nlegs(self, n) -> float:
         self._nlegs = n
-        # self._Asv = self.nlegs * pi * self.bar_dia ** 2 / 4
-        return self.Asv
+        self.__Asv = self.nlegs * pi * self.bar_dia ** 2 / 4
+        return self.__Asv
 
     @property
     def bar_dia(self) -> int:
@@ -410,7 +418,7 @@ class Stirrups(ShearReinforcement):
     @bar_dia.setter
     def bar_dia(self, dia) -> None:
         self._bar_dia = dia
-        self._Asv = self.nlegs * pi * self.bar_dia ** 2 / 4
+        self.__Asv = self.nlegs * pi * self.bar_dia ** 2 / 4
 
     @property
     def sv(self) -> float:
@@ -444,8 +452,14 @@ class Stirrups(ShearReinforcement):
             Vus *= sin(alpha_rad) + cos(alpha_rad)
         return Vus
 
+    def get_type(self):
+        if self._alpha_deg == 90:
+            return "vertical_stirrups"
+        else:
+            return "inclined_stirrups"
 
-"""Bent up bars as shear reinforcement"""
+
+"""Single group (sv == 0) or a series of parallel (sv != 0) bent-up bars as shear reinforcement"""
 
 
 class BentupBars(ShearReinforcement):
@@ -453,24 +467,66 @@ class BentupBars(ShearReinforcement):
         self, rebar: Rebar, bars: List[int], _alpha_deg: float = 45, _sv: float = 0.0
     ):
         super().__init__(rebar, pi / 4 * sum([x ** 2 for x in bars]), _sv)
-        # self.rebar = rebar
         self.bars = bars
         self._alpha_deg = _alpha_deg
-        # self._Asv = self.Asv
-        # self._sv = _sv
 
-    @property
-    def Asv(self) -> float:
+    def _Asv(self) -> float:
         area = 0.0
         for bar_dia in self.bars:
             area += bar_dia ** 2
-        return pi * area / 4
+        self.__Asv = pi / 4 * area
+        return self.__Asv
 
-    def Vus(self) -> float:
+    @property
+    def Asv(self):
+        return self._Asv()
+
+    def Vus(self, d: float = 0.0) -> float:
         Vus = self.rebar.fd * self.Asv
         alpha_rad = self._alpha_deg * pi / 180
         if self._sv == 0:  # Single group of parallel bars
             Vus *= sin(alpha_rad)
         else:  # Series of bars bent-up at different sections
-            Vus *= sin(alpha_rad) + cos(alpha_rad)
+            Vus *= d / self._sv * (sin(alpha_rad) + cos(alpha_rad))
         return Vus
+
+    def get_type(self):
+        if self._sv == 0:
+            return "single_bentup_bars"
+        else:
+            return "series_bentup_bars"
+
+
+@dataclass
+class ShearRebarGroup:
+    shear_reinforcement: List[ShearReinforcement]
+
+    def Asv(self) -> List[float]:
+        asv = []
+        for reinf in self.shear_reinforcement:
+            asv.append(reinf._Asv())
+        return asv
+
+    def Vus(self, d: float) -> List[float]:
+        vus = []
+        for reinf in self.shear_reinforcement:
+            vus.append(reinf.Vus(d))
+        return vus
+
+    def get_type(self) -> Dict[str, int]:
+        d = {
+            "vertical_stirrups": 0,
+            "inclined_stirrups": 0,
+            "single_bentup_bars": 0,
+            "series_bentup_bars": 0,
+        }
+        for reinf in self.shear_reinforcement:
+            if reinf.get_type() == "vertical_stirrups":
+                d["vertical_stirrups"] += 1
+            elif reinf.get_type() == "inclined_stirrups":
+                d["inclined_stirrups"] += 1
+            elif reinf.get_type() == "single_bentup_bars":
+                d["single_bentup_bars"] += 1
+            elif reinf.get_type() == "series_bentup_bars":
+                d["series_bentup_bars"] += 1
+        return d
