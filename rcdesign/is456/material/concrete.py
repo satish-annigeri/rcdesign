@@ -1,6 +1,6 @@
 """Class to represent concrete as defined in IS456:2000"""
 
-from typing import Optional
+from typing import Optional, Tuple
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 import numpy as np
@@ -48,10 +48,12 @@ class ConcreteStressBlock(StressBlock):
         self.ecy = ecy
         self.ecu = ecu
 
-    def invalidx(self, x1: float, x2: float = 1) -> bool:
+    def validate_sb(self, x1: float, x2: float) -> Tuple[float, float]:
         if x1 > x2:
             x1, x2 = x2, x1
-        return not ((0 <= x1 <= 1) and (x1 <= x2 <= 1))
+        if (0 <= x1 <= 1) and (x1 <= x2 <= 1):
+            return x1, x2
+        raise StressBlockError(x1, x2)
 
     def stress(self, x: float, ecmax: float = 0.0035) -> float:
         k = self.ecy / ecmax
@@ -62,11 +64,10 @@ class ConcreteStressBlock(StressBlock):
             r = 1.0
         return r
 
-    def area(self, x1: float, x2: float, ecmax: float = 0.0035) -> Optional[float]:
-        if self.invalidx(x1, x2):
-            return None
-        if x1 > x2:
-            x1, x2 = x2, x1
+    def area(self, x1: float, x2: float, ecmax: float = 0.0035) -> float:
+        x1, x2 = self.validate_sb(
+            x1, x2
+        )  # Throws an exception if x1 and x2 are invalid
         k = nsimplify(self.ecy / ecmax)
 
         if x2 <= k:  # Entirely within parabolic region
@@ -80,11 +81,10 @@ class ConcreteStressBlock(StressBlock):
             a2 = integrate(1, (self.z, k, x2))
         return a1 + a2
 
-    def moment(self, x1: float, x2: float, ecmax: float = 0.0035) -> Optional[float]:
-        if self.invalidx(x1, x2):
-            return None
-        if x1 > x2:
-            x1, x2 = x2, x1
+    def moment(self, x1: float, x2: float, ecmax: float = 0.0035) -> float:
+        x1, x2 = self.validate_sb(
+            x1, x2
+        )  # Throws an exception if x1 and x2 are invalid
         k = nsimplify(self.ecy / ecmax)
 
         if x2 <= k:
