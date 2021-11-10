@@ -2,11 +2,9 @@
 
 from math import isclose
 from enum import Enum
-
-from typing import Tuple, List, Union
+from typing import Tuple, Union, Optional
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
-from os import sep
 from scipy.optimize import brentq
 
 
@@ -28,8 +26,16 @@ class DesignForceType(Enum):
 
 
 class Section(ABC):  # pragma: no cover
-    def __init__(self, design_force_type, clear_cover):
+    def __init__(
+        self,
+        design_force_type: DesignForceType,
+        conc: Concrete,
+        long_steel: RebarGroup,
+        clear_cover: float,
+    ):
         self.design_force_type = design_force_type
+        self.conc = conc
+        self.long_steel = long_steel
         self.clear_cover = clear_cover
 
     @abstractmethod
@@ -46,23 +52,21 @@ class RectBeamSection(Section):
         b: float,
         D: float,
         conc: Concrete,
-        # t_steel: RebarGroup,
-        # c_steel: RebarGroup,
         long_steel: RebarGroup,
         shear_steel: ShearReinforcement,
         clear_cover: float,
         stress_type: str = "Unknown",
     ):
-        super().__init__(DesignForceType.BEAM, clear_cover)
+        super().__init__(DesignForceType.BEAM, conc, long_steel, clear_cover)
         self.b = b
         self.D = D
-        self.conc = conc
+
         self.shear_steel = shear_steel
-        self.long_steel = long_steel
         self.calc_xc()
 
-    def calc_xc(self) -> float:
+    def calc_xc(self) -> None:
         self.long_steel.calc_xc(self.D)
+        return None
 
     def adjust_x(self, xu: float) -> None:
         for layer in self.long_steel.layers:
@@ -87,35 +91,51 @@ class RectBeamSection(Section):
         xumax = self.xumax() * d
         return (17 / 21) * self.conc.fd * self.b * xumax * (d - (99 / 238) * xumax)
 
-    def C(self, xu: float, ecu: float) -> float:
+    def C(self, xu: float, ecu: float) -> Tuple[Optional[float], Optional[float]]:
         C, _, M, _ = self.force_moment(xu, ecu)
-        return C, M
+        if C and M:
+            return C, M
+        else:
+            return None, None
 
-    def force_moment(self, xu: float, ecu: float) -> Tuple[float, float, float, float]:
+    def force_moment(
+        self, xu: float, ecu: float
+    ) -> Tuple[Optional[float], Optional[float], Optional[float], Optional[float]]:
         self.adjust_x(xu)
         Fc = Mc = Ft = Mt = 0.0
-        Fcc = self.conc.area(0, 1, self.conc.fd) * xu * self.b
-        Mcc = self.conc.moment(0, 1, self.conc.fd) * xu ** 2 * self.b
-        Fc += Fcc
-        Mc += Mcc
-        Fsc = Msc = Fst = Mst = 0.0
-        Fsc, Msc, Fst, Mst = self.long_steel.force_moment(xu, self.conc, ecu)
-        Fc += Fsc
-        Mc += Msc
-        Ft += Fst
-        Mt += Mst
-        return Fc, Ft, Mc, Mt
+        area = self.conc.area(0, 1, self.conc.fd)
+        moment = self.conc.moment(0, 1, self.conc.fd)
+        if area and moment:
+            Fcc = area * xu * self.b
+            Mcc = moment * xu ** 2 * self.b
+            Fc += Fcc
+            Mc += Mcc
+            Fsc = Msc = Fst = Mst = 0.0
+            Fsc, Msc, Fst, Mst = self.long_steel.force_moment(xu, self.conc, ecu)
+            Fc += Fsc
+            Mc += Msc
+            Ft += Fst
+            Mt += Mst
+            return Fc, Ft, Mc, Mt
+        else:
+            return None, None, None, None
 
-    def T(self, xu: float, ecu: float) -> Tuple[float, float]:
+    def T(self, xu: float, ecu: float) -> Tuple[Optional[float], Optional[float]]:
         _, _T, _, _M = self.force_moment(xu, ecu)
-        return _T, _M
+        if _T and _M:
+            return _T, _M
+        else:
+            return None, None
 
-    def C_T(self, x: float, ecu: float) -> float:
+    def C_T(self, x: float, ecu: float) -> Optional[float]:
         # C, _ = self.C(x, ecu)
         # T, _ = self.T(x, ecu)
         self.adjust_x(x)
         C, T, _, _ = self.force_moment(x, ecu)
-        return C - T
+        if C and T:
+            return C - T
+        else:
+            return None
 
     def xu(self, ecu: float) -> float:
         dc_max = 10
@@ -124,15 +144,21 @@ class RectBeamSection(Section):
         x = brentq(self.C_T, x1, x2, args=(ecu,))
         return x
 
-    def Mu(self, xu: float, ecu: float) -> float:
+    def Mu(self, xu: float, ecu: float) -> Optional[float]:
         # Assuming tension steel to produce an equal tension force as C
         C, M = self.C(xu, ecu)
-        return M + C * (self.eff_d(xu) - xu)
+        if C and M:
+            return M + C * (self.eff_d(xu) - xu)
+        else:
+            return None
 
-    def analyse(self, ecu: float) -> Tuple[float, float]:
+    def analyse(self, ecu: float) -> Tuple[Optional[float], Optional[float]]:
         xu = self.xu(ecu)
         Mu = self.Mu(xu, ecu)
-        return xu, Mu
+        if xu and Mu:
+            return xu, Mu
+        else:
+            return None, None
 
     def tauc(self, xu: float) -> float:
         return self.conc.tauc(self.pt(xu))
@@ -148,7 +174,7 @@ class RectBeamSection(Section):
                 return True
         return False
 
-    def report(self, xu: float, ecu: float) -> str:  # pragma: no cover
+    def report(self, xu: float, ecu: float) -> Optional[str]:  # pragma: no cover
         self.adjust_x(xu)
         s = f"Rectangular Beam Section {self.b} x {self.D}  (xu = {xu:.2f})\n"
         s += f"Concrete: {self.conc.fck}, Tension Steel: {self.long_steel.rebar.fy:.2f}"
@@ -160,8 +186,12 @@ class RectBeamSection(Section):
             "Units: Distance in mm, Area in mm^2, Force in kN, Moment about NA in kNm\n"
         )
         s += "Flexure Capacity\n"
-        Fcc = self.conc.area(0, 1, self.conc.fd) * xu * self.b
-        Mcc = self.conc.moment(0, 1, self.conc.fd) * xu ** 2 * self.b
+        area = self.conc.area(0, 1, self.conc.fd)
+        moment = self.conc.moment(0, 1, self.conc.fd)
+        if not area or not moment:
+            return None
+        Fcc = area * xu * self.b
+        Mcc = moment * xu ** 2 * self.b
         s += "Concrete in Compression\n"
         s += f"{' ':60}{'C (kN)':>8}{'M (kNm)':>8}\n{' ':60}{Fcc/1e3:8.2f}{Mcc/1e6:8.2f}\n"
 
@@ -218,7 +248,7 @@ class RectBeamSection(Section):
             s += f"{' ':60}{(Fc - Ft)/1e3:8.2}"
         s += f"{M/1e6:8.2f}\n"
         # Shear reinforcement
-        s += f"Shear Capacity\n"
+        s += "Shear Capacity\n"
         s += f"{self.shear_steel.__repr__()}\n"
         tauc, Vus, Vuc = self.Vu(xu, separate_output=True)
         s += f"pst = {self.pt(xu):.2f}%, d = {self.eff_d(xu):.2f}, "
@@ -258,9 +288,9 @@ class RectBeamSection(Section):
         if nlegs > 0:
             self.shear_steel.nlegs = nlegs
         if bar_dia > 0:
-            self.shear_steel.bar_dia = bar_dia
+            self.shear_steel._bar_dia = bar_dia
         if sv > 0:
-            self.shear_steel.sv = sv
+            self.shear_steel._sv = sv
         # pt = self.long_steel.area * 100 / (self.b * self.eff_d())
         pt = self.pt(xu)
         tauc = self.conc.tauc(pt)
@@ -306,14 +336,10 @@ class FlangedBeamSection(RectBeamSection):
         Df: float,
         conc: Concrete,
         long_steel: RebarGroup,
-        # t_steel: RebarGroup,
-        # c_steel: RebarGroup,
-        shear_steel: Rebar,
+        shear_steel: ShearReinforcement,
         clear_cover: float,
     ):
         super().__init__(bw, D, conc, long_steel, shear_steel, clear_cover)
-        bw: float
-        # D: float
         self.bf = bf
         self.Df = Df
 
@@ -325,17 +351,27 @@ class FlangedBeamSection(RectBeamSection):
     def bw(self, _bw) -> None:
         self.b = _bw
 
-    def Cw(self, xu: float, ecu: float) -> Tuple[float, float]:
-        C = self.conc.area(0, 1, self.conc.fd) * xu * self.bw
-        M = self.conc.moment(0, 1, self.conc.fd) * xu ** 2 * self.bw
-        return C, M
+    def Cw(self, xu: float, ecu: float) -> Tuple[Optional[float], Optional[float]]:
+        area = self.conc.area(0, 1, self.conc.fd)
+        moment = self.conc.moment(0, 1, self.conc.fd)
+        if area and moment:
+            C = area * xu * self.bw
+            M = moment * xu ** 2 * self.bw
+            return C, M
+        else:
+            return None, None
 
-    def Cf(self, xu: float) -> Tuple[float, float]:
+    def Cf(self, xu: float) -> Tuple[Optional[float], Optional[float]]:
         df = xu if xu <= self.Df else self.Df
         x1 = xu - df
-        C = self.conc.area(x1 / xu, 1, self.conc.fd) * xu * (self.bf - self.bw)
-        M = self.conc.moment(x1 / xu, 1, self.conc.fd) * xu ** 2 * (self.bf - self.bw)
-        return C, M
+        area = self.conc.area(x1 / xu, 1, self.conc.fd)
+        moment = self.conc.moment(x1 / xu, 1, self.conc.fd)
+        if area and moment:
+            C = area * xu * (self.bf - self.bw)
+            M = moment * xu ** 2 * (self.bf - self.bw)
+            return C, M
+        else:
+            return None, None
 
     def C(self, xu: float, ecu: float) -> Tuple[float, float]:
         # Compression force and moment due to concrete of web
@@ -363,13 +399,16 @@ class FlangedBeamSection(RectBeamSection):
     def __repr__(self) -> str:  # pragma: no cover
         s = f"Flanged Beam Section {self.bw}x{self.D} {self.bf}x{self.Df}\n"
         s += self.conc.__repr__() + "\n"
-        s += f"{self.c_steel.layers[0]}\n"
+        s += f"{self.long_steel.layers[0]}\n"
         return s
 
-    def C_T(self, x: float, ecu: float) -> float:
+    def C_T(self, x: float, ecu: float) -> Optional[float]:
         C, _ = self.C(x, ecu)
         T, _ = self.T(x, ecu)
-        return C - T
+        if C and T:
+            return C - T
+        else:
+            return None
 
     def xu(self, ecu: float) -> float:
         # x1, x2 = rootsearch(self.C_T, self.t_steel.layers[0].dc, self.D, 10, ecu)
@@ -416,7 +455,7 @@ class FlangedBeamSection(RectBeamSection):
                 # Compression steel
                 x = xu - L._xc
                 esc = ecu / xu * x
-                fsc = L.rebar.fs(esc)
+                fsc = self.long_steel.rebar.fs(esc)
                 fcc = self.conc.fc(x / xu, self.conc.fd)
                 _Fsc = L.area * (fsc - fcc)
                 _Msc = Fsc * x

@@ -1,9 +1,22 @@
 """Class to represent concrete as defined in IS456:2000"""
 
+from typing import Optional
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 import numpy as np
-from sympy import symbols, integrate, nsimplify
+from sympy import symbols, integrate, nsimplify  # type: ignore
+
+
+from rcdesign.exceptions import RCDException
+
+
+class StressBlockError(RCDException):
+    def __init__(self, x1: float, x2: float):
+        self.x1 = x1
+        self.x2 = x2
+
+    def __str__(self):
+        return f"StressBlockError: Stress block distances ({self.x1}, {self.x2}) must be within 0 to 1"
 
 
 # Generalized Stress Block
@@ -38,7 +51,7 @@ class ConcreteStressBlock(StressBlock):
     def invalidx(self, x1: float, x2: float = 1) -> bool:
         if x1 > x2:
             x1, x2 = x2, x1
-        return not ((0 <= x1 <= 1) and (0 <= x2 <= 1))
+        return not ((0 <= x1 <= 1) and (x1 <= x2 <= 1))
 
     def stress(self, x: float, ecmax: float = 0.0035) -> float:
         k = self.ecy / ecmax
@@ -49,27 +62,27 @@ class ConcreteStressBlock(StressBlock):
             r = 1.0
         return r
 
-    def area(self, x1: float, x2: float, ecmax: float = 0.0035) -> float:
+    def area(self, x1: float, x2: float, ecmax: float = 0.0035) -> Optional[float]:
         if self.invalidx(x1, x2):
             return None
         if x1 > x2:
             x1, x2 = x2, x1
         k = nsimplify(self.ecy / ecmax)
 
-        if x2 <= k:
+        if x2 <= k:  # Entirely within parabolic region
             a1 = integrate(self.expr, (self.z, x1 / k, x2 / k)) * k
             a2 = 0.0
-        elif x1 >= k:
+        elif x1 >= k:  # Entirely within rectangular region
             a1 = 0.0
             a2 = integrate(1, (self.z, x1, x2))
-        else:
+        else:  # Partly in parabolic and rest in rectangular region
             a1 = integrate(self.expr, (self.z, x1 / k, 1)) * k
             a2 = integrate(1, (self.z, k, x2))
         return a1 + a2
 
-    def moment(self, x1: float, x2: float, ecmax: float = 0.0035) -> float:
+    def moment(self, x1: float, x2: float, ecmax: float = 0.0035) -> Optional[float]:
         if self.invalidx(x1, x2):
-            return
+            return None
         if x1 > x2:
             x1, x2 = x2, x1
         k = nsimplify(self.ecy / ecmax)
@@ -121,22 +134,27 @@ class Concrete:
         else:
             raise ValueError("x/xu = %.4f. Must be between 0 and 1" % (x_xu))
 
-    def area(self, x1_xu: float, x2_xu: float, fd: float = 1.0) -> float:
+    def area(self, x1_xu: float, x2_xu: float, fd: float = 1.0) -> Optional[float]:
         factor = self.stress_block.area(x1_xu, x2_xu)
         if factor:
             return factor * fd
         else:
             return None
 
-    def moment(self, x1_xu: float, x2_xu: float, fd: float = 1.0) -> float:
+    def moment(self, x1_xu: float, x2_xu: float, fd: float = 1.0) -> Optional[float]:
         factor = self.stress_block.moment(x1_xu, x2_xu)
         if factor:
             return factor * fd
         else:
             return None
 
-    def centroid(self, x1_xu: float, x2_xu: float, fd: float = 1.0) -> float:
-        return self.moment(x1_xu, x2_xu) / self.area(x1_xu, x2_xu)
+    def centroid(self, x1_xu: float, x2_xu: float, fd: float = 1.0) -> Optional[float]:
+        m = self.moment(x1_xu, x2_xu)
+        a = self.area(x1_xu, x2_xu)
+        if m and a:
+            return m / a
+        else:
+            return None
 
     def tauc_max(self):
         tauc = np.array([[15, 20, 25, 30, 35, 40], [2.5, 2.8, 3.1, 3.5, 3.7, 4.0]])

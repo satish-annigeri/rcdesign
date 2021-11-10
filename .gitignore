@@ -146,3 +146,17 @@ activate.bat
 # Backup directories and files
 bak/
 *.bak
+
+# Sphinx
+build/
+_build/
+_static/
+_templates/
+
+# Virtual environment management files
+.python-version
+
+# Images
+*.png
+*.dot
+*.jpg

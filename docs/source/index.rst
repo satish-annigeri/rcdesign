@@ -14,6 +14,7 @@ Welcome to rcdesign's documentation!
    installation.md
    tutorial.md
    theory.md
+   apiref.md
 
 
 Indices and tables
