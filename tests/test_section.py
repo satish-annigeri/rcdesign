@@ -453,7 +453,7 @@ class TestFlangedBeamSection:
         M = m0 + m1 + m2 + m3
         Mu_manual = M + C * (d - xu)
         # Method
-        Mu = tsec.Mu(d, xu, 0.0035)
+        Mu = tsec.Mu(xu, 0.0035)
         assert Mu == Mu_manual
 
     # Moment capacity based on compression force

@@ -523,7 +523,8 @@ class BentupBars(ShearReinforcement):
 
 @dataclass
 class ShearRebarGroup:
-    shear_reinforcement: List[ShearReinforcement]
+    def __init__(self, shear_reinforcement: List[ShearReinforcement]):
+        self.shear_reinforcement = shear_reinforcement
 
     def Asv(self) -> List[float]:
         asv = []

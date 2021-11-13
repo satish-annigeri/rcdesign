@@ -152,6 +152,12 @@ class RectBeamSection(Section):
 
     def report(self, xu: float, ecu: float) -> Optional[str]:  # pragma: no cover
         self.adjust_x(xu)
+        result = {
+            "header": f"Rectangular Beam {self.b}x{self.D}\nDepth of neutral axis={xu}, Effective depth={self.eff_d(xu)}",
+            "concrete": f"Concrete: {self.conc.fck}",
+            "long_steel": f"Main steel: {self.long_steel.rebar.fy}",
+            "shear_steel": f"Shear steel: {self.shear_steel.shear_reinforcement[0].rebar.fy}",
+        }
         s = f"Rectangular Beam Section {self.b} x {self.D}  (xu = {xu:.2f})\n"
         s += f"Concrete: {self.conc.fck}, Tension Steel: {self.long_steel.rebar.fy:.2f}"
         if self.has_compr_steel(xu):
@@ -164,8 +170,8 @@ class RectBeamSection(Section):
         s += "Flexure Capacity\n"
         area = self.conc.area(0, 1, self.conc.fd)
         moment = self.conc.moment(0, 1, self.conc.fd)
-        if not area or not moment:
-            return None
+        # if not area or not moment:
+        #     return None
         Fcc = area * xu * self.b
         Mcc = moment * xu ** 2 * self.b
         s += "Concrete in Compression\n"
@@ -224,13 +230,13 @@ class RectBeamSection(Section):
             s += f"{' ':60}{(Fc - Ft)/1e3:8.2}"
         s += f"{M/1e6:8.2f}\n"
         # Shear reinforcement
-        s += "Shear Capacity\n"
-        s += f"{self.shear_steel.__repr__()}\n"
-        tauc, Vus, Vuc = self.Vu(xu)
-        s += f"pst = {self.pt(xu):.2f}%, d = {self.eff_d(xu):.2f}, "
-        s += f"tau_c (N/mm^2) = {tauc:.2f}\n"
-        Vu = Vuc + Vus
-        s += f"Vuc (kN) = {Vuc/1e3:.2f}, Vus = {Vus/1e3:.2f}, Vu (kN) = {Vu/1e3:.2f}"
+        # s += "Shear Capacity\n"
+        # s += f"{self.shear_steel.__repr__()}\n"
+        # tauc, Vus, Vuc = self.Vu(xu)
+        # s += f"pst = {self.pt(xu):.2f}%, d = {self.eff_d(xu):.2f}, "
+        # s += f"tau_c (N/mm^2) = {tauc:.2f}\n"
+        # Vu = Vuc + Vus
+        # s += f"Vuc (kN) = {Vuc/1e3:.2f}, Vus = {Vus/1e3:.2f}, Vu (kN) = {Vu/1e3:.2f}"
         return s
 
     def eff_d(self, xu: float) -> float:
@@ -349,7 +355,8 @@ class FlangedBeamSection(RectBeamSection):
         M = M1 + M2 + M3
         return C, M
 
-    def Mu(self, d: float, xu: float, ecu: float) -> float:
+    def Mu(self, xu: float, ecu: float) -> float:
+        d = self.eff_d(xu)
         # Based on compression force C, assuming the right amount of tension steel
         C, M = self.C(xu, ecu)
         Mu = M + C * (d - xu)
@@ -377,7 +384,7 @@ class FlangedBeamSection(RectBeamSection):
 
     def analyse(self, ecu: float) -> Tuple[float, float]:
         xu = self.xu(ecu)
-        Mu = self.Mu(self.eff_d(xu), xu, ecu)
+        Mu = self.Mu(xu, ecu)
         return xu, Mu
 
     def report(self, xu: float, ecu: float) -> str:  # pragma: no cover

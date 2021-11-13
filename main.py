@@ -37,7 +37,7 @@ print(rect_sec)
 print()
 
 # Analysis of a rectangular beam section of size 230x450 mm overall
-xu = 150  # Assumed depth of neutral axis. May not correspond to equilibrium
+xu = 150.0  # Assumed depth of neutral axis. May not correspond to equilibrium
 print(f"Analysis of section for xu = {xu}")
 print(f"Compression (C): {rect_sec.C(xu, 0.0035)[0]/1e3:10.2f} kN")
 print(f"    Tension (T): {rect_sec.T(xu, 0.0035)[0]/1e3:10.2f} kN")
@@ -60,8 +60,7 @@ rect_sec.report(xu, rect_sec.conc.ecu)
 
 # Flanged section
 long_st = RebarGroup(fe415, [t1, t2])
-t_sec = FlangedBeamSection(230, 450, 1000, 150, m20, long_st, shear_st, 25)
-print("\n\n")
-xu, Mu = t_sec.analyse(0.0035)
+tsec = FlangedBeamSection(230, 450, 1000, 150, m20, long_st, shear_st, 25)
+xu = tsec.xu(0.0035)
 # print(f"xu = {xu:.2f} Mu = {Mu/1e6:.2f}")
-print(t_sec.report(xu, 0.0035))
+print(tsec.report(xu, 0.0035))

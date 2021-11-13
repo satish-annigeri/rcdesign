@@ -7,7 +7,13 @@ Output: xu and report of the section.
 from scipy.optimize import brentq
 
 from rcdesign.is456.material.concrete import ConcreteStressBlock, Concrete
-from rcdesign.is456.material.rebar import RebarHYSD, RebarLayer, RebarGroup, Stirrups
+from rcdesign.is456.material.rebar import (
+    RebarHYSD,
+    RebarLayer,
+    RebarGroup,
+    Stirrups,
+    ShearRebarGroup,
+)
 from rcdesign.is456.section import RectBeamSection
 from rcdesign.utils import rootsearch
 
@@ -25,7 +31,7 @@ c3 = RebarLayer([12, 12], 100)
 # c_st = RebarGroup(fe415, [c1, c2])
 t_st = None
 c_st = None
-sh_st = Stirrups(fe415, 2, 8, 150)
+sh_st = ShearRebarGroup([Stirrups(fe415, 2, 8, 150)])
 long_st = RebarGroup(fe415, [t2, c1, t1, c2])
 
 sec = RectBeamSection(230, 500, m20, long_st, sh_st, 25)
