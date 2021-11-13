@@ -5,6 +5,8 @@ from rcdesign.is456.material.rebar import (
     ShearRebarGroup,
     Stirrups,
     BentupBars,
+    RebarType,
+    ShearRebarType,
 )
 
 
@@ -79,6 +81,13 @@ class TestStirrup:
         Vus = st.rebar.fd * Asv * d / st._sv
         assert st.Vus(d) == Vus
 
+    def test_shearrebar10(self):
+        fe415 = RebarHYSD("Fe 415", 415)
+        st = Stirrups(fe415, 2, 8, 150)
+        assert st._sv == 150
+        st.sv = 125
+        assert st._sv == 125
+
 
 class TestBentupBars:
     def test_bentupbars01(self):
@@ -106,7 +115,7 @@ class TestBentupBars:
         assert bup.Vus(d) == Vus
 
 
-class TestShearReinfGroup:
+class TestShearRebarGroup:
     def test_sheargroup01(self):
         fe415 = RebarHYSD("fe 415", 415)
         d = 415.0
@@ -114,17 +123,21 @@ class TestShearReinfGroup:
         asv1 = 2 * pi / 4 * 8 ** 2
         vus1 = fe415.fd * asv1 * d / vst._sv
         ist = Stirrups(fe415, 2, 8, 150, 45)
+        alpha = 45 * pi / 180
         asv3 = asv1
-        vus3 = 0
+        vus3 = fe415.fd * asv1 * d / ist._sv * (sin(alpha) + cos(alpha))
         bup = BentupBars(fe415, [16, 16], 45)
         asv2 = pi / 4 * (2 * 16 ** 2)
         vus2 = fe415.fd * asv2 * sin(bup._alpha_deg * pi / 180)
-        shear_gr = ShearRebarGroup([vst, bup])
-        assert shear_gr.Asv() == [asv1, asv2]
-        assert shear_gr.Vus(d) == [vus1, vus2]
+        bupseries = BentupBars(fe415, [16, 16], 45, 150)
+        asv4 = asv2
+        vus4 = fe415.fd * asv4 * d / bupseries._sv * (sin(alpha) + cos(alpha))
+        shear_gr = ShearRebarGroup([vst, bup, ist, bupseries])
+        assert shear_gr.Asv() == [asv1, asv2, asv3, asv4]
+        assert shear_gr.Vus(d) == [vus1, vus2, vus3, vus4]
         assert shear_gr.get_type() == {
-            "vertical_stirrups": 1,
-            "inclined_stirrups": 0,
-            "single_bentup_bars": 1,
-            "series_bentup_bars": 0,
+            ShearRebarType.SHEAR_REBAR_VERTICAL_STIRRUP: 1,
+            ShearRebarType.SHEAR_REBAR_INCLINED_STIRRUP: 1,
+            ShearRebarType.SHEAR_REBAR_BENTUP_SINGLE: 1,
+            ShearRebarType.SHEAR_REBAR_BENTUP_SERIES: 1,
         }

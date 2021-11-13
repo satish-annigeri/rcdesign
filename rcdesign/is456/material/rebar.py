@@ -1,14 +1,39 @@
 """Classes to represent reinforcement bars, layers of reinforcement bars
 and groups of reinforcement layers"""
 
-import numpy as np
+from enum import IntEnum
 from math import pi, sin, cos, isclose
 from typing import Tuple, List, Union, Dict, Optional
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
+import numpy as np
 
 from .concrete import Concrete
 
+# Rebar Enumerations
+
+
+class RebarType(IntEnum):
+    REBAR_MS = 1
+    REBAR_HYSD = 2
+
+
+RebarLabel = {RebarType.REBAR_MS: "Mild Steel", RebarType.REBAR_HYSD: "HYSD"}
+
+
+class ShearRebarType(IntEnum):
+    SHEAR_REBAR_VERTICAL_STIRRUP = 1
+    SHEAR_REBAR_INCLINED_STIRRUP = 2
+    SHEAR_REBAR_BENTUP_SINGLE = 3
+    SHEAR_REBAR_BENTUP_SERIES = 4
+
+
+ShearRebarLabel = {
+    ShearRebarType.SHEAR_REBAR_VERTICAL_STIRRUP: "Vertical stirrup",
+    ShearRebarType.SHEAR_REBAR_INCLINED_STIRRUP: "Inclined stirrup",
+    ShearRebarType.SHEAR_REBAR_BENTUP_SINGLE: "Bent-up bars in single group",
+    ShearRebarType.SHEAR_REBAR_BENTUP_SERIES: "Bent-up bars in series",
+}
 
 # Rebar class
 
@@ -41,7 +66,7 @@ class RebarMS(Rebar):
     def __init__(self, label: str, fy: float):
         super().__init__(label, fy)
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self):
         return f"{self.label:>6}: Type={'MS':4} fy={self.fy} fd={self.fd:.2f}"
 
     def _fs(self, es: float) -> float:
@@ -78,7 +103,7 @@ class RebarHYSD(Rebar):
         self.es[:, 0] = self.es[:, 0] * self.fy / self.gamma_m
         self.es[:, 1] = self.es[:, 0] / self.Es + self.es[:, 1]
 
-    def __repr__(self) -> str:  # pragma: no cover
+    def __repr__(self) -> str:
         return f"{self.label:>6}: Type={'HYSD'} fy={self.fy} fd={self.fd:.2f}"
 
     def _fs(self, es: float) -> float:
@@ -157,7 +182,7 @@ class RebarLayer:
     def x(self, xu: float) -> float:
         return xu - self._xc
 
-    def __repr__(self) -> str:  # pragma: no cover
+    def __repr__(self) -> str:
         s = "Dia: "
         b = ""
         for bardia in self.dia:
@@ -344,7 +369,7 @@ class RebarGroup:
             xmax = D
         return (xmin, xmax)
 
-    def __repr__(self) -> str:  # pragma: no cover
+    def __repr__(self) -> str:
         sl = "layers" if len(self.layers) > 1 else "layer"
         s = f"Rebar Group {self.rebar.label} in {len(self.layers)} {sl}\n"
         s += f"{'dc':>10}{'xc':>10}{'Bars':>12}{'Area':>10}\n"
@@ -427,7 +452,6 @@ class Stirrups(ShearReinforcement):
     @sv.setter
     def sv(self, _sv: float) -> float:
         self._sv = _sv
-        # self._Asv = self.nlegs * pi * self.bar_dia ** 2 / 4
         return self._sv
 
     def calc_sv(self, Vus: float, d: float) -> Optional[float]:
@@ -437,7 +461,7 @@ class Stirrups(ShearReinforcement):
         self._sv = self.rebar.fd * self.Asv * d * sin(alpha_rad) / Vus
         return self._sv
 
-    def __repr__(self) -> str:  # pragma: no cover
+    def __repr__(self) -> str:
         sh_rein = "Vertical" if self._alpha_deg == 90 else "Inclined"
         s = f"Shear reinforcement: {sh_rein} Stirrups "
         s += f"{self._nlegs}-{self._bar_dia} @ {self._sv} c/c"
@@ -452,11 +476,11 @@ class Stirrups(ShearReinforcement):
             Vus *= sin(alpha_rad) + cos(alpha_rad)
         return Vus
 
-    def get_type(self):
+    def get_type(self) -> int:
         if self._alpha_deg == 90:
-            return "vertical_stirrups"
+            return ShearRebarType.SHEAR_REBAR_VERTICAL_STIRRUP
         else:
-            return "inclined_stirrups"
+            return ShearRebarType.SHEAR_REBAR_INCLINED_STIRRUP
 
 
 """Single group (sv == 0) or a series of parallel (sv != 0) bent-up bars as shear reinforcement"""
@@ -490,11 +514,11 @@ class BentupBars(ShearReinforcement):
             Vus *= d / self._sv * (sin(alpha_rad) + cos(alpha_rad))
         return Vus
 
-    def get_type(self):
+    def get_type(self) -> int:
         if self._sv == 0:
-            return "single_bentup_bars"
+            return ShearRebarType.SHEAR_REBAR_BENTUP_SINGLE
         else:
-            return "series_bentup_bars"
+            return ShearRebarType.SHEAR_REBAR_BENTUP_SERIES
 
 
 @dataclass
@@ -513,20 +537,20 @@ class ShearRebarGroup:
             vus.append(reinf.Vus(d))
         return vus
 
-    def get_type(self) -> Dict[str, int]:
+    def get_type(self) -> Dict[ShearRebarType, int]:
         d = {
-            "vertical_stirrups": 0,
-            "inclined_stirrups": 0,
-            "single_bentup_bars": 0,
-            "series_bentup_bars": 0,
+            ShearRebarType.SHEAR_REBAR_VERTICAL_STIRRUP: 0,
+            ShearRebarType.SHEAR_REBAR_INCLINED_STIRRUP: 0,
+            ShearRebarType.SHEAR_REBAR_BENTUP_SINGLE: 0,
+            ShearRebarType.SHEAR_REBAR_BENTUP_SERIES: 0,
         }
         for reinf in self.shear_reinforcement:
-            if reinf.get_type() == "vertical_stirrups":
-                d["vertical_stirrups"] += 1
-            elif reinf.get_type() == "inclined_stirrups":
-                d["inclined_stirrups"] += 1
-            elif reinf.get_type() == "single_bentup_bars":
-                d["single_bentup_bars"] += 1
-            elif reinf.get_type() == "series_bentup_bars":
-                d["series_bentup_bars"] += 1
+            if reinf.get_type() == ShearRebarType.SHEAR_REBAR_VERTICAL_STIRRUP:
+                d[ShearRebarType.SHEAR_REBAR_VERTICAL_STIRRUP] += 1
+            elif reinf.get_type() == ShearRebarType.SHEAR_REBAR_INCLINED_STIRRUP:
+                d[ShearRebarType.SHEAR_REBAR_INCLINED_STIRRUP] += 1
+            elif reinf.get_type() == ShearRebarType.SHEAR_REBAR_BENTUP_SINGLE:
+                d[ShearRebarType.SHEAR_REBAR_BENTUP_SINGLE] += 1
+            elif reinf.get_type() == ShearRebarType.SHEAR_REBAR_BENTUP_SERIES:
+                d[ShearRebarType.SHEAR_REBAR_BENTUP_SERIES] += 1
         return d

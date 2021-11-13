@@ -1,0 +1,11 @@
+[run]
+omit =
+    example*.py
+
+[report]
+omit =
+    example*.py
+
+exclude_lines =
+    pragma: no cover
+    def __repr__

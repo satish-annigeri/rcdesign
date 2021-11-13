@@ -4,7 +4,13 @@ from scipy.optimize import brentq
 from rcdesign.utils import rootsearch
 
 from rcdesign.is456.material.concrete import ConcreteStressBlock, Concrete
-from rcdesign.is456.material.rebar import RebarHYSD, RebarLayer, RebarGroup, Stirrups
+from rcdesign.is456.material.rebar import (
+    RebarHYSD,
+    RebarLayer,
+    RebarGroup,
+    ShearRebarGroup,
+    Stirrups,
+)
 from rcdesign.is456.section import RectBeamSection, FlangedBeamSection
 
 from rcdesign import __version__
@@ -24,7 +30,7 @@ c1 = RebarLayer([16, 16], 35)  # 2-16mm dia @ 35mm from compression edge
 # Group of tension bars
 long_st = RebarGroup(fe415, [c1, t1, t2])  # Sequence is unimportant
 # Shear reinforcement in the form of vertical stirrups
-shear_st = Stirrups(fe415, 2, 8, 150, 90)  # 2 legged 8# @ 150 c/c
+shear_st = ShearRebarGroup([Stirrups(fe415, 2, 8, 150, 90)])  # 2 legged 8# @ 150 c/c
 # Rectangular beam section
 rect_sec = RectBeamSection(230, 450, m20, long_st, shear_st, 25)
 print(rect_sec)

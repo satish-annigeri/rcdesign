@@ -12,7 +12,7 @@ from rcdesign.is456.material.concrete import (
 
 
 def test_version():
-    assert __version__ == "0.1.0"
+    assert __version__ == "0.2.0"
 
 
 def parabolic_area(z1, z2, k=4 / 7):
@@ -154,6 +154,13 @@ class TestCSB:
             sb.validate_sb(-0.1, 0.1)
         with pytest.raises(StressBlockError):
             sb.validate_sb(0.1, -0.1)
+        try:
+            sb.validate_sb(0, 1.1)
+        except Exception as E:
+            assert (
+                E.__str__()
+                == f"StressBlockError: Stress block distances ({0}, {1.1}) must be within 0 to 1"
+            )
 
 
 class TestConcrete:
