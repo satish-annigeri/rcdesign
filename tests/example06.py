@@ -18,7 +18,7 @@ from rcdesign.is456.section import RectBeamSection
 from rcdesign.utils import rootsearch
 
 
-sb = ConcreteStressBlock("IS456 LSM", 0.002, 0.0035)
+sb = ConcreteStressBlock("IS456 LSM")
 m20 = Concrete("M20", 20, sb)
 fe415 = RebarHYSD("Fe 415", 415)
 

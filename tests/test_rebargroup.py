@@ -37,7 +37,7 @@ class TestRebarGroup:
 
     def test_rebargroup04(self):
         fe415 = RebarHYSD("Fe 415", 415)
-        csb = ConcreteStressBlock("IS456 LSM", 0.002, 0.0035)
+        csb = ConcreteStressBlock("IS456 LSM")
         conc = Concrete("M20", 20, csb)
         l1 = RebarLayer([16, 16, 16], 35)
         l2 = RebarLayer([16, 16], 70)

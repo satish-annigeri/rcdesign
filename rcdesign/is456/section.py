@@ -90,11 +90,13 @@ class RectBeamSection(Section):
         xumax = self.xumax() * d
         return (17 / 21) * self.conc.fd * self.b * xumax * (d - (99 / 238) * xumax)
 
-    def C(self, xu: float, ecu: float) -> Tuple[float, float]:
-        C, _, M, _ = self.force_moment(xu, ecu)
+    def C(self, xu: float, ecmax: float) -> Tuple[float, float]:
+        C, _, M, _ = self.force_moment(xu, ecmax)
         return C, M
 
-    def force_moment(self, xu: float, ecu: float) -> Tuple[float, float, float, float]:
+    def force_moment(
+        self, xu: float, ecmax: float
+    ) -> Tuple[float, float, float, float]:
         self.adjust_x(xu)
         Fc = Mc = Ft = Mt = 0.0
         area = self.conc.area(0, 1, self.conc.fd)
@@ -104,44 +106,52 @@ class RectBeamSection(Section):
         Fc += Fcc
         Mc += Mcc
         Fsc = Msc = Fst = Mst = 0.0
-        Fsc, Msc, Fst, Mst = self.long_steel.force_moment(xu, self.conc, ecu)
+        Fsc, Msc, Fst, Mst = self.long_steel.force_moment(xu, self.conc, ecmax)
         Fc += Fsc
         Mc += Msc
         Ft += Fst
         Mt += Mst
         return Fc, Ft, Mc, Mt
 
-    def T(self, xu: float, ecu: float) -> Tuple[float, float]:
-        _, _T, _, _M = self.force_moment(xu, ecu)
+    def T(self, xu: float, ecmax: float) -> Tuple[float, float]:
+        _, _T, _, _M = self.force_moment(xu, ecmax)
         return _T, _M
 
-    def C_T(self, x: float, ecu: float) -> float:
+    def C_T(self, x: float, ecmax: float) -> float:
         self.adjust_x(x)
-        C, T, _, _ = self.force_moment(x, ecu)
+        C, T, _, _ = self.force_moment(x, ecmax)
         return C - T
 
-    def xu(self, ecu: float) -> float:
+    def xu(self, ecmax: float) -> float:
         dc_max = 10
 
-        x1, x2 = rootsearch(self.C_T, dc_max, self.D, 10, ecu)
-        x = brentq(self.C_T, x1, x2, args=(ecu,))
+        x1, x2 = rootsearch(self.C_T, dc_max, self.D, 10, ecmax)
+        x = brentq(self.C_T, x1, x2, args=(ecmax,))
         return x
 
-    def Mu(self, xu: float, ecu: float) -> float:
-        # Assuming tension steel to produce an equal tension force as C
-        C, M = self.C(xu, ecu)
+    def Mu(self, xu: float, ecmax: float) -> float:
+        # Assuming area of tension steel to such as to produce a tension force equal to C
+        C, M = self.C(xu, ecmax)
         return M + C * (self.eff_d(xu) - xu)
 
-    def analyse(self, ecu: float) -> Tuple[float, float]:
-        xu = self.xu(ecu)
-        Mu = self.Mu(xu, ecu)
+    def analyse(self, ecmax: float) -> Tuple[float, float]:
+        xu = self.xu(ecmax)
+        Mu = self.Mu(xu, ecmax)
         return xu, Mu
 
     def tauc(self, xu: float) -> float:
         return self.conc.tauc(self.pt(xu))
 
     def __repr__(self) -> str:
-        s = f"Size: {self.b} x {self.D}\nTension Steel: {self.long_steel}\n"
+        s = f"Size: {self.b} x {self.D}\n"
+        s += self.long_steel.report()
+        ecmax = self.conc.stress_block.ecu
+        xu = self.xu(ecmax)
+        s += f"Equilibrium NA {xu:10.2f}\n"
+        s += f"Mu = {self.Mu(xu, ecmax)/1e6:.2f} kN\n"
+        vuc, vus = self.Vu(xu)
+        vu = vuc + sum(vus)
+        s += f"Vu = {vu/1e3:.2f} kN\n"
         return s
 
     def has_compr_steel(self, xu: float) -> bool:
@@ -150,7 +160,7 @@ class RectBeamSection(Section):
                 return True
         return False
 
-    def report(self, xu: float, ecu: float) -> Optional[str]:  # pragma: no cover
+    def report(self, xu: float, ecmax: float) -> Optional[str]:  # pragma: no cover
         self.adjust_x(xu)
         result = {
             "header": f"Rectangular Beam {self.b}x{self.D}\nDepth of neutral axis={xu}, Effective depth={self.eff_d(xu)}",
@@ -164,9 +174,7 @@ class RectBeamSection(Section):
             s += f", Compression Steel: {self.long_steel.rebar.fy:.2f}\n"
         else:
             s += "\n"
-        s += (
-            "Units: Distance in mm, Area in mm^2, Force in kN, Moment about NA in kNm\n"
-        )
+        s += "Units: Distance in mm, Area in mm^2\n"
         s += "Flexure Capacity\n"
         area = self.conc.area(0, 1, self.conc.fd)
         moment = self.conc.moment(0, 1, self.conc.fd)
@@ -180,36 +188,38 @@ class RectBeamSection(Section):
         # Compression steel
         if self.has_compr_steel(xu):
             sc = "Compression Steel\n"
-            sc += f"{'dc':>8}{'Bars':>8}{'Area':>8}{'x':>8}{'Strain':>12}{'f_sc':>8}"
+            sc += f"{'dc':>8}{'Bars':>12}{'Area':>8}{'x':>8}{'Strain':>12}{'f_sc':>8}"
             sc += f"{'f_cc':>8}{'C (kN)':>8}{'M (kNm)':>8}\n"
         else:
             sc = ""
         st = "Tension Steel\n"
-        st += f"{'dc':>8}{'Bars':>8}{'Area':>8}{'x':>8}{'Strain':>12}{'f_st':>8}{' ':8}"
+        st += (
+            f"{'dc':>8}{'Bars':>12}{'Area':>8}{'x':>8}{'Strain':>12}{'f_st':>8}{' ':8}"
+        )
         st += f"{'T (kN)':>8}{'M (kNm)':>8}\n"
         Fsc = Msc = 0.0
         Fst = Mst = 0.0
         for L in self.long_steel.layers:
             if L._xc < xu:  # Layer of compression steel
                 x = xu - L._xc
-                esc = ecu / xu * x
+                esc = ecmax / xu * x
                 fsc = self.long_steel.rebar.fs(esc)
                 fcc = self.conc.fc(x / xu, self.conc.fd)
                 _Fsc = L.area * (fsc - fcc)
                 _Msc = _Fsc * x
                 Fsc += _Fsc
                 Msc += _Msc
-                sc += f"{L.dc:8.1f}{L.bar_list():>8}{L.area:8.2f}{x:8.2f}{esc:12.4e}"
+                sc += f"{L.dc:8.1f}{L.bar_list():>12}{L.area:8.2f}{x:8.2f}{esc:12.4e}"
                 sc += f"{fsc:8.2f}{fcc:8.2f}{_Fsc/1e3:8.2f}{_Msc/1e6:8.2f}\n"
             else:
                 x = L._xc - xu
-                est = ecu / xu * x
+                est = ecmax / xu * x
                 fst = self.long_steel.rebar.fs(est)
                 _Fst = L.area * fst
                 _Mst = _Fst * x
                 Fst += _Fst
                 Mst += _Mst
-                st += f"{L.dc:8.1f}{L.bar_list():>8}{L.area:8.2f}{x:8.2f}{est:12.4e}"
+                st += f"{L.dc:8.1f}{L.bar_list():>12}{L.area:8.2f}{x:8.2f}{est:12.4e}"
                 st += f"{fst:8.2f}{' ':8}{_Fst/1e3:8.2f}{_Mst/1e6:8.2f}\n"
         Fc = Fcc + Fsc
         Ft = Fst
@@ -230,7 +240,7 @@ class RectBeamSection(Section):
             s += f"{' ':60}{(Fc - Ft)/1e3:8.2}"
         s += f"{M/1e6:8.2f}\n"
         # Shear reinforcement
-        # s += "Shear Capacity\n"
+        s += "Shear Capacity\n"
         # s += f"{self.shear_steel.__repr__()}\n"
         # tauc, Vus, Vuc = self.Vu(xu)
         # s += f"pst = {self.pt(xu):.2f}%, d = {self.eff_d(xu):.2f}, "
@@ -261,37 +271,20 @@ class RectBeamSection(Section):
         return pt
 
     def Vu(self, xu: float) -> Tuple[float, List[float]]:
-        print("\nstart::RectBeamSection.Vu(xu)", xu)
+        # print("\nstart::RectBeamSection.Vu(xu)", xu)
         pt = self.pt(xu)
-        print("stop::RectBeamSection.Vu(xu)\n")
+        # print("stop::RectBeamSection.Vu(xu)\n")
         tauc = self.conc.tauc(pt)
         d = self.eff_d(xu)
         vuc = tauc * self.b * d
         vus = self.shear_steel.Vus(d)
-        print("===", vuc, vus)
+        # print("===", vuc, vus)
         return vuc, vus
-
-    # def sv(
-    #     self, xu: float, Vu: float, nlegs: int, bar_dia: int, mof: float = 25
-    # ) -> float:
-    #     self.shear_steel.nlegs = nlegs
-    #     self.shear_steel.bar_dia = bar_dia
-
-    #     pt = self.pt(xu)
-    #     d = self.eff_d(xu)
-    #     tauc = self.conc.tauc(pt)
-    #     Vuc = tauc * self.b * d
-
-    #     Vus = Vu - Vuc
-    #     self._sv = self.shear_steel.rebar.fd * self.shear_steel._Asv * d / Vus
-    #     self._sv = floor(self._sv, mof)
-    #     return self._sv
 
 
 """Class to repersent flanged section"""
 
 
-@dataclass
 class FlangedBeamSection(RectBeamSection):
     def __init__(
         self,
@@ -316,7 +309,7 @@ class FlangedBeamSection(RectBeamSection):
     def bw(self, _bw) -> None:
         self.b = _bw
 
-    def Cw(self, xu: float, ecu: float) -> Tuple[float, float]:
+    def Cw(self, xu: float, ecmax: float) -> Tuple[float, float]:
         area = self.conc.area(0, 1, self.conc.fd)
         moment = self.conc.moment(0, 1, self.conc.fd)
         # if area and moment:
@@ -338,12 +331,12 @@ class FlangedBeamSection(RectBeamSection):
         # else:
         #     return None, None
 
-    def C(self, xu: float, ecu: float) -> Tuple[float, float]:
+    def C(self, xu: float, ecmax: float) -> Tuple[float, float]:
         # Compression force and moment due to concrete of web
-        C1, M1 = self.Cw(xu, ecu)
+        C1, M1 = self.Cw(xu, ecmax)
         # Compression force and moment due to compression reinforcement bars
         if self.has_compr_steel(xu):
-            C2, M2 = self.long_steel.force_compression(xu, self.conc, ecu)
+            C2, M2 = self.long_steel.force_compression(xu, self.conc, ecmax)
         else:
             C2 = M2 = 0.0
 
@@ -355,10 +348,10 @@ class FlangedBeamSection(RectBeamSection):
         M = M1 + M2 + M3
         return C, M
 
-    def Mu(self, xu: float, ecu: float) -> float:
+    def Mu(self, xu: float, ecmax: float) -> float:
         d = self.eff_d(xu)
         # Based on compression force C, assuming the right amount of tension steel
-        C, M = self.C(xu, ecu)
+        C, M = self.C(xu, ecmax)
         Mu = M + C * (d - xu)
         return Mu
 
@@ -368,33 +361,33 @@ class FlangedBeamSection(RectBeamSection):
         s += f"{self.long_steel.layers[0]}\n"
         return s
 
-    def C_T(self, x: float, ecu: float) -> float:
-        C, _ = self.C(x, ecu)
-        T, _ = self.T(x, ecu)
+    def C_T(self, x: float, ecmax: float) -> float:
+        C, _ = self.C(x, ecmax)
+        T, _ = self.T(x, ecmax)
         # if C and T:
         return C - T
         # else:
         #     return None
 
-    def xu(self, ecu: float) -> float:
-        # x1, x2 = rootsearch(self.C_T, self.t_steel.layers[0].dc, self.D, 10, ecu)
-        x1, x2 = rootsearch(self.C_T, 10, self.D, 10, ecu)
-        x = brentq(self.C_T, x1, x2, args=(ecu,))
+    def xu(self, ecmax: float) -> float:
+        # x1, x2 = rootsearch(self.C_T, self.t_steel.layers[0].dc, self.D, 10, ecmax)
+        x1, x2 = rootsearch(self.C_T, 10, self.D, 10, ecmax)
+        x = brentq(self.C_T, x1, x2, args=(ecmax,))
         return x
 
-    def analyse(self, ecu: float) -> Tuple[float, float]:
-        xu = self.xu(ecu)
-        Mu = self.Mu(xu, ecu)
+    def analyse(self, ecmax: float) -> Tuple[float, float]:
+        xu = self.xu(ecmax)
+        Mu = self.Mu(xu, ecmax)
         return xu, Mu
 
-    def report(self, xu: float, ecu: float) -> str:  # pragma: no cover
+    def report(self, xu: float, ecmax: float) -> str:  # pragma: no cover
         s = f"Flanged Beam Section {self.b} x {self.D}, bf = {self.bf}, Df = {self.Df}, (xu = {xu:.2f})\n"
         s += f"Concrete: {self.conc.fck}, Tension Steel: {self.long_steel.rebar.fy}"
         s += f", Compression Steel: {self.long_steel.rebar.fy}"
         s += "\nUnits: Distance in mm, Area in mm^2, Force in kN, Moment about NA in kNm\n"
         s += "Flexure Capacity\n"
         # Web of beam
-        Cw, Mw = self.Cw(xu, ecu)
+        Cw, Mw = self.Cw(xu, ecmax)
         # Flange of beam
         Cf, Mf = self.Cf(xu)
         Fcc = Cw + Cf
@@ -420,7 +413,7 @@ class FlangedBeamSection(RectBeamSection):
             if L._xc < xu:
                 # Compression steel
                 x = xu - L._xc
-                esc = ecu / xu * x
+                esc = ecmax / xu * x
                 fsc = self.long_steel.rebar.fs(esc)
                 fcc = self.conc.fc(x / xu, self.conc.fd)
                 _Fsc = L.area * (fsc - fcc)
@@ -431,7 +424,7 @@ class FlangedBeamSection(RectBeamSection):
             else:
                 # Tension steel
                 x = L._xc - xu
-                est = ecu / xu * x
+                est = ecmax / xu * x
                 fst = self.long_steel.rebar.fs(est)
                 _Fst = L.area * fst
                 _Mst = _Fst * x

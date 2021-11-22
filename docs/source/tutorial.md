@@ -44,7 +44,7 @@ from rcdesign.is456.section import RectBeamSection
 
 # Create the materials
 # Concrete
-csb = ConcreteStressBlock('IS456 LSM', 0.002, 0.0035)
+csb = ConcreteStressBlock('IS456 LSM')
 m20 = Concrete('M20', 20, csb)
 # Reinforcement
 fe415 = RebarHYSD('Fe 415', 415)
@@ -111,7 +111,7 @@ from rcdesign.is456.section import RectBeamSection
 # Doubly reinforced rectangular section
 # Create the materials
 # Concrete
-csb = ConcreteStressBlock('IS456 LSM', 0.002, 0.0035)
+csb = ConcreteStressBlock('IS456 LSM')
 m20 = Concrete('M20', 20, csb)
 # Reinforcement
 fe415 = RebarHYSD('Fe 415', 415)
@@ -181,7 +181,7 @@ from rcdesign.is456.section import FlangedBeamSection
 # Singly reinforced flanged section
 # Create the materials
 # Concrete
-csb = ConcreteStressBlock('IS456 LSM', 0.002, 0.0035)
+csb = ConcreteStressBlock('IS456 LSM')
 m20 = Concrete('M20', 20, csb)
 # Reinforcement
 fe415 = RebarHYSD('Fe 415', 415)

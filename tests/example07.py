@@ -10,7 +10,7 @@ from rcdesign.is456.material.rebar import (
 )
 from rcdesign.is456.section import FlangedBeamSection
 
-csb = ConcreteStressBlock("IS456 LSM", 0.002, 0.0035)
+csb = ConcreteStressBlock("IS456 LSM")
 m25 = Concrete("M25", 25, csb)
 fe415 = RebarHYSD("Fe 415", 415)
 t1 = RebarLayer([20, 20, 20], -35)

@@ -137,12 +137,12 @@ class RebarHYSD(Rebar):
 """Layer of reinforcement bars"""
 
 
-@dataclass
 class RebarLayer:
-    dia: List[int]  # List of bar diameters, left to right, all of same type
-    _dc: float  # Distance of centre of layer from edge of section
-    _xc: float = 0.0  # Distance from compression edge
-    stress_type: str = ""  # Type of stress, C (compression) or T (tension)
+    def __init__(self, dia: List[int], _dc: float):
+        self.dia = dia
+        self._dc = _dc
+        self._xc = _dc
+        self.stress_type = ""
 
     def max_dia(self) -> int:
         return max(self.dia)
@@ -191,15 +191,15 @@ class RebarLayer:
         s += f"{b} at {self.dc}. Area: {self.area:.2f} (xc = {self._xc:.2f})"
         return s
 
-    def fs(self, xu: float, rebar: Rebar, ecu: float) -> float:
-        es = ecu / xu * self.x(xu)
+    def fs(self, xu: float, rebar: Rebar, ecmax: float) -> float:
+        es = ecmax / xu * self.x(xu)
         return rebar.fs(es)
 
     def force_tension(
-        self, xu: float, rebar: Rebar, ecu: float
+        self, xu: float, rebar: Rebar, ecmax: float
     ) -> Tuple[float, float, Dict]:
         x = self.x(xu)
-        es = ecu / xu * x
+        es = ecmax / xu * x
         fs = rebar.fs(es)
 
         _f = self.area * fs
@@ -208,10 +208,10 @@ class RebarLayer:
         return _f, _m, result
 
     def force_compression(
-        self, xu: float, conc: Concrete, rebar: Rebar, ecu: float
+        self, xu: float, conc: Concrete, rebar: Rebar, ecmax: float
     ) -> Tuple[float, float, Dict]:
         x = xu - self._xc
-        esc = ecu / xu * x
+        esc = ecmax / xu * x
         fsc = rebar.fs(esc)  # Stress in compression steel
         fcc = conc.fc(x / xu, conc.fd)  # Stress in concrete
         _f = self.area * (fsc - fcc)
@@ -250,14 +250,17 @@ class RebarLayer:
     def __ge__(self, b) -> bool:
         return self._xc >= b._xc
 
+    def report(self):
+        pass
+
 
 """Group of reinforcement bars"""
 
 
-@dataclass
 class RebarGroup:
-    rebar: Rebar  # Rebar object
-    layers: List[RebarLayer]  # List of layers of bars, in any order from edge
+    def __init__(self, rebar: Rebar, layers: List[RebarLayer]):
+        self.rebar = rebar  # Rebar object
+        self.layers = layers  # List of layers of bars, in any order from edge
 
     @property
     def area(self) -> float:
@@ -313,39 +316,39 @@ class RebarGroup:
             L.calc_stress_type(xu)
 
     def force_moment(
-        self, xu: float, conc: Concrete, ecu: float
+        self, xu: float, conc: Concrete, ecmax: float
     ) -> Tuple[float, float, float, float]:
         fc = ft = mc = mt = 0.0
         for L in self.layers:
             if L._xc < xu:  # in compression
-                _fc, _mc, _ = L.force_compression(xu, conc, self.rebar, ecu)
+                _fc, _mc, _ = L.force_compression(xu, conc, self.rebar, ecmax)
                 fc += _fc
                 mc += _mc
             else:
                 # x = L._xc - xu
-                _ft, _mt, _ = L.force_tension(xu, self.rebar, ecu)
+                _ft, _mt, _ = L.force_tension(xu, self.rebar, ecmax)
                 _ft = abs(_ft)
                 ft += _ft
                 mt += _mt
         return fc, mc, ft, mt
 
-    def force_tension(self, xu: float, ecu: float) -> Tuple[float, float]:
+    def force_tension(self, xu: float, ecmax: float) -> Tuple[float, float]:
         f = m = 0.0
         for L in self.layers:
             if L._xc > xu:
                 # D_xu = L._xc - xu
-                _f, _m, _ = L.force_tension(xu, self.rebar, ecu)
+                _f, _m, _ = L.force_tension(xu, self.rebar, ecmax)
                 f += _f
                 m += _m
         return f, m
 
     def force_compression(
-        self, xu: float, conc: Concrete, ecu: float
+        self, xu: float, conc: Concrete, ecmax: float
     ) -> Tuple[float, float]:
         _f = _m = 0.0
         for L in self.layers:
             if L._xc < xu:
-                __f, __m, _ = L.force_compression(xu, conc, self.rebar, ecu)
+                __f, __m, _ = L.force_compression(xu, conc, self.rebar, ecmax)
                 _f += __f
                 _m += __m
         return _f, _m
@@ -376,6 +379,14 @@ class RebarGroup:
         for L in self.layers:
             s += f"{L.dc:10.2f}{L._xc:10.2f}{L.bar_list():>12}{L.area:10.2f}\n"
         s += f"{' ':20}{'-'*22}\n{' ':20}{'Total':>12}{self.area:10.2f}"
+        return s
+
+    def report(self) -> str:
+        s = ""
+        for L in sorted(self.layers):
+            s += f"{L._dc:10.2f}{L._xc:10.2f}{L.bar_list():>12}{L.area:10.2f}\n"
+        s += " " * 32 + "-" * 10 + "\n"
+        s += f"{self.area:40.2f}\n"
         return s
 
 
@@ -521,7 +532,6 @@ class BentupBars(ShearReinforcement):
             return ShearRebarType.SHEAR_REBAR_BENTUP_SERIES
 
 
-@dataclass
 class ShearRebarGroup:
     def __init__(self, shear_reinforcement: List[ShearReinforcement]):
         self.shear_reinforcement = shear_reinforcement

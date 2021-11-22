@@ -6,7 +6,7 @@ from dataclasses import dataclass
 import numpy as np
 from sympy import symbols, integrate, nsimplify  # type: ignore
 
-
+from rcdesign import ecy, ecu
 from rcdesign.exceptions import RCDException
 
 
@@ -17,6 +17,17 @@ class StressBlockError(RCDException):
 
     def __str__(self):
         return f"StressBlockError: Stress block distances ({self.x1}, {self.x2}) must be within 0 to 1"
+
+
+class MaximumStrainError(RCDException):
+    def __init__(self, ecmax: float, ecu: float):
+        self.ecmax = ecmax
+        self.ecmax = ecu
+
+    def __str__(self):
+        return "MaximumStrainError: Maximum strain exceeds permitted ultimate strain {}".format(
+            self.ecmax
+        )
 
 
 # Generalized Stress Block
@@ -38,12 +49,13 @@ class StressBlock(ABC):  # pragma: no cover
 
 
 # Concrete Stress Block for flexure as per IS456:2000 Limit State Method
-@dataclass
+
+
 class ConcreteStressBlock(StressBlock):
     z = symbols("z")
     expr = 2 * z - z ** 2
 
-    def __init__(self, label, ecy: float, ecu: float):
+    def __init__(self, label):
         super().__init__(label)
         self.ecy = ecy
         self.ecu = ecu
@@ -56,6 +68,8 @@ class ConcreteStressBlock(StressBlock):
         raise StressBlockError(x1, x2)
 
     def stress(self, x: float, ecmax: float = 0.0035) -> float:
+        if ecmax > self.ecu:
+            raise MaximumStrainError(ecmax, self.ecu)
         k = self.ecy / ecmax
 
         if x <= k:
@@ -103,13 +117,20 @@ class ConcreteStressBlock(StressBlock):
 """Concrete class with stress-strain properties as defined in IS456:2000"""
 
 
-@dataclass
 class Concrete:
-    label: str
-    fck: float
-    stress_block: ConcreteStressBlock
-    gamma_m: float = 1.5
-    density: float = 25.0
+    def __init__(
+        self,
+        label: str,
+        fck: float,
+        stress_block: ConcreteStressBlock,
+        gamma_m: float = 1.5,
+        density: float = 25.0,
+    ):
+        self.label = label
+        self.fck = fck
+        self.stress_block = stress_block
+        self.gamma_m = gamma_m
+        self.density = density
 
     @property
     def Ec(self) -> float:

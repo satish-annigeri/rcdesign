@@ -15,7 +15,7 @@ from rcdesign.utils import floor, rootsearch
 
 
 fe415 = RebarHYSD("Fe 415", 415)
-csb = ConcreteStressBlock("IS456 LSM", 0.002, 0.0035)
+csb = ConcreteStressBlock("IS456 LSM")
 m20 = Concrete("M20", 20, csb)
 c1 = RebarLayer([16, 16], 35)
 t1 = RebarLayer([16, 16, 16], -35)
@@ -141,7 +141,7 @@ class TestRectBeamSection:
 
     def test_rectbeam12(self):
         fe415 = RebarHYSD("Fe 415", 415)
-        csb = ConcreteStressBlock("IS456 LSM", 0.002, 0.0035)
+        csb = ConcreteStressBlock("IS456 LSM")
         m20 = Concrete("M20", 20, csb)
         c1 = RebarLayer([16, 16], 35)
         t1 = RebarLayer([16, 16, 16], -35)
@@ -169,7 +169,7 @@ class TestRectBeamSection:
 
     def test_rectbeam13(self):
         fe415 = RebarHYSD("Fe 415", 415)
-        csb = ConcreteStressBlock("IS456 LSM", 0.002, 0.0035)
+        csb = ConcreteStressBlock("IS456 LSM")
         m20 = Concrete("M20", 20, csb)
         c1 = RebarLayer([16, 16], 35)
         t1 = RebarLayer([16, 16, 16], -35)
@@ -204,7 +204,7 @@ class TestRectBeamSection:
 
     def test_rectbeam13a(self):
         fe415 = RebarHYSD("Fe 415", 415)
-        csb = ConcreteStressBlock("IS456 LSM", 0.002, 0.0035)
+        csb = ConcreteStressBlock("IS456 LSM")
         m20 = Concrete("M20", 20, csb)
         c1 = RebarLayer([16, 16], 35)
         t1 = RebarLayer([16, 16, 16], -35)
