@@ -195,5 +195,5 @@ class Concrete:
 
     def __repr__(self) -> str:
         s = f"Stress Block {self.stress_block.label} - {self.label}: "
-        s += f"{self.fck} {self.fd:.2f} {self.density}"
+        s += f"fck = {self.fck:.2f} N/mm^2, fd = {self.fd:.2f} N/mm^2"
         return s

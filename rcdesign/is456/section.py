@@ -145,15 +145,15 @@ class RectBeamSection(Section):
     def __repr__(self) -> str:
         ecmax = self.conc.stress_block.ecu
         xu = self.xu(ecmax)
-        s = f"Size: {self.b} x {self.D}\n"
+        s = f"Rectangular Beam Section: {self.b} x {self.D}\n"
+        s += f"Equilibrium NA = {xu:.2f}\n"
         s += f"Concrete: {self.conc}\n"
         s += f"Longitudinal Bars: {self.long_steel}"
         s += f"{self.shear_steel}\n"
-        s += f"Equilibrium NA = {xu:.2f}\n"
-        s += f"{'Mu = ':>17}{self.Mu(xu, ecmax)/1e6:.2f} kN\n"
+        s += f"{'Mu = ':>5}{self.Mu(xu, ecmax)/1e6:.2f} kNm\n"
         vuc, vus = self.Vu(xu)
         vu = vuc + sum(vus)
-        s += f"{'Vu = ':>17}{vu/1e3:.2f} kN\n"
+        s += f"{'Vu = ':>5}{vu/1e3:.2f} kN\n"
         return s
 
     def has_compr_steel(self, xu: float) -> bool:
@@ -165,7 +165,7 @@ class RectBeamSection(Section):
     def report(self, xu: float, ecmax: float) -> Optional[str]:  # pragma: no cover
         self.adjust_x(xu)
         result = {
-            "header": f"Rectangular Beam {self.b}x{self.D}\nDepth of neutral axis={xu}, Effective depth={self.eff_d(xu)}",
+            "header": f"Rectangular Beam Section {self.b}x{self.D}\nDepth of neutral axis={xu}, Effective depth={self.eff_d(xu)}",
             "concrete": f"Concrete: {self.conc.fck}",
             "long_steel": f"Main steel: {self.long_steel.rebar.fy}",
             "shear_steel": f"Shear steel: {self.shear_steel.shear_reinforcement[0].rebar.fy}",
@@ -361,15 +361,15 @@ class FlangedBeamSection(RectBeamSection):
         ecmax = self.conc.stress_block.ecu
         xu = self.xu(ecmax)
         self.long_steel.calc_stress_type(xu)
-        s = f"Flanged Beam Section {self.bw}x{self.D} {self.bf}x{self.Df}\n"
+        s = f"Flanged Beam Section - Web: {self.bw}x{self.D}, Flange: {self.bf}x{self.Df}\n"
+        s += f"Equilibrium NA = {xu:.2f}\n"
         s += f"Concrete: {self.conc}\n"
         s += f"Longitudinal Bars: {self.long_steel}"
         s += f"{self.shear_steel}\n"
-        s += f"Equilibrium NA = {xu:.2f}\n"
-        s += f"{'Mu = ':>17}{self.Mu(xu, ecmax)/1e6:.2f} kN\n"
+        s += f"{'Mu = ':>5}{self.Mu(xu, ecmax)/1e6:.2f} kNm\n"
         vuc, vus = self.Vu(xu)
         vu = vuc + sum(vus)
-        s += f"{'Vu = ':>17}{vu/1e3:.2f} kN\n"
+        s += f"{'Vu = ':>5}{vu/1e3:.2f} kN\n"
         return s
 
     def C_T(self, x: float, ecmax: float) -> float:

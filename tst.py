@@ -21,6 +21,16 @@ rsec = RectBeamSection(
 )
 print(rsec)
 print()
+print(
+    rsec.long_steel.report(
+        100,
+        Concrete("M20", 20, ConcreteStressBlock("IS456 LSM")),
+        RebarHYSD("Fe 415", 415),
+        0.0035,
+    )
+)
+print()
+
 tsec = FlangedBeamSection(
     230,
     450,

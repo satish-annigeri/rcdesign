@@ -219,6 +219,36 @@ class RebarLayer:
         result = {"x": x, "esc": esc, "f_sc": fsc, "f_cc": fcc, "C": _f, "M": _m}
         return _f, _m, result
 
+    def report(
+        self, xu: float, conc: Concrete, rebar: Rebar, ecmax: float
+    ) -> Dict[str, float]:  # pragma: no cover
+        x = self.x(xu)
+        # print("***", xu, self._xc, x)
+
+        if x >= 0:  # Compression
+            esc = ecmax / xu * x
+            fsc = rebar.fs(esc)
+            fcc = conc.fc(x / xu, conc.fd)
+            _f = self.area * (fsc - fcc)
+            _m = _f * x
+            d = {
+                "type": "C",
+                "x": x,
+                "es": esc,
+                "fs": fsc,
+                "fc": fcc,
+                "F": _f,
+                "M": _m,
+            }
+        else:  # Tension
+            est = ecmax / xu * abs(x)
+            fst = rebar.fs(est)
+
+            _f = self.area * fst
+            _m = _f * abs(x)
+            d = {"type": "T", "x": x, "es": est, "fs": fst, "fc": 0, "F": _f, "M": _m}
+        return d
+
     def bar_list(self, sep=";") -> str:
         d: Dict = dict()
         for bar_dia in self.dia:
@@ -249,9 +279,6 @@ class RebarLayer:
 
     def __ge__(self, b) -> bool:
         return self._xc >= b._xc
-
-    def report(self):
-        pass
 
 
 """Group of reinforcement bars"""
@@ -382,13 +409,13 @@ class RebarGroup:
         s += f"{self.area:42.2f}\n"
         return s
 
-    def report(self) -> str:
-        s = f"{'dc':>10}{'xc':>10}{'Bars':>12}{'Area':>10}\n"
+    def report(
+        self, xu: float, conc: Concrete, rebar: Rebar, ecmax: float
+    ) -> List[Dict[str, float]]:  # pragma: no cover
+        result = []
         for L in sorted(self.layers):
-            s += f"{L._dc:10.2f}{L._xc:10.2f}{L.bar_list():>12}{L.area:10.2f}\n"
-        s += " " * 32 + "-" * 10 + "\n"
-        s += f"{self.area:42.2f}\n"
-        return s
+            result.append(L.report(xu, conc, rebar, ecmax))
+        return result
 
 
 """Shear reinforcement"""
