@@ -374,19 +374,20 @@ class RebarGroup:
 
     def __repr__(self) -> str:
         sl = "layers" if len(self.layers) > 1 else "layer"
-        s = f"Rebar Group {self.rebar.label} in {len(self.layers)} {sl}\n"
+        s = f"{self.rebar.label} in {len(self.layers)} {sl}\n"
         s += f"{'dc':>10}{'xc':>10}{'Bars':>12}{'Area':>10}\n"
-        for L in self.layers:
-            s += f"{L.dc:10.2f}{L._xc:10.2f}{L.bar_list():>12}{L.area:10.2f}\n"
-        s += f"{' ':20}{'-'*22}\n{' ':20}{'Total':>12}{self.area:10.2f}"
+        for L in sorted(self.layers):
+            s += f"{L._dc:10.2f}{L._xc:10.2f}{L.bar_list():>12}{L.area:10.2f}{L.stress_type.capitalize():>15}\n"
+        s += " " * 32 + "-" * 10 + "\n"
+        s += f"{self.area:42.2f}\n"
         return s
 
     def report(self) -> str:
-        s = ""
+        s = f"{'dc':>10}{'xc':>10}{'Bars':>12}{'Area':>10}\n"
         for L in sorted(self.layers):
             s += f"{L._dc:10.2f}{L._xc:10.2f}{L.bar_list():>12}{L.area:10.2f}\n"
         s += " " * 32 + "-" * 10 + "\n"
-        s += f"{self.area:40.2f}\n"
+        s += f"{self.area:42.2f}\n"
         return s
 
 
@@ -474,7 +475,7 @@ class Stirrups(ShearReinforcement):
 
     def __repr__(self) -> str:
         sh_rein = "Vertical" if self._alpha_deg == 90 else "Inclined"
-        s = f"Shear reinforcement: {sh_rein} Stirrups "
+        s = f"{sh_rein} Stirrups: {self.rebar.label} "
         s += f"{self._nlegs}-{self._bar_dia} @ {self._sv} c/c"
         if self._alpha_deg != 90:
             s += " inclined at {self._alpha_deg} degrees"
@@ -565,3 +566,9 @@ class ShearRebarGroup:
             elif reinf.get_type() == ShearRebarType.SHEAR_REBAR_BENTUP_SERIES:
                 d[ShearRebarType.SHEAR_REBAR_BENTUP_SERIES] += 1
         return d
+
+    def __repr__(self):
+        s = ""
+        for sh_reinf in self.shear_reinforcement:
+            s += f"{sh_reinf}"
+        return s

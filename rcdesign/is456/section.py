@@ -143,15 +143,17 @@ class RectBeamSection(Section):
         return self.conc.tauc(self.pt(xu))
 
     def __repr__(self) -> str:
-        s = f"Size: {self.b} x {self.D}\n"
-        s += self.long_steel.report()
         ecmax = self.conc.stress_block.ecu
         xu = self.xu(ecmax)
-        s += f"Equilibrium NA {xu:10.2f}\n"
-        s += f"Mu = {self.Mu(xu, ecmax)/1e6:.2f} kN\n"
+        s = f"Size: {self.b} x {self.D}\n"
+        s += f"Concrete: {self.conc}\n"
+        s += f"Longitudinal Bars: {self.long_steel}"
+        s += f"{self.shear_steel}\n"
+        s += f"Equilibrium NA = {xu:.2f}\n"
+        s += f"{'Mu = ':>17}{self.Mu(xu, ecmax)/1e6:.2f} kN\n"
         vuc, vus = self.Vu(xu)
         vu = vuc + sum(vus)
-        s += f"Vu = {vu/1e3:.2f} kN\n"
+        s += f"{'Vu = ':>17}{vu/1e3:.2f} kN\n"
         return s
 
     def has_compr_steel(self, xu: float) -> bool:
@@ -356,9 +358,18 @@ class FlangedBeamSection(RectBeamSection):
         return Mu
 
     def __repr__(self) -> str:
+        ecmax = self.conc.stress_block.ecu
+        xu = self.xu(ecmax)
+        self.long_steel.calc_stress_type(xu)
         s = f"Flanged Beam Section {self.bw}x{self.D} {self.bf}x{self.Df}\n"
-        s += self.conc.__repr__() + "\n"
-        s += f"{self.long_steel.layers[0]}\n"
+        s += f"Concrete: {self.conc}\n"
+        s += f"Longitudinal Bars: {self.long_steel}"
+        s += f"{self.shear_steel}\n"
+        s += f"Equilibrium NA = {xu:.2f}\n"
+        s += f"{'Mu = ':>17}{self.Mu(xu, ecmax)/1e6:.2f} kN\n"
+        vuc, vus = self.Vu(xu)
+        vu = vuc + sum(vus)
+        s += f"{'Vu = ':>17}{vu/1e3:.2f} kN\n"
         return s
 
     def C_T(self, x: float, ecmax: float) -> float:

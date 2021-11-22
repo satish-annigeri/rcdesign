@@ -16,7 +16,7 @@ from rcdesign.is456.material.rebar import (
 from rcdesign.is456.section import RectBeamSection
 
 
-sb = ConcreteStressBlock("IS456 LSM", 0.002, 0.0035)
+sb = ConcreteStressBlock("IS456 LSM")
 m20 = Concrete("M20", 20, sb)
 fe415 = RebarHYSD("Fe 415", 415)
 
