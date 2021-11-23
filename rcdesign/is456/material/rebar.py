@@ -221,7 +221,7 @@ class RebarLayer:
 
     def report(
         self, xu: float, conc: Concrete, rebar: Rebar, ecmax: float
-    ) -> Dict[str, float]:  # pragma: no cover
+    ) -> Dict[str, Union[float, str, int]]:  # pragma: no cover
         x = self.x(xu)
         # print("***", xu, self._xc, x)
 
@@ -233,6 +233,10 @@ class RebarLayer:
             _m = _f * x
             d = {
                 "type": "C",
+                "dc": self._dc,
+                "xc": self._xc,
+                "bars": self.bar_list(),
+                "area": self.area,
                 "x": x,
                 "es": esc,
                 "fs": fsc,
@@ -246,7 +250,19 @@ class RebarLayer:
 
             _f = self.area * fst
             _m = _f * abs(x)
-            d = {"type": "T", "x": x, "es": est, "fs": fst, "fc": 0, "F": _f, "M": _m}
+            d = {
+                "type": "T",
+                "dc": self._dc,
+                "xc": self._xc,
+                "bars": self.bar_list(),
+                "area": self.area,
+                "x": x,
+                "es": est,
+                "fs": fst,
+                "fc": 0,
+                "F": _f,
+                "M": _m,
+            }
         return d
 
     def bar_list(self, sep=";") -> str:
@@ -411,7 +427,7 @@ class RebarGroup:
 
     def report(
         self, xu: float, conc: Concrete, rebar: Rebar, ecmax: float
-    ) -> List[Dict[str, float]]:  # pragma: no cover
+    ) -> List[Dict[str, Union[str, int, float]]]:  # pragma: no cover
         result = []
         for L in sorted(self.layers):
             result.append(L.report(xu, conc, rebar, ecmax))

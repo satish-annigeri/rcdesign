@@ -145,10 +145,31 @@ class RectBeamSection(Section):
     def __repr__(self) -> str:
         ecmax = self.conc.stress_block.ecu
         xu = self.xu(ecmax)
+        d = self.long_steel.report(xu, self.conc, self.long_steel.rebar, ecmax)
         s = f"Rectangular Beam Section: {self.b} x {self.D}\n"
         s += f"Equilibrium NA = {xu:.2f}\n"
         s += f"Concrete: {self.conc}\n"
-        s += f"Longitudinal Bars: {self.long_steel}"
+        Fc = self.b * self.conc.area(0, 1, self.conc.fd) * xu / 1e3
+        Mc = self.conc.moment(0, 1, self.conc.fd) * self.b * xu ** 2 / 1e6
+        s += f"{'Concrete in compression':<42}{'C':>4}{xu:10.2f}{ecmax:12.4e}{' ':>10}"
+        s += f"{self.conc.fd:10.2f}{Fc:10.2f}{Mc:10.2f}\n"
+        Ft = 0.0
+        Mt = 0.0
+        for L in d:
+            s += f"{L['dc']:10}{L['xc']:10}{L['bars']:>12}{L['area']:10.2f}{L['type']:>4}"
+            s += f"{abs(float(L['x'])):10.2f}{L['es']:12.4e}{L['fs']:10.2f}"
+            if L["type"] == "C":
+                s += f"{L['fc']:10.2f}"
+                Fc += float(L["F"]) / 1e3
+                Mc += float(L["M"]) / 1e6
+            else:
+                s += f"{' ':>10}"
+                Ft += float(L["F"]) / 1e3
+                Mt += float(L["M"]) / 1e6
+            F = float(L["F"]) / 1e3
+            M = float(L["M"]) / 1e6
+            s += f"{F:10.2f}{M:10.2f}\n"
+        s += f"C = {Fc:.2f} T = {Ft:.2f} C - T = {Fc - Ft:.4e} Mu = {(Mc + Mt):.2f}\n"
         s += f"{self.shear_steel}\n"
         s += f"{'Mu = ':>5}{self.Mu(xu, ecmax)/1e6:.2f} kNm\n"
         vuc, vus = self.Vu(xu)
@@ -162,94 +183,94 @@ class RectBeamSection(Section):
                 return True
         return False
 
-    def report(self, xu: float, ecmax: float) -> Optional[str]:  # pragma: no cover
-        self.adjust_x(xu)
-        result = {
-            "header": f"Rectangular Beam Section {self.b}x{self.D}\nDepth of neutral axis={xu}, Effective depth={self.eff_d(xu)}",
-            "concrete": f"Concrete: {self.conc.fck}",
-            "long_steel": f"Main steel: {self.long_steel.rebar.fy}",
-            "shear_steel": f"Shear steel: {self.shear_steel.shear_reinforcement[0].rebar.fy}",
-        }
-        s = f"Rectangular Beam Section {self.b} x {self.D}  (xu = {xu:.2f})\n"
-        s += f"Concrete: {self.conc.fck}, Tension Steel: {self.long_steel.rebar.fy:.2f}"
-        if self.has_compr_steel(xu):
-            s += f", Compression Steel: {self.long_steel.rebar.fy:.2f}\n"
-        else:
-            s += "\n"
-        s += "Units: Distance in mm, Area in mm^2\n"
-        s += "Flexure Capacity\n"
-        area = self.conc.area(0, 1, self.conc.fd)
-        moment = self.conc.moment(0, 1, self.conc.fd)
-        # if not area or not moment:
-        #     return None
-        Fcc = area * xu * self.b
-        Mcc = moment * xu ** 2 * self.b
-        s += "Concrete in Compression\n"
-        s += f"{' ':60}{'C (kN)':>8}{'M (kNm)':>8}\n{' ':60}{Fcc/1e3:8.2f}{Mcc/1e6:8.2f}\n"
+    # def report(self, xu: float, ecmax: float) -> Optional[str]:  # pragma: no cover
+    #     self.adjust_x(xu)
+    #     result = {
+    #         "header": f"Rectangular Beam Section {self.b}x{self.D}\nDepth of neutral axis={xu}, Effective depth={self.eff_d(xu)}",
+    #         "concrete": f"Concrete: {self.conc.fck}",
+    #         "long_steel": f"Main steel: {self.long_steel.rebar.fy}",
+    #         "shear_steel": f"Shear steel: {self.shear_steel.shear_reinforcement[0].rebar.fy}",
+    #     }
+    #     s = f"Rectangular Beam Section {self.b} x {self.D}  (xu = {xu:.2f})\n"
+    #     s += f"Concrete: {self.conc.fck}, Tension Steel: {self.long_steel.rebar.fy:.2f}"
+    #     if self.has_compr_steel(xu):
+    #         s += f", Compression Steel: {self.long_steel.rebar.fy:.2f}\n"
+    #     else:
+    #         s += "\n"
+    #     s += "Units: Distance in mm, Area in mm^2\n"
+    #     s += "Flexure Capacity\n"
+    #     area = self.conc.area(0, 1, self.conc.fd)
+    #     moment = self.conc.moment(0, 1, self.conc.fd)
+    #     # if not area or not moment:
+    #     #     return None
+    #     Fcc = area * xu * self.b
+    #     Mcc = moment * xu ** 2 * self.b
+    #     s += "Concrete in Compression\n"
+    #     s += f"{' ':60}{'C (kN)':>8}{'M (kNm)':>8}\n{' ':60}{Fcc/1e3:8.2f}{Mcc/1e6:8.2f}\n"
 
-        # Compression steel
-        if self.has_compr_steel(xu):
-            sc = "Compression Steel\n"
-            sc += f"{'dc':>8}{'Bars':>12}{'Area':>8}{'x':>8}{'Strain':>12}{'f_sc':>8}"
-            sc += f"{'f_cc':>8}{'C (kN)':>8}{'M (kNm)':>8}\n"
-        else:
-            sc = ""
-        st = "Tension Steel\n"
-        st += (
-            f"{'dc':>8}{'Bars':>12}{'Area':>8}{'x':>8}{'Strain':>12}{'f_st':>8}{' ':8}"
-        )
-        st += f"{'T (kN)':>8}{'M (kNm)':>8}\n"
-        Fsc = Msc = 0.0
-        Fst = Mst = 0.0
-        for L in self.long_steel.layers:
-            if L._xc < xu:  # Layer of compression steel
-                x = xu - L._xc
-                esc = ecmax / xu * x
-                fsc = self.long_steel.rebar.fs(esc)
-                fcc = self.conc.fc(x / xu, self.conc.fd)
-                _Fsc = L.area * (fsc - fcc)
-                _Msc = _Fsc * x
-                Fsc += _Fsc
-                Msc += _Msc
-                sc += f"{L.dc:8.1f}{L.bar_list():>12}{L.area:8.2f}{x:8.2f}{esc:12.4e}"
-                sc += f"{fsc:8.2f}{fcc:8.2f}{_Fsc/1e3:8.2f}{_Msc/1e6:8.2f}\n"
-            else:
-                x = L._xc - xu
-                est = ecmax / xu * x
-                fst = self.long_steel.rebar.fs(est)
-                _Fst = L.area * fst
-                _Mst = _Fst * x
-                Fst += _Fst
-                Mst += _Mst
-                st += f"{L.dc:8.1f}{L.bar_list():>12}{L.area:8.2f}{x:8.2f}{est:12.4e}"
-                st += f"{fst:8.2f}{' ':8}{_Fst/1e3:8.2f}{_Mst/1e6:8.2f}\n"
-        Fc = Fcc + Fsc
-        Ft = Fst
-        Mc = Mcc + Msc
-        Mt = Mst
-        sc += f"{' ':16}{'-'*8}{' ':36}{'-'*16}\n"
-        sc += f"{' ':16}{self.long_steel.area_comp(xu):8.2f}{' ':36}{Fc/1e3:8.2f}{Mc/1e6:8.2f}\n"
-        st += f"{' ':16}{'-'*8}{' ':36}{'-'*16}\n"
-        st += f"{' ':16}{self.long_steel.area_tension(xu):8.2f}{' ':36}{Ft/1e3:8.2f}{Mt/1e6:8.2f}\n"
-        s += sc
-        s += st
-        s += f"{' ':60}{'='*16}\n"
-        F = Fc - Ft
-        M = Mc + Mt
-        if isclose(F, 0.0, abs_tol=1e-4):
-            s += f"{' ':60}{0.00:>8}"
-        else:
-            s += f"{' ':60}{(Fc - Ft)/1e3:8.2}"
-        s += f"{M/1e6:8.2f}\n"
-        # Shear reinforcement
-        s += "Shear Capacity\n"
-        # s += f"{self.shear_steel.__repr__()}\n"
-        # tauc, Vus, Vuc = self.Vu(xu)
-        # s += f"pst = {self.pt(xu):.2f}%, d = {self.eff_d(xu):.2f}, "
-        # s += f"tau_c (N/mm^2) = {tauc:.2f}\n"
-        # Vu = Vuc + Vus
-        # s += f"Vuc (kN) = {Vuc/1e3:.2f}, Vus = {Vus/1e3:.2f}, Vu (kN) = {Vu/1e3:.2f}"
-        return s
+    #     # Compression steel
+    #     if self.has_compr_steel(xu):
+    #         sc = "Compression Steel\n"
+    #         sc += f"{'dc':>8}{'Bars':>12}{'Area':>8}{'x':>8}{'Strain':>12}{'f_sc':>8}"
+    #         sc += f"{'f_cc':>8}{'C (kN)':>8}{'M (kNm)':>8}\n"
+    #     else:
+    #         sc = ""
+    #     st = "Tension Steel\n"
+    #     st += (
+    #         f"{'dc':>8}{'Bars':>12}{'Area':>8}{'x':>8}{'Strain':>12}{'f_st':>8}{' ':8}"
+    #     )
+    #     st += f"{'T (kN)':>8}{'M (kNm)':>8}\n"
+    #     Fsc = Msc = 0.0
+    #     Fst = Mst = 0.0
+    #     for L in self.long_steel.layers:
+    #         if L._xc < xu:  # Layer of compression steel
+    #             x = xu - L._xc
+    #             esc = ecmax / xu * x
+    #             fsc = self.long_steel.rebar.fs(esc)
+    #             fcc = self.conc.fc(x / xu, self.conc.fd)
+    #             _Fsc = L.area * (fsc - fcc)
+    #             _Msc = _Fsc * x
+    #             Fsc += _Fsc
+    #             Msc += _Msc
+    #             sc += f"{L.dc:8.1f}{L.bar_list():>12}{L.area:8.2f}{x:8.2f}{esc:12.4e}"
+    #             sc += f"{fsc:8.2f}{fcc:8.2f}{_Fsc/1e3:8.2f}{_Msc/1e6:8.2f}\n"
+    #         else:
+    #             x = L._xc - xu
+    #             est = ecmax / xu * x
+    #             fst = self.long_steel.rebar.fs(est)
+    #             _Fst = L.area * fst
+    #             _Mst = _Fst * x
+    #             Fst += _Fst
+    #             Mst += _Mst
+    #             st += f"{L.dc:8.1f}{L.bar_list():>12}{L.area:8.2f}{x:8.2f}{est:12.4e}"
+    #             st += f"{fst:8.2f}{' ':8}{_Fst/1e3:8.2f}{_Mst/1e6:8.2f}\n"
+    #     Fc = Fcc + Fsc
+    #     Ft = Fst
+    #     Mc = Mcc + Msc
+    #     Mt = Mst
+    #     sc += f"{' ':16}{'-'*8}{' ':36}{'-'*16}\n"
+    #     sc += f"{' ':16}{self.long_steel.area_comp(xu):8.2f}{' ':36}{Fc/1e3:8.2f}{Mc/1e6:8.2f}\n"
+    #     st += f"{' ':16}{'-'*8}{' ':36}{'-'*16}\n"
+    #     st += f"{' ':16}{self.long_steel.area_tension(xu):8.2f}{' ':36}{Ft/1e3:8.2f}{Mt/1e6:8.2f}\n"
+    #     s += sc
+    #     s += st
+    #     s += f"{' ':60}{'='*16}\n"
+    #     F = Fc - Ft
+    #     M = Mc + Mt
+    #     if isclose(F, 0.0, abs_tol=1e-4):
+    #         s += f"{' ':60}{0.00:>8}"
+    #     else:
+    #         s += f"{' ':60}{(Fc - Ft)/1e3:8.2}"
+    #     s += f"{M/1e6:8.2f}\n"
+    #     # Shear reinforcement
+    #     s += "Shear Capacity\n"
+    #     # s += f"{self.shear_steel.__repr__()}\n"
+    #     # tauc, Vus, Vuc = self.Vu(xu)
+    #     # s += f"pst = {self.pt(xu):.2f}%, d = {self.eff_d(xu):.2f}, "
+    #     # s += f"tau_c (N/mm^2) = {tauc:.2f}\n"
+    #     # Vu = Vuc + Vus
+    #     # s += f"Vuc (kN) = {Vuc/1e3:.2f}, Vus = {Vus/1e3:.2f}, Vu (kN) = {Vu/1e3:.2f}"
+    #     return s
 
     def eff_d(self, xu: float) -> float:
         a = 0.0
@@ -314,24 +335,20 @@ class FlangedBeamSection(RectBeamSection):
     def Cw(self, xu: float, ecmax: float) -> Tuple[float, float]:
         area = self.conc.area(0, 1, self.conc.fd)
         moment = self.conc.moment(0, 1, self.conc.fd)
-        # if area and moment:
+
         C = area * xu * self.bw
         M = moment * xu ** 2 * self.bw
         return C, M
-        # else:
-        #     return None, None
 
     def Cf(self, xu: float) -> Tuple[float, float]:
         df = xu if xu <= self.Df else self.Df
         x1 = xu - df
         area = self.conc.area(x1 / xu, 1, self.conc.fd)
         moment = self.conc.moment(x1 / xu, 1, self.conc.fd)
-        # if area and moment:
+
         C = area * xu * (self.bf - self.bw)
         M = moment * xu ** 2 * (self.bf - self.bw)
         return C, M
-        # else:
-        #     return None, None
 
     def C(self, xu: float, ecmax: float) -> Tuple[float, float]:
         # Compression force and moment due to concrete of web
@@ -360,11 +377,37 @@ class FlangedBeamSection(RectBeamSection):
     def __repr__(self) -> str:
         ecmax = self.conc.stress_block.ecu
         xu = self.xu(ecmax)
-        self.long_steel.calc_stress_type(xu)
-        s = f"Flanged Beam Section - Web: {self.bw}x{self.D}, Flange: {self.bf}x{self.Df}\n"
+        d = self.long_steel.report(xu, self.conc, self.long_steel.rebar, ecmax)
+        s = f"Flanged Beam Section - Web: {self.b} x {self.D}, Flange: {self.bf} x {self.Df}\n"
         s += f"Equilibrium NA = {xu:.2f}\n"
         s += f"Concrete: {self.conc}\n"
-        s += f"Longitudinal Bars: {self.long_steel}"
+        Fcw, Mcw = self.Cw(xu, ecmax)
+        Fcf, Mcf = self.Cf(xu)
+        Fcw /= 1e3
+        Fcf /= 1e3
+        Mcw /= 1e6
+        Mcf /= 1e6
+        Fc = Fcw + Fcf
+        Mc = Mcw + Mcf
+        s += f"{'Concrete in compression':<42}{'C':>4}{xu:10.2f}{ecmax:12.4e}{' ':>10}"
+        s += f"{self.conc.fd:10.2f}{Fc:10.2f}{Mc:10.2f}\n"
+        Ft = 0.0
+        Mt = 0.0
+        for L in d:
+            s += f"{L['dc']:10}{L['xc']:10}{L['bars']:>12}{L['area']:10.2f}{L['type']:>4}"
+            s += f"{abs(float(L['x'])):10.2f}{L['es']:12.4e}{L['fs']:10.2f}"
+            if L["type"] == "C":
+                s += f"{L['fc']:10.2f}"
+                Fc += float(L["F"]) / 1e3
+                Mc += float(L["M"]) / 1e6
+            else:
+                s += f"{' ':>10}"
+                Ft += float(L["F"]) / 1e3
+                Mt += float(L["M"]) / 1e6
+            F = float(L["F"]) / 1e3
+            M = float(L["M"]) / 1e6
+            s += f"{F:10.2f}{M:10.2f}\n"
+        s += f"C = {Fc:.2f} T = {Ft:.2f} C - T = {Fc - Ft:.4e} Mu = {(Mc + Mt):.2f}\n"
         s += f"{self.shear_steel}\n"
         s += f"{'Mu = ':>5}{self.Mu(xu, ecmax)/1e6:.2f} kNm\n"
         vuc, vus = self.Vu(xu)
@@ -391,67 +434,67 @@ class FlangedBeamSection(RectBeamSection):
         Mu = self.Mu(xu, ecmax)
         return xu, Mu
 
-    def report(self, xu: float, ecmax: float) -> str:  # pragma: no cover
-        s = f"Flanged Beam Section {self.b} x {self.D}, bf = {self.bf}, Df = {self.Df}, (xu = {xu:.2f})\n"
-        s += f"Concrete: {self.conc.fck}, Tension Steel: {self.long_steel.rebar.fy}"
-        s += f", Compression Steel: {self.long_steel.rebar.fy}"
-        s += "\nUnits: Distance in mm, Area in mm^2, Force in kN, Moment about NA in kNm\n"
-        s += "Flexure Capacity\n"
-        # Web of beam
-        Cw, Mw = self.Cw(xu, ecmax)
-        # Flange of beam
-        Cf, Mf = self.Cf(xu)
-        Fcc = Cw + Cf
-        Mcc = Mw + Mf
-        Fc = Fcc
-        Mc = Mcc
-        cw = f"{' ':24}{'Cw (kN)':>8}{'Mw (kN)':>8}{'Cf (kN)':>8}{'Mf (kN)':>8}{'C (kN)':>8}{'M (kNm)':>8}\n"
-        cw += "-" * 72 + "\n"
-        cw += f"{' ':24}{Cw/1e3:8.2f}{Mw/1e6:8.2f}{Cf/1e3:8.2f}{Mf/1e6:8.2f}{Fcc/1e3:8.2f}{Mcc/1e6:8.2f}\n"
-        s += cw
-        # Compression steel
-        Fsc = Msc = 0.0
-        Ft = Mt = 0.0
-        if self.has_compr_steel(xu):
-            sc = "Compression Reinforcement\n"
-            sc = f"{'dc':>4}{'Bars':>8}{'Area':>8}{'x':>8}{'Strain':>12}{'f_sc':>8}{'f_cc':>8}{'C (kN)':>8}{'M (kNm)':>8}\n"
-            sc += "-" * 72 + "\n"
-        else:
-            sc = ""
-        st = f"{'dc':>4}{'Bars':>8}{'Area':>8}{'x':>8}{'Strain':>12}{'f_st':>8}{' ':>8}{'C (kN)':>8}{'M (kNm)':>8}\n"
-        st += "-" * 72 + "\n"
-        for L in self.long_steel.layers:
-            if L._xc < xu:
-                # Compression steel
-                x = xu - L._xc
-                esc = ecmax / xu * x
-                fsc = self.long_steel.rebar.fs(esc)
-                fcc = self.conc.fc(x / xu, self.conc.fd)
-                _Fsc = L.area * (fsc - fcc)
-                _Msc = Fsc * x
-                Fsc += _Fsc
-                Msc = _Msc
-                sc += f"{L.dc:4.0f} {L.area:8.2f} {x:8.2f} {esc:12.4e} {fsc:8.2f} {fcc:8.2f} {_Fsc/1e3:8.2f} {_Msc/1e6:8.2f}\n"
-            else:
-                # Tension steel
-                x = L._xc - xu
-                est = ecmax / xu * x
-                fst = self.long_steel.rebar.fs(est)
-                _Fst = L.area * fst
-                _Mst = _Fst * x
-                Ft += _Fst
-                Mt += _Mst
-                st += f"{L.dc:4.0f}{L.bar_list():>8}{L.area:8.2f}{x:8.2f}{est:12.4e}{fst:8.2f}{' ':8}{_Fst/1e3:8.2f}{_Mst/1e6:8.2f}\n"
-        sc += f"{' ':56}{'-'*16}\n{' ':56}{Fc/1e3:8.2f}{Mc/1e6:8.2f}\n"
-        st += f"{' ':56}{'-'*16}\n{' ':56}{Ft/1e3:8.2f}{Mt/1e6:8.2f}\n"
-        Fc += Fsc
-        Mc += Msc
-        s += sc
-        s += "Tension Reinforcement\n"
-        s += st
-        if isclose(Fc, Ft):
-            C_T = "0.00"
-        else:
-            C_T = f"{(Fc - Ft)/1e6:8.2f}"
-        s += f"{' ':56}{'='*16}\n{' ':56}{C_T:>8}{(Mc+Mt)/1e6:8.2f}"
-        return s
+    # def report(self, xu: float, ecmax: float) -> str:  # pragma: no cover
+    #     s = f"Flanged Beam Section {self.b} x {self.D}, bf = {self.bf}, Df = {self.Df}, (xu = {xu:.2f})\n"
+    #     s += f"Concrete: {self.conc.fck}, Tension Steel: {self.long_steel.rebar.fy}"
+    #     s += f", Compression Steel: {self.long_steel.rebar.fy}"
+    #     s += "\nUnits: Distance in mm, Area in mm^2, Force in kN, Moment about NA in kNm\n"
+    #     s += "Flexure Capacity\n"
+    #     # Web of beam
+    #     Cw, Mw = self.Cw(xu, ecmax)
+    #     # Flange of beam
+    #     Cf, Mf = self.Cf(xu)
+    #     Fcc = Cw + Cf
+    #     Mcc = Mw + Mf
+    #     Fc = Fcc
+    #     Mc = Mcc
+    #     cw = f"{' ':24}{'Cw (kN)':>8}{'Mw (kN)':>8}{'Cf (kN)':>8}{'Mf (kN)':>8}{'C (kN)':>8}{'M (kNm)':>8}\n"
+    #     cw += "-" * 72 + "\n"
+    #     cw += f"{' ':24}{Cw/1e3:8.2f}{Mw/1e6:8.2f}{Cf/1e3:8.2f}{Mf/1e6:8.2f}{Fcc/1e3:8.2f}{Mcc/1e6:8.2f}\n"
+    #     s += cw
+    #     # Compression steel
+    #     Fsc = Msc = 0.0
+    #     Ft = Mt = 0.0
+    #     if self.has_compr_steel(xu):
+    #         sc = "Compression Reinforcement\n"
+    #         sc = f"{'dc':>4}{'Bars':>8}{'Area':>8}{'x':>8}{'Strain':>12}{'f_sc':>8}{'f_cc':>8}{'C (kN)':>8}{'M (kNm)':>8}\n"
+    #         sc += "-" * 72 + "\n"
+    #     else:
+    #         sc = ""
+    #     st = f"{'dc':>4}{'Bars':>8}{'Area':>8}{'x':>8}{'Strain':>12}{'f_st':>8}{' ':>8}{'C (kN)':>8}{'M (kNm)':>8}\n"
+    #     st += "-" * 72 + "\n"
+    #     for L in self.long_steel.layers:
+    #         if L._xc < xu:
+    #             # Compression steel
+    #             x = xu - L._xc
+    #             esc = ecmax / xu * x
+    #             fsc = self.long_steel.rebar.fs(esc)
+    #             fcc = self.conc.fc(x / xu, self.conc.fd)
+    #             _Fsc = L.area * (fsc - fcc)
+    #             _Msc = Fsc * x
+    #             Fsc += _Fsc
+    #             Msc = _Msc
+    #             sc += f"{L.dc:4.0f} {L.area:8.2f} {x:8.2f} {esc:12.4e} {fsc:8.2f} {fcc:8.2f} {_Fsc/1e3:8.2f} {_Msc/1e6:8.2f}\n"
+    #         else:
+    #             # Tension steel
+    #             x = L._xc - xu
+    #             est = ecmax / xu * x
+    #             fst = self.long_steel.rebar.fs(est)
+    #             _Fst = L.area * fst
+    #             _Mst = _Fst * x
+    #             Ft += _Fst
+    #             Mt += _Mst
+    #             st += f"{L.dc:4.0f}{L.bar_list():>8}{L.area:8.2f}{x:8.2f}{est:12.4e}{fst:8.2f}{' ':8}{_Fst/1e3:8.2f}{_Mst/1e6:8.2f}\n"
+    #     sc += f"{' ':56}{'-'*16}\n{' ':56}{Fc/1e3:8.2f}{Mc/1e6:8.2f}\n"
+    #     st += f"{' ':56}{'-'*16}\n{' ':56}{Ft/1e3:8.2f}{Mt/1e6:8.2f}\n"
+    #     Fc += Fsc
+    #     Mc += Msc
+    #     s += sc
+    #     s += "Tension Reinforcement\n"
+    #     s += st
+    #     if isclose(Fc, Ft):
+    #         C_T = "0.00"
+    #     else:
+    #         C_T = f"{(Fc - Ft)/1e6:8.2f}"
+    #     s += f"{' ':56}{'='*16}\n{' ':56}{C_T:>8}{(Mc+Mt)/1e6:8.2f}"
+    #     return s
