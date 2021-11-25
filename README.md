@@ -184,8 +184,8 @@ Contributions are welcome. Contributions can be in a variety of forms:
 4. Additional examples
 
 ## Links
-- Documentation: To Do
-- PyPI release: To Do
+- Documentation: [Documentation](https://rcdesign.readthedocs.io/en/latest/)
+- PyPI release: 0.2.0
 - Github repository: https://github.com/satish-annigeri/rcdesign
 
 ## What `rcdesign` can and cannot do
@@ -260,7 +260,7 @@ Automated testing can be donw using. Verify that `nox` is installed with the com
 ```
 
 ### Documentation
-Documentation is presently not available, but is the current ongoing task. I am figuring out how to prepare the API documentation. Any advise or help is welcome.
+[Documentation is available here](https://rcdesign.readthedocs.io/en/latest/). Any advise or help on documentation is welcome.
 
 ## Future Plans
 
@@ -282,4 +282,5 @@ Long term plans include:
 
 ## References
 1. IS 456:2000 Indian Standard Code of Practice for Plain and Reinforced Concrete (Fourth Revision), Bureau of Indian Standards, New Delhi, 2000.
-2. SP:24 Explanatory Handbook on Indian Standard Code of Practice for Plain and Reinforced Concrete (IS 456:1978), Bureau of Indian Standards, New Delhi, 1984.
+2. SP:24 (S&T)-1983 Explanatory Handbook on Indian Standard Code of Practice for Plain and Reinforced Concrete (IS 456:1978), Bureau of Indian Standards, New Delhi, 1984.
+3. SP 16:1980 Design Aids for Reinforced Concrete to IS:456-1978, Bureau of Indian Standards, New Delhi, 1980.
