@@ -2,7 +2,7 @@
 
 from math import isclose
 from enum import Enum
-from typing import Tuple, List, Optional
+from typing import Tuple, List
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
 from scipy.optimize import brentq
@@ -182,7 +182,8 @@ class RectBeamSection(Section):
             M = float(L["M"]) / 1e6
             s += f"{F:10.2f}{M:10.2f}\n"
         s += f"{' ':>92}{'-'*10}{'-'*10}\n"
-        s += f"{abs(Fc - Ft):102.2f}{(Mc + Mt):10.2f}\n"
+        C_T = Fc - Ft if not isclose(Fc, Ft) else 0.0
+        s += f"{C_T:102.2f}{(Mc + Mt):10.2f}\n"
         s += f"SHEAR\n{self.shear_steel}\n"
         s += f"CAPACITY\n{'Mu = ':>5}{self.Mu(xu, ecmax)/1e6:.2f} kNm\n"
         vuc, vus = self.Vu(xu)
@@ -351,7 +352,8 @@ class FlangedBeamSection(RectBeamSection):
             M = float(L["M"]) / 1e6
             s += f"{F:10.2f}{M:10.2f}\n"
         s += f"{' ':>92}{'-'*10}{'-'*10}\n"
-        s += f"{abs(Fc - Ft):102.2f}{(Mc + Mt):10.2f}\n"
+        C_T = Fc - Ft if not isclose(Fc, Ft) else 0.0
+        s += f"{C_T:102.2f}{(Mc + Mt):10.2f}\n"
         s += f"SHEAR\n{self.shear_steel}\n"
         s += f"CAPACITY\n{'Mu = ':>5}{self.Mu(xu, ecmax)/1e6:.2f} kNm\n"
         vuc, vus = self.Vu(xu)

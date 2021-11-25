@@ -266,15 +266,12 @@ class RebarLayer:
         return d
 
     def bar_list(self, sep=";") -> str:
-        d: Dict = dict()
-        for bar_dia in self.dia:
-            if bar_dia in d.keys():
-                d[bar_dia] += 1
-            else:
-                d[bar_dia] = 1
+        from collections import Counter
+
+        d = Counter(self.dia)
         s = ""
-        for bar_dia in sorted(d.keys()):
-            s += f"{d[bar_dia]}-{bar_dia} "
+        for k in sorted(d):
+            s += f"{d[k]}-{k} "
         s = s.rstrip().replace(" ", sep)
         return s
 
