@@ -1,5 +1,6 @@
 from rcdesign.is456.material.concrete import ConcreteStressBlock, Concrete
 from rcdesign.is456.material.rebar import (
+    BentupBars,
     RebarHYSD,
     RebarLayer,
     RebarGroup,
@@ -19,7 +20,7 @@ rsec = RectBeamSection(
     ShearRebarGroup([Stirrups(RebarHYSD("Fe 415", 415), 2, 8, 150)]),
     25,
 )
-print(rsec)
+# print(rsec)
 print()
 # print(
 #     rsec.long_steel.report(
@@ -41,7 +42,15 @@ tsec = FlangedBeamSection(
         RebarHYSD("Fe 415", 415),
         [RebarLayer([16, 16], 35), RebarLayer([20, 20, 20], -35)],
     ),
-    ShearRebarGroup([Stirrups(RebarHYSD("Fe 415", 415), 2, 8, 150)]),
+    ShearRebarGroup(
+        [
+            Stirrups(RebarHYSD("Fe 415", 415), 2, 8, 150),
+            BentupBars(RebarHYSD("Fe 415", 415), [16, 16], _sv=250),
+        ]
+    ),
     25,
 )
-print(tsec)
+# print(tsec)
+
+print(rsec.report(120, 0.0035))
+# print(tsec.report(40, 0.0035))

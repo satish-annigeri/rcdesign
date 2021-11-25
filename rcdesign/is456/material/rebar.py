@@ -522,6 +522,7 @@ class Stirrups(ShearReinforcement):
         s += f"{self._nlegs}-{self._bar_dia} @ {self._sv} c/c"
         if self._alpha_deg != 90:
             s += " inclined at {self._alpha_deg} degrees"
+        s += f" (Asv = {self.Asv:.2f})"
         return s
 
     def Vus(self, d: float) -> float:
@@ -575,6 +576,16 @@ class BentupBars(ShearReinforcement):
         else:
             return ShearRebarType.SHEAR_REBAR_BENTUP_SERIES
 
+    def __repr__(self) -> str:
+        if self._sv == 0:
+            s = f"Single group of parallel bent-up bars: {self.rebar.label}-[{self.bars}]"
+        else:
+            s = f"Series of parallel bent-up bars: {self.rebar.label}-{self.bars} @ {self._sv} c/c"
+        if self._alpha_deg != 90:
+            s += f" inclined at {self._alpha_deg} degrees"
+        s += f" (Asv = {self.Asv:.2f})"
+        return s
+
 
 class ShearRebarGroup:
     def __init__(self, shear_reinforcement: List[ShearReinforcement]):
@@ -613,5 +624,5 @@ class ShearRebarGroup:
     def __repr__(self):
         s = ""
         for sh_reinf in self.shear_reinforcement:
-            s += f"{sh_reinf}"
+            s += f"{sh_reinf}\n"
         return s
