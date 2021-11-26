@@ -8,6 +8,7 @@ __pycache__/
 
 # VS Code
 .vscode/
+.dccache
 
 # Distribution / packaging
 .Python
@@ -160,3 +161,4 @@ _templates/
 *.png
 *.dot
 *.jpg
+.dccache

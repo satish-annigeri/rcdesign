@@ -13,7 +13,7 @@ from rcdesign.is456.material.concrete import (
 
 
 def test_version():
-    assert __version__ == "0.2.0"
+    assert __version__ == "0.3.0"
 
 
 def parabolic_area(z1, z2, k=4 / 7):

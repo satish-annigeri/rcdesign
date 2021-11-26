@@ -1,6 +1,8 @@
 # Tutorial
 ## Install `rcdesign`
-Create a separate directory and install a virtual environment. Activate the virtual environment and install required packages. On *nix systems, do the following:
+Create a separate directory and create a virtual environment within that directory. Activate the virtual environment and install required packages.
+
+On *nix systems, do the following:
 ```bash
 $ mkdir rcd_tutorial
 $ cd rcd_tutorial

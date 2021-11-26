@@ -11,21 +11,22 @@ Analysis of sections subjected to axial compression and bending about one axis i
 ## Beam Sections
 A beam section can have any shape but from the point of view of ease of fabrication and aesthetics, rectangular beam section is the most common. The attributes, required to repesent a section irrespective of whether it belongs to a beam or a column, are listed below:
 
-1. `conc`: Object of type `Concrete`. There is only one object of this type associated with a given section.
-2. `main_steel`: Object of type `RebarGroup` representing the main reinforcement provided along the length of the structural member. At present, there is only one object of this type associated with a given section.
+1. `conc`: Object of type `Concrete`. There must only be one object of this type associated with a given section.
+2. `main_steel`: Object of type `RebarGroup` representing the main reinforcement provided along the length of the structural member. There must only be one object of this type associated with a given section.
 3. `clear_cover`: Clear cover to reinforcement bars. 
 
-Since reinforced concrete slabs are cast together with beams, the effective shape of the section is a flanged section if the slab happens to be in the compression zone or rectangular if the slab happens to be in the tension zone. A flanged section can be a T section with the flange extending on both sides of the web (as in the case of an intermediate beam) or an L section with the flange extending on only one side (as in the case of an end beam).
+Effective section of a beam can be rectangular or flanged. Since reinforced concrete slab is cast together with beams, the effective shape of the section is a flanged section if the slab happens to be in the compression zone or rectangular if the slab happens to be in the tension zone. A flanged section can be a T section with the flange extending on both sides of the web (as in the case of an intermediate beam) or an L section with the flange extending on only one side (as in the case of an end beam). Typically, mid-span section under gravity loads is subjected to sagging bending moment and the slab is in the compression zone resulting in a flanged section. But end sections are subjected to hogging bending moment and the slab is in the tension zone resulting in a rectangular section. Based on the bending moment distribution, section can be categorized as rectangular or flanged.
 
 ### Rectangular Beam Sections
 The `RectBeamSection` class is derived from the `Section` abstract class. Being a beam section, it is expected to be subjected to bending, shear and torsion. Additional attributes of a `RectBeamSection` in addition to those already defined in the parent class `Section` are:
 1. `b`: Breadth of the beam, in mm
 2. `D`: Overall depth of the beam, in mm
-3. `shear_steel`: Shear reinforcement, one of `Stirrups` or `BentupBars`. At present, only one object of this type is associated with a given section. This may change in future.
+3. 
+3. `shear_steel`: Object of type `ShearRebarGroup`, containing a list of one or more shear reinforcement types.
 
 
 ### Flanged Beam Sections
-The `FlagnedBeamSection` is a derived class of `RectBeamSection` and has all its atributes and many of its behaviours. Additional attributes of a `FlangedBeamSection` in addition to those already defined in the parent class `RectBeamSection` are:
+The `FlagnedBeamSection` is a derived class of `RectBeamSection` and has all its atributes and many of its behaviours. Additional attributes of a `FlangedBeamSection`, in addition to those already defined in the parent class `RectBeamSection` are:
 
 1. `bf`: Breadth of the flange, in mm
 2. `Df`: Depth of the flange, in mm
@@ -34,6 +35,3 @@ The `FlagnedBeamSection` is a derived class of `RectBeamSection` and has all its
 ## Column Sections
 TO DO
 
-### Rectangular Sections
-
-TO DO
