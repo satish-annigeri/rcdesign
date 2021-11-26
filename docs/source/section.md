@@ -21,7 +21,6 @@ Effective section of a beam can be rectangular or flanged. Since reinforced conc
 The `RectBeamSection` class is derived from the `Section` abstract class. Being a beam section, it is expected to be subjected to bending, shear and torsion. Additional attributes of a `RectBeamSection` in addition to those already defined in the parent class `Section` are:
 1. `b`: Breadth of the beam, in mm
 2. `D`: Overall depth of the beam, in mm
-3. 
 3. `shear_steel`: Object of type `ShearRebarGroup`, containing a list of one or more shear reinforcement types.
 
 
