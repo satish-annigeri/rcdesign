@@ -161,51 +161,19 @@ Let us determine the Limit State capacity of the section in bending and shear.
 Create a Python script named `flanged03.py` and type the following code in it.
 
 ```python
-# File: flanged03.py
-from rcdesign.is456.material.concrete import ConcreteStressBlock, Concrete
-from rcdesign.is456.material.rebar import RebarHYSD, RebarLayer, RebarGroup, Stirrups
-from rcdesign.is456.section import FlangedBeamSection
+FLANGED BEAM SECTION - Web: 230 x 450, Flange: 900 x 150
+FLEXURE
+Equilibrium NA = 52.26 (ec,max = 0.003500)
+Concrete: Stress Block IS456 LSM - M20: fck = 20.00 N/mm^2, fd = 8.93 N/mm^2
+            dc    xc        Bars      Area  Stress      x NA      Strain        fs        fc     Force    Moment
+Concrete                                         C     52.26  3.5000e-03                8.93    340.11     10.38
+   Rebar   -35   415        3-20    942.48       T    362.74  2.4296e-02    360.87              340.11    123.37
+                                                                                            --------------------
+                                                                                                  0.00    133.75
+SHEAR
+Vertical Stirrups: Fe 415 2-8 @ 150 c/c (Asv = 100.53)
 
-# Singly reinforced flanged section
-# Create the materials
-# Concrete
-csb = ConcreteStressBlock('IS456 LSM')
-m20 = Concrete('M20', 20, csb)
-# Reinforcement
-fe415 = RebarHYSD('Fe 415', 415)
-layer = RebarLayer([20, 20, 20], -35)
-main_steel = RebarGroup(fe415, [layer])
-shear_steel = Stirrups(fe415, 2, 8, 150)
-# Section
-rsec = FlangedBeamSection(230, 450, 900, 150, m20, main_steel, shear_steel, 25)
-
-# Calculate depth of neutral axis
-xu = rsec.xu(0.0035)
-# Report limit state capacity
-print(rsec.report(xu, 0.0035))
-```
-Run the script from the command line:
-```bash
-$ python flanged03.py
-```
-
-The output of the program must be:
-```bash
-Flanged Beam Section 230 x 450, bf = 900, Df = 150, (xu = 52.26)
-Concrete: 20, Tension Steel: 415, Compression Steel: 415
-Units: Distance in mm, Area in mm^2, Force in kN, Moment about NA in kNm
-Flexure Capacity
-                         Cw (kN) Mw (kN) Cf (kN) Mf (kN)  C (kN) M (kNm)
-------------------------------------------------------------------------
-                           86.92    2.65  253.19    7.73  340.11   10.38
-                                                        ----------------
-                                                          340.11   10.38
-Tension Reinforcement
-  dc    Bars    Area       x      Strain    f_st          C (kN) M (kNm)
-------------------------------------------------------------------------
- -35    3-20  942.48  362.74  2.4296e-02  360.87          340.11  123.37
-                                                        ----------------
-                                                          340.11  123.37
-                                                        ================
-                                                            0.00  133.75
+CAPACITY
+Mu = 133.75 kNm
+Vu = 159.52 kN
 ```
