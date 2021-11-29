@@ -1,7 +1,7 @@
 from math import pi
 
 from rcdesign.is456.material.rebar import RebarHYSD, RebarLayer, RebarGroup
-from rcdesign.is456.material.concrete import ConcreteStressBlock, Concrete
+from rcdesign.is456.material.concrete import ConcreteLSMFlexure, Concrete
 
 
 class TestRebarGroup:
@@ -37,7 +37,7 @@ class TestRebarGroup:
 
     def test_rebargroup04(self):
         fe415 = RebarHYSD("Fe 415", 415)
-        csb = ConcreteStressBlock("IS456 LSM")
+        csb = ConcreteLSMFlexure("IS456 LSM")
         conc = Concrete("M20", 20, csb)
         l1 = RebarLayer([16, 16, 16], 35)
         l2 = RebarLayer([16, 16], 70)

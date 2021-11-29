@@ -1,6 +1,6 @@
 # Krishna Raju, N. and Pranesh, R.N., Reinforced Concrete Design, 6.3.5, pp. 89,
 
-from rcdesign.is456.material.concrete import ConcreteStressBlock, Concrete
+from rcdesign.is456.material.concrete import ConcreteLSMFlexure, Concrete
 from rcdesign.is456.material.rebar import (
     RebarHYSD,
     RebarLayer,
@@ -10,7 +10,7 @@ from rcdesign.is456.material.rebar import (
 )
 from rcdesign.is456.section import FlangedBeamSection
 
-csb = ConcreteStressBlock("IS456 LSM")
+csb = ConcreteLSMFlexure("IS456 LSM")
 m25 = Concrete("M25", 25, csb)
 fe415 = RebarHYSD("Fe 415", 415)
 t1 = RebarLayer([20, 20, 20], -35)

@@ -51,7 +51,7 @@ class StressBlock(ABC):  # pragma: no cover
 # Concrete Stress Block for flexure as per IS456:2000 Limit State Method
 
 
-class ConcreteStressBlock(StressBlock):
+class ConcreteLSMFlexure(StressBlock):
     z = symbols("z")
     expr = 2 * z - z ** 2
 
@@ -122,7 +122,7 @@ class Concrete:
         self,
         label: str,
         fck: float,
-        stress_block: ConcreteStressBlock,
+        stress_block: ConcreteLSMFlexure,
         gamma_m: float = 1.5,
         density: float = 25.0,
     ):

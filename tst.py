@@ -1,4 +1,4 @@
-from rcdesign.is456.material.concrete import ConcreteStressBlock, Concrete
+from rcdesign.is456.material.concrete import ConcreteLSMFlexure, Concrete
 from rcdesign.is456.material.rebar import (
     BentupBars,
     RebarHYSD,
@@ -12,7 +12,7 @@ from rcdesign.is456.section import RectBeamSection, FlangedBeamSection
 rsec = RectBeamSection(
     230,
     450,
-    Concrete("M20", 20, ConcreteStressBlock("IS456 LSM")),
+    Concrete("M20", 20, ConcreteLSMFlexure("IS456 LSM")),
     RebarGroup(
         RebarHYSD("Fe 415", 415),
         [RebarLayer([16, 16], 35), RebarLayer([20, 20, 20], -35)],
@@ -25,7 +25,7 @@ print()
 # print(
 #     rsec.long_steel.report(
 #         100,
-#         Concrete("M20", 20, ConcreteStressBlock("IS456 LSM")),
+#         Concrete("M20", 20, ConcreteLSMFlexure("IS456 LSM")),
 #         RebarHYSD("Fe 415", 415),
 #         0.0035,
 #     )
@@ -37,7 +37,7 @@ tsec = FlangedBeamSection(
     450,
     1000,
     150,
-    Concrete("M20", 20, ConcreteStressBlock("IS456 LSM")),
+    Concrete("M20", 20, ConcreteLSMFlexure("IS456 LSM")),
     RebarGroup(
         RebarHYSD("Fe 415", 415),
         [RebarLayer([16, 16], 35), RebarLayer([20, 20, 20], -35)],
