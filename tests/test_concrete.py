@@ -164,7 +164,7 @@ class TestCSB:
             )
 
     # Verify MaximumStrainException
-    def test_csb18(self):
+    def test_csb_18(self):
         csb = ConcreteLSMFlexure("IS456 LSM")
         ecmax = 0.0036
         with pytest.raises(MaximumStrainError):
