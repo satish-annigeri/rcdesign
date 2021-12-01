@@ -40,13 +40,13 @@ Create a Python script named `singly01.py` and type the following code in it.
 
 ```python
 # File: singly01.py
-from rcdesign.is456.material.concrete import ConcreteStressBlock, Concrete
+from rcdesign.is456.material.concrete import ConcreteLSMFlexure, Concrete
 from rcdesign.is456.material.rebar import RebarHYSD, RebarLayer, RebarGroup, Stirrups, ShearRebarGroup
 from rcdesign.is456.section import RectBeamSection
 
 # Create the materials
 # Concrete
-csb = ConcreteStressBlock('IS456 LSM')
+csb = ConcreteLSMFlexure('IS456 LSM')
 m20 = Concrete('M20', 20, csb)
 # Reinforcement
 fe415 = RebarHYSD('Fe 415', 415)
@@ -101,14 +101,14 @@ Create a Python script named `doubly02.py` and type the following code in it.
 
 ```python
 # File: doubly02.py
-from rcdesign.is456.material.concrete import ConcreteStressBlock, Concrete
+from rcdesign.is456.material.concrete import ConcreteLSMFlexure, Concrete
 from rcdesign.is456.material.rebar import RebarHYSD, RebarLayer, RebarGroup, Stirrups, ShearRebarGroup
 from rcdesign.is456.section import RectBeamSection
 
 # Doubly reinforced rectangular section
 # Create the materials
 # Concrete
-csb = ConcreteStressBlock('IS456 LSM')
+csb = ConcreteLSMFlexure('IS456 LSM')
 m20 = Concrete('M20', 20, csb)
 # Reinforcement
 fe415 = RebarHYSD('Fe 415', 415)

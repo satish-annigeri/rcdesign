@@ -4,7 +4,7 @@ Section: Rectangular 230 x 450
 Compression steel: Nil, Tension steel: 1 layer
 Output: xu and report of the section.
 """
-from rcdesign.is456.material.concrete import ConcreteStressBlock, Concrete
+from rcdesign.is456.material.concrete import ConcreteLSMFlexure, Concrete
 from rcdesign.is456.material.rebar import (
     RebarHYSD,
     RebarLayer,
@@ -15,7 +15,7 @@ from rcdesign.is456.material.rebar import (
 from rcdesign.is456.section import RectBeamSection
 
 
-sb = ConcreteStressBlock("IS456 LSM")
+sb = ConcreteLSMFlexure("IS456 LSM")
 m20 = Concrete("M20", 20, sb)
 fe415 = RebarHYSD("Fe 415", 415)
 

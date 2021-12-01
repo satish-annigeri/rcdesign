@@ -118,12 +118,12 @@ Run the built-in example with the following command.
 
 Alternately, you can create the following Python script `example.py` and run it.
 ```python
-from rcdesign.is456.material.concrete import ConcreteStressBlock, Concrete
+from rcdesign.is456.material.concrete import ConcreteLSMFlexure, Concrete
 from rcdesign.is456.material.rebar import RebarHYSD, RebarLayer, RebarGroup, Stirrups
 from rcdesign.is456.section import RectBeamSection
 
 
-sb = ConcreteStressBlock("IS456 LSM")
+sb = ConcreteLSMFlexure("IS456 LSM")
 m20 = Concrete("M20", 20, sb)
 fe415 = RebarHYSD("Fe 415", 415)
 
@@ -218,8 +218,8 @@ The package is in early development and has undergone testing of the current cod
 ### Classes
 The following classes have been implemented:
 
-1. An abstract base class **StressBlock** to represent a stress block. A derived class **ConcreteStressBlock** to represent the stress block for concrete in compression under limit state of flexure, derived from the abstract StressBlock class.
-3. A class **Concrete** to represent concrete which consists of a ConcreteStressBlock.
+1. An abstract base class **StressBlock** to represent a stress block. A derived class **ConcreteLSMFlexure** to represent the stress block for concrete in compression under limit state of flexure, derived from the abstract StressBlock class.
+3. A class **Concrete** to represent concrete which consists of a ConcreteLSMFlexure.
 4. An abstract class **Rebar** to represent reinforcement bars. Two derived classes **RebarMS** and **RebarHYSD** to represent mild steel bars and high yield strength deformed bars, respectively.
 5. A class **RebarLayer** to represent a single layer of reinforcement bars, defined as a list of bar diameters and the distance of the centre of the bars from the nearest edge. A class **RebarGroup** to represnt a list of layers of reinforcement bars.
 6. An abstract class **ShearReinforcement** to represent shear reinforcement. Two derived classes **Stirrups** and **BentupBars** to represent vertical/inclined stirrups and bent up bars, respectively.
@@ -228,7 +228,7 @@ The following classes have been implemented:
 ### Methods
 Following funcationality has been implemented for the different classes:
 
-1. **ConcreteStressBlock**: Calculation of design stress, stress at a specified distance $x$ from neutral axis, area of stress block between two locations $x_1$ and $x_2$ from neutral axis and moment of stress block between the two locations with respect to depth $x_u$ of the neutral axis.
+1. **ConcreteLSMFlexure**: Calculation of design stress, stress at a specified distance $x$ from neutral axis, area of stress block between two locations $x_1$ and $x_2$ from neutral axis and moment of stress block between the two locations with respect to depth $x_u$ of the neutral axis.
 2. **RebarMS** and **RebarHYSD**: Stress for a specified value of strain and design stress.
 3. **RebarLayer**: Area of bars in a layer.
 4. **RebarGroup**: Calculation of the sum of the following values aggregated after calculating the values individually for each layer:
@@ -245,7 +245,7 @@ Following funcationality has been implemented for the different classes:
 ### Testing
 Testing  has been implemented using `pytest` and unit tests have been implemented for the following classes:
 
-1. **ConcreteStressBlock** and **Concrete**
+1. **ConcreteLSMFlexure** and **Concrete**
 2. **RebarMS** and **RebarHYSD**
 3. **RebarLayer** and **RebarGroup**
 4. **ShearReinforcement** and **Stirrups**

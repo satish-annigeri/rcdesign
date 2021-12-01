@@ -3,7 +3,7 @@
 from scipy.optimize import brentq
 from rcdesign.utils import rootsearch
 
-from rcdesign.is456.material.concrete import ConcreteStressBlock, Concrete
+from rcdesign.is456.material.concrete import ConcreteLSMFlexure, Concrete
 from rcdesign.is456.material.rebar import (
     RebarHYSD,
     RebarLayer,
@@ -18,7 +18,7 @@ from rcdesign import __version__
 print(f"Analysis of Reinforced Concrete Sections v{__version__}\n")
 # Create materials
 # Concrete: M20 grade concrete in flexure Limit State Method
-sb_lsm_flex = ConcreteStressBlock("IS456:2000 LSM")
+sb_lsm_flex = ConcreteLSMFlexure("IS456:2000 LSM")
 m20 = Concrete("M20", 20, sb_lsm_flex)
 # HYSD reinforcement bars: Fe 415 grade
 fe415 = RebarHYSD("Fe 415", 415)
