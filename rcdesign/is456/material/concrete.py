@@ -52,10 +52,10 @@ class StressBlock(ABC):  # pragma: no cover
 
 
 class ConcreteLSMFlexure(StressBlock):
-    z = symbols("z")
-    expr = 2 * z - z ** 2
+    z, k = symbols("z k")
+    expr = 2 * k * z - k ** 2 * z ** 2
 
-    def __init__(self, label):
+    def __init__(self, label: str, ecy: float = ecy, ecu: float = ecu):
         super().__init__(label)
         self.ecy = ecy
         self.ecu = ecu
@@ -67,49 +67,53 @@ class ConcreteLSMFlexure(StressBlock):
             return x1, x2
         raise StressBlockError(x1, x2)
 
-    def stress(self, x: float, ecmax: float = 0.0035) -> float:
+    def stress(self, x: float, ecmax: float = ecu) -> float:
         if ecmax > self.ecu:
             raise MaximumStrainError(ecmax, self.ecu)
-        k = self.ecy / ecmax
+        k = nsimplify(ecmax / self.ecy)
 
-        if x <= k:
-            r = self.expr.evalf(subs={"z": x / k})
+        if x <= 1 / k:
+            r = self.expr.evalf(subs={"z": x, "k": k})
         else:
             r = 1.0
         return r
 
-    def area(self, x1: float, x2: float, ecmax: float = 0.0035) -> float:
-        x1, x2 = self.validate_sb(
-            x1, x2
-        )  # Throws an exception if x1 and x2 are invalid
-        k = nsimplify(self.ecy / ecmax)
-
-        if x2 <= k:  # Entirely within parabolic region
-            a1 = integrate(self.expr, (self.z, x1 / k, x2 / k)) * k
+    def area(self, x1: float, x2: float, ecmax: float = ecu) -> float:
+        if ecmax > self.ecu:
+            raise MaximumStrainError(ecmax, self.ecu)
+        x1, x2 = self.validate_sb(x1, x2)
+        k = nsimplify(ecmax / self.ecy)
+        xx = 1 / k
+        if 0 <= k <= 1:  # Yield strain not crossed
+            return integrate(self.expr, (self.z, x1, x2)).evalf(subs={"k": k})
+        if x2 <= xx:  # Entirely within parabolic region
+            a1 = integrate(self.expr, (self.z, x1, x2)).evalf(subs={"k": k})
             a2 = 0.0
-        elif x1 >= k:  # Entirely within rectangular region
+        elif x1 >= xx:  # Entirely within rectangular region
             a1 = 0.0
             a2 = integrate(1, (self.z, x1, x2))
         else:  # Partly in parabolic and rest in rectangular region
-            a1 = integrate(self.expr, (self.z, x1 / k, 1)) * k
-            a2 = integrate(1, (self.z, k, x2))
+            a1 = integrate(self.expr, (self.z, x1, xx)).evalf(subs={"k": k})
+            a2 = integrate(1, (self.z, xx, x2))
         return a1 + a2
 
-    def moment(self, x1: float, x2: float, ecmax: float = 0.0035) -> float:
-        x1, x2 = self.validate_sb(
-            x1, x2
-        )  # Throws an exception if x1 and x2 are invalid
-        k = nsimplify(self.ecy / ecmax)
-
-        if x2 <= k:
-            m1 = integrate(self.expr * self.z, (self.z, x1 / k, x2 / k)) * k ** 2
+    def moment(self, x1: float, x2: float, ecmax: float = ecu) -> float:
+        if ecmax > self.ecu:
+            raise MaximumStrainError(ecmax, self.ecu)
+        x1, x2 = self.validate_sb(x1, x2)
+        k = nsimplify(ecmax / self.ecy)
+        xx = 1 / k
+        if 0 <= k <= 1:  # Yield strain not crossed
+            return integrate(self.expr, (self.z, x1, x2)).evalf(subs={"k": k})
+        if x2 <= xx:
+            m1 = integrate(self.expr * self.z, (self.z, x1, x2)).evalf(subs={"k": k})
             m2 = 0.0
-        elif x1 >= k:
+        elif x1 >= 1 / k:
             m1 = 0.0
             m2 = integrate(self.z, (self.z, x1, x2))
         else:
-            m1 = integrate(self.expr * self.z, (self.z, x1 / k, 1)) * k ** 2
-            m2 = integrate(self.z, (self.z, k, x2))
+            m1 = integrate(self.expr * self.z, (self.z, x1, xx)).evalf(subs={"k": k})
+            m2 = integrate(self.z, (self.z, xx, x2))
         return m1 + m2
 
 
