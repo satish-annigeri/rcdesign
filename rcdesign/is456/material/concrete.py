@@ -83,9 +83,9 @@ class ConcreteLSMFlexure(StressBlock):
             raise MaximumStrainError(ecmax, self.ecu)
         x1, x2 = self.validate_sb(x1, x2)
         k = nsimplify(ecmax / self.ecy)
-        xx = 1 / k
         if 0 <= k <= 1:  # Yield strain not crossed
             return integrate(self.expr, (self.z, x1, x2)).evalf(subs={"k": k})
+        xx = 1 / k
         if x2 <= xx:  # Entirely within parabolic region
             a1 = integrate(self.expr, (self.z, x1, x2)).evalf(subs={"k": k})
             a2 = 0.0
@@ -102,9 +102,9 @@ class ConcreteLSMFlexure(StressBlock):
             raise MaximumStrainError(ecmax, self.ecu)
         x1, x2 = self.validate_sb(x1, x2)
         k = nsimplify(ecmax / self.ecy)
-        xx = 1 / k
         if 0 <= k <= 1:  # Yield strain not crossed
-            return integrate(self.expr, (self.z, x1, x2)).evalf(subs={"k": k})
+            return integrate(self.expr * self.z, (self.z, x1, x2)).evalf(subs={"k": k})
+        xx = 1 / k
         if x2 <= xx:
             m1 = integrate(self.expr * self.z, (self.z, x1, x2)).evalf(subs={"k": k})
             m2 = 0.0

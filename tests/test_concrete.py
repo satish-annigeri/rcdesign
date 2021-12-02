@@ -169,6 +169,24 @@ class TestCSB:
         ecmax = 0.0036
         with pytest.raises(MaximumStrainError):
             assert csb.stress(0.1, 0.0036)
+        with pytest.raises(MaximumStrainError):
+            assert csb.area(0, 1, 0.0036)
+        with pytest.raises(MaximumStrainError):
+            assert csb.moment(0, 1, 0.0036)
+
+    def test_csb_19(self):
+        def area_moment(k, z1, z2):
+            a = k * (z2 ** 2 - z1 ** 2) - k ** 2 / 3 * (z2 ** 3 - z1 ** 3)
+            m = 2 * k / 3 * (z2 ** 3 - z1 ** 3) - k ** 2 / 4 * (z2 ** 4 - z1 ** 4)
+            return a, m
+
+        csb = ConcreteLSMFlexure("IS456 LSM")
+        ecmax = 0.0015
+        ecy = 0.002
+        k = ecmax / ecy
+        a, m = area_moment(k, 0, 1)
+        assert isclose(csb.area(0, 1, ecmax), a)
+        assert isclose(csb.moment(0, 1, ecmax), m)
 
 
 class TestConcrete:
