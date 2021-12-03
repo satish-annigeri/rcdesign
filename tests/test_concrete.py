@@ -4,6 +4,7 @@ import pytest
 
 from rcdesign import __version__
 from rcdesign.is456.material.concrete import (
+    ConcreteLSMCompression,
     MaximumStrainError,
     StressBlock,
     ConcreteLSMFlexure,
@@ -187,6 +188,16 @@ class TestCSB:
         a, m = area_moment(k, 0, 1)
         assert isclose(csb.area(0, 1, ecmax), a)
         assert isclose(csb.moment(0, 1, ecmax), m)
+
+
+class TestLSMCompression:
+    def test_lsmcomp_01(self):
+        csb = ConcreteLSMCompression("LSM Compression")
+        k = 1.5
+        assert csb.ec(k, k - 3 / 7) == 1
+        assert csb.stress(k, k - 3 / 7) == 1
+        assert isclose(csb.area(k, k - 3 / 7, k), 0.517248677248677)
+        assert isclose(csb.moment(k, k - 3 / 7, k), 0.414149659863946)
 
 
 class TestConcrete:

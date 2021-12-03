@@ -36,15 +36,15 @@ class StressBlock(ABC):  # pragma: no cover
         self.label = label
 
     @abstractmethod
-    def stress(self, x: float):
+    def stress(self, x: float, ecmax: float) -> float:
         pass
 
     @abstractmethod
-    def area(self, x1: float, x2: float):
+    def area(self, x1: float, x2: float, ecmax: float) -> float:
         pass
 
     @abstractmethod
-    def moment(self, x1: float, x2: float):
+    def moment(self, x1: float, x2: float, ecmax: float) -> float:
         pass
 
 
@@ -115,6 +115,45 @@ class ConcreteLSMFlexure(StressBlock):
             m1 = integrate(self.expr * self.z, (self.z, x1, xx)).evalf(subs={"k": k})
             m2 = integrate(self.z, (self.z, xx, x2))
         return m1 + m2
+
+
+# ConcreteLSMCompression class
+"""ConcreteLSMCompression class to represent stress block for axial compression with NA outside the section"""
+
+
+class ConcreteLSMCompression(StressBlock):
+    z, k = symbols("z k")
+    _ec = z / (k - nsimplify(3 / 7))
+    _fc = 2 * _ec - _ec ** 2
+
+    def __init__(self, label: str, ecy: float = ecy, ecu: float = ecu):
+        super().__init__(label)
+        self.ecy = ecy
+        self.ecu = ecu
+
+    def ec(self, k: float, z: float):
+        if k < 1:
+            raise ValueError
+        return self._ec.evalf(subs={"k": k, "z": z})
+
+    def ecmin(self, k: float) -> float:
+        return self.ec(k, k - 1)
+
+    def ecmax(self, k: float) -> float:
+        return self.ec(k, k)
+
+    def stress(self, k: float, z: float):
+        return self._fc.evalf(subs={"k": k, "z": z})
+
+    def area(self, z1: float, z2: float, k: float):
+        return integrate(self._fc, (self.z, k - 1, k - nsimplify(3 / 7))).evalf(
+            subs={"k": k}
+        )
+
+    def moment(self, z1: float, z2: float, k: float):
+        return integrate(
+            self._fc * self.z, (self.z, k - 1, k - nsimplify(3 / 7))
+        ).evalf(subs={"k": k})
 
 
 # Concrete class
