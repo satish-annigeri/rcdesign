@@ -146,14 +146,42 @@ class ConcreteLSMCompression(StressBlock):
         return self._fc.evalf(subs={"k": k, "z": z})
 
     def area(self, z1: float, z2: float, k: float):
-        return integrate(self._fc, (self.z, k - 1, k - nsimplify(3 / 7))).evalf(
-            subs={"k": k}
-        )
+        if k <= 1:
+            raise ValueError
+        if z1 > z2:
+            z1, z2 = z2, z1
+        if z1 < (k - 1) or (z2 > k):
+            raise ValueError
+        if z2 <= k - 3 / 7:  # Parabolic only
+            a1 = integrate(self._fc, (self.z, z1, z2)).evalf(subs={"k": k})
+            a2 = 0.0
+        elif z1 >= k - 3 / 7:  # Rectangular only
+            a1 = 0.0
+            a2 = integrate(1, (self.z, z1, z2)).evalf(subs={"k": k})
+        else:  # Partly parabolic, partly rectangular
+            a1 = integrate(self._fc, (self.z, z1, k - 3 / 7)).evalf(subs={"k": k})
+            a2 = integrate(1, (self.z, k - 3 / 7, z2)).evalf(subs={"k": k})
+        return a1 + a2
 
     def moment(self, z1: float, z2: float, k: float):
-        return integrate(
-            self._fc * self.z, (self.z, k - 1, k - nsimplify(3 / 7))
-        ).evalf(subs={"k": k})
+        if k <= 1:
+            raise ValueError
+        if z1 > z2:
+            z1, z2 = z2, z1
+        if z1 < (k - 1) or (z2 > k):
+            raise ValueError
+        if z2 <= k - 3 / 7:  # Parabolic only
+            m1 = integrate(self._fc * self.z, (self.z, z1, z2)).evalf(subs={"k": k})
+            m2 = 0.0
+        elif z1 >= k - 3 / 7:  # Rectangular only
+            m1 = 0.0
+            m2 = integrate(self.z, (self.z, z1, z2)).evalf(subs={"k": k})
+        else:  # Partly parabolic, partly rectangular
+            m1 = integrate(self._fc * self.z, (self.z, z1, k - 3 / 7)).evalf(
+                subs={"k": k}
+            )
+            m2 = integrate(self.z, (self.z, k - 3 / 7, z2)).evalf(subs={"k": k})
+        return m1 + m2
 
 
 # Concrete class

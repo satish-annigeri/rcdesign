@@ -196,8 +196,48 @@ class TestLSMCompression:
         k = 1.5
         assert csb.ec(k, k - 3 / 7) == 1
         assert csb.stress(k, k - 3 / 7) == 1
-        assert isclose(csb.area(k, k - 3 / 7, k), 0.517248677248677)
-        assert isclose(csb.moment(k, k - 3 / 7, k), 0.414149659863946)
+        assert isclose(csb.area(k - 1, k - 3 / 7, k), 0.517248677248677)
+        assert isclose(csb.moment(k - 1, k - 3 / 7, k), 0.414149659863946)
+        assert csb.ecmin(k) == (k - 1) / (k - 3 / 7)
+        assert csb.ecmax(k) == 1.4
+        with pytest.raises(ValueError):
+            assert csb.ec(0.9, k)
+
+    def test_lsmcomp_02(self):
+        csb = ConcreteLSMCompression("LSM Compression")
+        k = 1.5
+        with pytest.raises(ValueError):
+            assert csb.area(k - 1, k, 0.9)
+        with pytest.raises(ValueError):
+            assert csb.area(k - 1.1, k, k)
+        with pytest.raises(ValueError):
+            assert csb.area(k - 1, k + 0.1, k)
+        # parabolic portion
+        assert isclose(csb.area(k - 1, k - 3 / 7, k), 0.517248677248677)
+        # z1 and z2 reversed
+        assert isclose(csb.area(k - 3 / 7, k - 1, k), 0.517248677248677)
+        # rectangular portion
+        assert isclose(csb.area(k - 3 / 7, k, k), 0.428571428571429)
+        # both parabolic and rectangular portions
+        assert isclose(csb.area(k - 1, k, k), 0.945820105820106)
+
+    def test_lsmcomp_03(self):
+        csb = ConcreteLSMCompression("LSM Compression")
+        k = 1.5
+        with pytest.raises(ValueError):
+            assert csb.moment(k - 1, k, 0.9)
+        with pytest.raises(ValueError):
+            assert csb.moment(k - 1.1, k, k)
+        with pytest.raises(ValueError):
+            assert csb.moment(k - 1, k + 0.1, k)
+        # parabolic portion
+        assert isclose(csb.moment(k - 1, k - 3 / 7, k), 0.414149659863946)
+        # z1 and z2 reversed
+        assert isclose(csb.moment(k - 3 / 7, k - 1, k), 0.414149659863946)
+        # rectangular portion
+        assert isclose(csb.moment(k - 3 / 7, k, k), 0.551020408163265)
+        # both parabolic and rectangular portions
+        assert isclose(csb.moment(k - 1, k, k), 0.965170068027211)
 
 
 class TestConcrete:
