@@ -141,9 +141,9 @@ class TestCSB:
         sb = ConcreteLSMFlexure("IS456_LSFlexure")
         assert isclose(sb.moment(0.6, 1, 0.0035), moment(0.6, 1, k))
 
-    def test_csb_16(self):
-        with pytest.raises(TypeError):
-            assert StressBlock("Stress Block").stress(0)
+    # def test_csb_16(self):
+    #     with pytest.raises(TypeError):
+    #         assert StressBlock("Stress Block").stress(0)
 
     def test_csb_17(self):
         sb = ConcreteLSMFlexure("IS456_LSFlexure")

@@ -8,9 +8,18 @@ from rcdesign.is456.material.rebar import (
     Stirrups,
     BentupBars,
     ShearRebarGroup,
+    LateralTies,
 )
-from rcdesign.is456.material.concrete import ConcreteLSMFlexure, Concrete
-from rcdesign.is456.section import RectBeamSection, FlangedBeamSection
+from rcdesign.is456.material.concrete import (
+    ConcreteLSMCompression,
+    ConcreteLSMFlexure,
+    Concrete,
+)
+from rcdesign.is456.section import (
+    RectBeamSection,
+    FlangedBeamSection,
+    RectColumnSection,
+)
 from rcdesign.utils import floor, rootsearch
 
 
@@ -470,3 +479,27 @@ class TestFlangedBeamSection:
         C1, _ = tsec.C(xu, ecu)
         T2, _ = tsec.T(xu, ecu)
         assert isclose(C1, T2)
+
+
+class TestRectColumn:
+    def test_rectcol_01(self):
+        m20 = Concrete("M20", 20, ConcreteLSMCompression)
+        long_st = RebarGroup(
+            RebarHYSD("Fe 415", 415),
+            [RebarLayer([20, 20, 20], 50), RebarLayer([20, 20, 20], 50)],
+        )
+        lat_ties = LateralTies(RebarHYSD("Fe 415", 415), 8)
+        col = RectColumnSection(230, 600, m20, long_st, lat_ties, 40)
+        assert col.Asc == 6 * pi * 20 ** 2 / 4
+        assert col.k(1200) == 2
+
+    def test_rectcol_02(self):
+        m20 = Concrete("M20", 20, ConcreteLSMCompression)
+        long_st = RebarGroup(
+            RebarHYSD("Fe 415", 415),
+            [RebarLayer([20, 20, 20], 50), RebarLayer([20, 20, 20], 50)],
+        )
+        lat_ties = LateralTies(RebarHYSD("Fe 415", 415), 8)
+        col = RectColumnSection(230, 600, m20, long_st, lat_ties, 40)
+        assert col.C(500) == 0.0
+        # assert col.C(900) == 230 * 0.945820105820106

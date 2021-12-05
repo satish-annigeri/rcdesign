@@ -623,3 +623,16 @@ class ShearRebarGroup:
         for sh_reinf in self.shear_reinforcement:
             s += f"{sh_reinf}\n"
         return s
+
+
+class LateralTies:
+    def __init__(self, rebar: Rebar, bar_dia: int, n: int = 1):
+        self.rebar = rebar
+        self.n = n
+        self.bar_dia = bar_dia
+
+    def __repr__(self):
+        s = f"Lateral Ties: {self.rebar} - {self.bar_dia}"
+        if self.n > 1:
+            s += " {self.n}"
+        return s

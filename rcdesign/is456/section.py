@@ -9,7 +9,13 @@ from scipy.optimize import brentq
 
 
 from .material.concrete import Concrete
-from .material.rebar import Rebar, RebarGroup, ShearRebarGroup, ShearReinforcement
+from .material.rebar import (
+    Rebar,
+    RebarGroup,
+    ShearRebarGroup,
+    ShearReinforcement,
+    LateralTies,
+)
 from rcdesign.utils import floor
 
 from ..utils import rootsearch
@@ -37,10 +43,6 @@ class Section(ABC):  # pragma: no cover
         self.conc = conc
         self.long_steel = long_steel
         self.clear_cover = clear_cover
-
-    @abstractmethod
-    def C(self, xu: float, ecmax: float):
-        pass
 
 
 """Class to repersent a rectangular beam section"""
@@ -360,3 +362,44 @@ class FlangedBeamSection(RectBeamSection):
         vu = vuc + sum(vus)
         s += f"{'Vu = ':>5}{vu/1e3:.2f} kN\n"
         return s
+
+
+class RectColumnSection(Section):
+    def __init__(
+        self,
+        b: float,
+        D: float,
+        conc: Concrete,
+        long_steel: RebarGroup,
+        lat_ties: LateralTies,
+        clear_cover: float,
+    ):
+        super().__init__(DesignForceType.COLUMN, conc, long_steel, clear_cover)
+        self.b = b
+        self.D = D
+        self.long_steel = long_steel
+        self.lat_ties = lat_ties
+
+    @property
+    def Asc(self) -> float:
+        return self.long_steel.area
+
+    def __repr__(self):
+        s = f"Rectangular Column {self.b} x {self.D}\n"
+        return s
+
+    def area(self, xu: float) -> float:
+        k = xu / self.D
+        return self.conc.stress_block.area(k - 1, k, k)
+
+    def C(self, xu: float):
+        k = xu / self.D
+        if k <= 1:  # NA within the section
+            C = 0.0
+        else:  # NA outside the section
+            a = self.area(xu)
+            C = a * self.b
+        return C
+
+    def k(self, xu: float) -> float:
+        return xu / self.D

@@ -226,19 +226,6 @@ class Concrete:
         else:
             raise ValueError("x/xu = %.4f. Must be between 0 and 1" % (x_xu))
 
-    def area(self, x1_xu: float, x2_xu: float, fd: float = 1.0) -> float:
-        factor = self.stress_block.area(x1_xu, x2_xu)
-        return factor * fd
-
-    def moment(self, x1_xu: float, x2_xu: float, fd: float = 1.0) -> float:
-        factor = self.stress_block.moment(x1_xu, x2_xu)
-        return factor * fd
-
-    def centroid(self, x1_xu: float, x2_xu: float, fd: float = 1.0) -> float:
-        m = self.moment(x1_xu, x2_xu)
-        a = self.area(x1_xu, x2_xu)
-        return m / a
-
     def tauc_max(self):
         tauc = np.array([[15, 20, 25, 30, 35, 40], [2.5, 2.8, 3.1, 3.5, 3.7, 4.0]])
         if self.fck < 15:
@@ -265,6 +252,19 @@ class Concrete:
         return num / den
 
     def __repr__(self) -> str:
-        s = f"Stress Block {self.stress_block.label} - {self.label}: "
-        s += f"fck = {self.fck:.2f} N/mm^2, fd = {self.fd:.2f} N/mm^2"
+        # s = f"Stress Block {self.stress_block.label} - {self.label}: "
+        s = f"fck = {self.fck:.2f} N/mm^2, fd = {self.fd:.2f} N/mm^2"
         return s
+
+    def area(self, x1_xu: float, x2_xu: float, fd: float = 1.0) -> float:
+        factor = self.stress_block.area(x1_xu, x2_xu)
+        return factor * fd
+
+    def moment(self, x1_xu: float, x2_xu: float, fd: float = 1.0) -> float:
+        factor = self.stress_block.moment(x1_xu, x2_xu)
+        return factor * fd
+
+    def centroid(self, x1_xu: float, x2_xu: float, fd: float = 1.0) -> float:
+        m = self.moment(x1_xu, x2_xu)
+        a = self.area(x1_xu, x2_xu)
+        return m / a
