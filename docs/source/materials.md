@@ -1,23 +1,29 @@
 # Materials
 The primary materials in reinforced concrete are:
 
-1. Concrete
+1. Concrete stress block
+2. Concrete
 2. Reinforcement bars
    1. Mild steel reinforcement bars with definite yield point
    2. High yield strength deformed bars with piece-wise linear stress-strain relation
+
+## Concrete Stress Block
+Concrete stress block repesents the strain distribution and the stress-strain relation so as to be able to obtain strain and stress at a given location as well as obtain the area and first moment of area of the stress distribution which leads to calculation of axial compressive force and moment due to axial compressive force abouth the neutral axis for the case of rectangular sections.
+
+The attributes of a class to represent concrete stress block for limit state method of design are:
+1. `label`: A string representing a label. It will be used as a label in output
+2. `ecy`: Yield strain $\epsilon_{cy}=0.002$, and
+3. `ecu`: Ultimate strain $\epsilon_{cu}=0.0035$
+
+Similarly, a class to repesent the stress block for working stress method of design could be implemented.
 
 ## Concrete
 The attributes of concrete that will be represented are:
 
 1. `label`: A string representing a label. It will be used as a label in output
-2. `fck`: Characteristic strength of concrete in N/mm$^2$
+2. `fck`: Characteristic strength of concrete in $\text{N/mm}^2$
 3. `gamma_m`: Partial safety factor for material, which is specified in IS&nbsp;456:2000 as 1.5
-4. `density`: Density of concrete in kN/m$^3$
-5. `stress_block`: Stress block specifying the stress-strain relation for concrete. This will depend on whether analysis or design is based on the Limit State Method&nbsp;(LSM) or Working Stress Method&nbsp;(WSM).
-
-
-### Concrete Stress Block
-Design or analysis of a section requires the determination of stress for a given strain. The stress-strain relation is different for the LSM and WSM. While characteristic strength $f_{ck}$ remains the common parameter, LSM and WSM use different parameters to obtain the stress-strain relation.
+4. `density`: Density of concrete in $\text{kN/m}^3$
 
 ## Reinforcement Bars
 `Rebar` is an abstract class representing a steel bar used as longitudinal or shear reinforcement. Reinforcement bars can be of different types, such as mild steel bars and high yield strength deformed&nbsp;(HYSD) bars. Both of them have some common attributes but have significantly different stress-strain relationships. The common attributes that will be available in all child classes are:
@@ -25,7 +31,7 @@ Design or analysis of a section requires the determination of stress for a given
 1. `label`: A string representing a label to refer to the type of reinforcement bar.
 2. `fy`: Characteristic strength $f_{y}$ of the bar.
 3. `gamma_m`: Partial safety factor for material, specifid by IS&nbsp;456:2000 to be $\gamma_m = 1.15$ for all types of reinforcement bars.
-4. `density`: Density of steel, usually taken to be 78.5&nbsp;kN/m$^3$. This will be used to calculate the weight of steel reinforcement.
+4. `density`: Density of steel, usually taken to be 78.5&nbsp;$\text{kN/m}^3$. This will be used to calculate the weight of steel reinforcement.
 5. `Es`: Modulus of elasticity for steel, specifid by IS&nbsp;456:2000 to be $E_s = 2 \times 10^5$ for all types of reinforcement bars.
 
 Reinforcement bars are specified as having a linear stress-strain relationship up to a certain point and stress is assumed to remain constant beyond yield up to infinity. While no material is truly infinitely ductile, if the ductile portion is sufficiently long in relation so as to permit concrete to reach its ultimate strain, it would be justified to call it infinitely ductile.
@@ -39,7 +45,8 @@ High Yield Strength Deformed (HYSD) reinforcement bars, repesented by the `Rebar
 ## Layers of Reinforcement Bars
 Reinforcement bars are placed in layers parallel to one of the principal axes of a section. The atrributes of a layer of reinforcement bars are:
 
-1. `dia`: List of diameter of bars in the layer. It is assumed that all bars in a layer are of the same type.
+1. `rebar`: An object of type `Rebar` representing the type of reinforcement bar and its properties. Thus it is presumed that all bars in a layer are of the same type.
+2. `dia`: List of diameter of bars in the layer. It is assumed that all bars in a layer are of the same type.
 2. `_dc`: Distance of the centroid of the layer from one of the edged of the section. If the distance is positive, it is interpreted as the distance from the highly compressed edge. If the distance is negative, it is interpreted as the distance from the tension edge. This assumes that the section has an edge parallel to one of the principal axes.
 3. `_xc`: Distance of the centroid of the layer from the highly compressed edge. This value is calculated once the size of the section is known. It is _not_ an input.
 4. `stress_type`: A string, 'C' if the layer is in compression and 'T' if it is tension. It is _not_ an input, but will be decided during analysis of the section depending on where the layer is located with respect to the neutral axis.
@@ -50,8 +57,7 @@ Layers of reinforcement bars in a section are arranged in groups. For example, o
 
 Attributes of a group of reinforcement bars are:
 
-1. `rebar`: An object of type `Rebar` representing the type of reinforcement bar and its properties. Thus it is presumed that all bars in all layers of a group are of the same reinforcement type.
-2. `layers`: List of objects of type `RebarLayer`. A group may have zero or more layers of reinforcement bars.
+1. `layers`: List of objects of type `RebarLayer`. A group may have zero or more layers of reinforcement bars.
 
 ## Shear Reinforcement
 Concrete, without any tension reinforcement has an ability to resist shear. However, when the shear force on a section exceeds the shear capacity of concrete, it will be necessary to either increase the depth of the cross section, if that is an option, or to provide shear reinforcement to resist the additional shear beyond the capacity of concrete if depth cannot be increased. Shear reinforcement can be provided in one of several ways:

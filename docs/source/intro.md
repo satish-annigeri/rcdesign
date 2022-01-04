@@ -18,5 +18,14 @@ The task of design can be broken down into determining the required section dime
 This project will adopt the Object Oriented Programming&nbsp;(OOP) approach to design and implement a set of classes and class hierarchies to represent the important components of reinforced concrete sections and structural elements. This approach is well suited to the problem at hand for several reasons:
 
 1. The concepts of data encapsulation is very helpful since each entity has several attributes and passing an object of a specific class will automatically carry its state in a single object. This will greatly reduce the number of arguments that must be passed to functions if it were to be implemented using the procedural programming approach.
-2. The concept of abstract classes and inheritance can repesent the relation between such entities as a rectangular beam section and a flanged beam section are concrete types of the abstract class such as a section. Similar relation exists between mild steel reinforcement bar and HYSD bar which are concrete classes of the abstract class such as reinforcement bar. Similarly, vertical stirrups, inclined stirrups and bent-up bars are concrete classes of the abstract class shear reinforcement.
-3. The concept of composition where a class is a synthesis of several components directly represents the construction of a class such as a section that consists of concrete, main reinforcement bars and shear reinforcement bars in addition to the attributes of a section such as its dimensions.
+2. The concept of abstract classes and inheritance can repesent the relation between such entities as a rectangular beam section and a flanged beam section are concrete types of the abstract class representing a section. Similar relation exists between mild steel reinforcement bar and HYSD bar which are concrete classes of the abstract class representing a reinforcement bar. Similarly, vertical stirrups, inclined stirrups and bent-up bars are concrete classes of the abstract class representing shear reinforcement.
+3. The concept of composition where a class is a synthesis of several components directly represents a class such as a section that consists of concrete, main reinforcement bars and shear reinforcement bars in addition to the attributes of a section such as its dimensions.
+
+This package will therefore consist of several abstract and concrete classes, at present, to represent the following:
+
+1. Concrete stress block
+2. Concrete
+3. Reinforcement bars, Mild steel reinforcement bars and HYSD reinforcement bars
+4. Reinforcement concrete section, Rectangular beam section, flanged beam section and rectangular column section
+
+Since it is decided to begin with analysis, the methods that are being implemented at present will aim to determine the limit state capacity of the different sections, such as $M_u$ and $V_u$ for beam sections and $P_u$ and $M_u$ for column sections, given the exact dimensions, material and reinforcement details.
