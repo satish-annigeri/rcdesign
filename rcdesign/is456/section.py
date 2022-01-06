@@ -3,22 +3,22 @@
 from math import isclose
 from enum import Enum
 from typing import Tuple, List
-from dataclasses import dataclass
-from abc import ABC, abstractmethod
+
+# from dataclasses import dataclass
+# from abc import ABC, abstractmethod
 from scipy.optimize import brentq
 
-
-from .material.concrete import Concrete
-from .material.rebar import (
-    Rebar,
+from rcdesign.is456 import ecy, ecu
+from rcdesign.is456.stressblock import LSMStressBlock
+from rcdesign.is456.concrete import Concrete
+from rcdesign.is456.rebar import (
     RebarGroup,
     ShearRebarGroup,
-    ShearReinforcement,
     LateralTies,
+    StressType,
+    StressLabel,
 )
-from rcdesign.utils import floor
-
-from ..utils import rootsearch
+from rcdesign.utils import rootsearch, underline, header
 
 
 # DesignForce class
@@ -31,34 +31,25 @@ class DesignForceType(Enum):
     SHEARWALL = 4
 
 
-class Section(ABC):  # pragma: no cover
-    def __init__(
-        self,
-        design_force_type: DesignForceType,
-        conc: Concrete,
-        long_steel: RebarGroup,
-        clear_cover: float,
-    ):
-        self.design_force_type = design_force_type
-        self.conc = conc
-        self.long_steel = long_steel
-        self.clear_cover = clear_cover
-
-
 """Class to repersent a rectangular beam section"""
 
 
-class RectBeamSection(Section):
+class RectBeamSection:
     def __init__(
         self,
         b: float,
         D: float,
+        csb: LSMStressBlock,
         conc: Concrete,
         long_steel: RebarGroup,
         shear_steel: ShearRebarGroup,
         clear_cover: float,
     ):
-        super().__init__(DesignForceType.BEAM, conc, long_steel, clear_cover)
+        self.design_force_type = DesignForceType.BEAM
+        self.csb = csb
+        self.conc = conc
+        self.long_steel = long_steel
+        self.clear_cover = clear_cover
         self.b = b
         self.D = D
 
@@ -69,83 +60,62 @@ class RectBeamSection(Section):
         self.long_steel.calc_xc(self.D)
         return None
 
-    def adjust_x(self, xu: float) -> None:
-        for layer in self.long_steel.layers:
-            # Calculate _xc from _dc
-            if layer._dc < 0:
-                layer._xc = self.D + layer._dc
-            else:
-                layer._xc = layer._dc
-            # Decide type of stress
-            if layer._xc < xu:
-                layer.stress_type = "compression"
-            elif layer._xc > xu:
-                layer.stress_type = "tension"
-            elif layer._xc == xu:
-                layer.stress_type = "neutral"
+    def calc_stress_type(self, xu: float) -> None:
+        self.calc_xc()
+        self.long_steel.calc_stress_type(xu)
 
-    def xumax(self, d: float = 1) -> float:
-        es_min = self.long_steel.rebar.es_min()
-        return 0.0035 / (es_min + 0.0035) * d
-
-    def mulim(self, d: float) -> float:
-        xumax = self.xumax() * d
-        return (17 / 21) * self.conc.fd * self.b * xumax * (d - (99 / 238) * xumax)
-
-    def C(self, xu: float, ecmax: float) -> Tuple[float, float]:
-        C, _, M, _ = self.force_moment(xu, ecmax)
-        return C, M
-
-    def force_moment(
-        self, xu: float, ecmax: float
-    ) -> Tuple[float, float, float, float]:
-        self.adjust_x(xu)
-        Fc = Mc = Ft = Mt = 0.0
-        area = self.conc.area(0, 1, self.conc.fd)
-        moment = self.conc.moment(0, 1, self.conc.fd)
-        Fcc = area * xu * self.b
-        Mcc = moment * xu ** 2 * self.b
-        Fc += Fcc
-        Mc += Mcc
-        Fsc = Msc = Fst = Mst = 0.0
-        Fsc, Msc, Fst, Mst = self.long_steel.force_moment(xu, self.conc, ecmax)
-        Fc += Fsc
-        Mc += Msc
-        Ft += Fst
-        Mt += Mst
-        return Fc, Ft, Mc, Mt
+    def C(self, xu: float, ecmax: float = ecu) -> Tuple[float, float]:
+        Fc, Mc, _, _ = self.F_M(xu, ecmax)
+        return Fc, Mc
 
     def T(self, xu: float, ecmax: float) -> Tuple[float, float]:
-        _, _T, _, _M = self.force_moment(xu, ecmax)
-        return _T, _M
+        _, _, Ft, Mt = self.F_M(xu, ecmax)
+        return Ft, Mt
 
-    def C_T(self, x: float, ecmax: float) -> float:
-        self.adjust_x(x)
-        C, T, _, _ = self.force_moment(x, ecmax)
+    def C_T(self, xu: float, ecmax: float = ecu) -> float:
+        self.calc_stress_type(xu)
+        C, _, T, _ = self.F_M(xu, ecmax)
         return C - T
 
-    def xu(self, ecmax: float) -> float:
+    def F_M(self, xu: float, ecmax: float = ecu) -> Tuple[float, float, float, float]:
+        # sb = LSMStressBlock("LSM Flexure")
+        self.calc_stress_type(xu)
+        Fc = Mc = Ft = Mt = 0.0
+        # Compression force - concrete
+        # Fcc = self.csb.C(0, 1, ecmax) * self.conc.fd * self.b * xu
+        # Mcc = self.csb.M(0, 1, ecmax) * self.conc.fd * self.b * xu ** 2
+        k = xu / self.D
+        Fcc = self.csb.C(0, k, k, ecmax) * self.conc.fd * self.b * self.D
+        Mcc = self.csb.M(0, k, k, ecmax) * self.conc.fd * self.b * self.D ** 2
+        # Compression force - compression steel
+        Fsc, Msc, Fst, Mst = self.long_steel.force_moment(
+            xu, self.csb, self.conc, ecmax
+        )
+        # Tension force in tension steel
+        Ft, Mt = self.long_steel.force_tension(xu, ecmax)
+        Fc = Fcc + Fsc
+        Mc = Mcc + Msc
+        return Fc, Mc, Ft, Mt
+
+    def xu(self, ecmax: float = ecu) -> float:
         dc_max = 10
 
         x1, x2 = rootsearch(self.C_T, dc_max, self.D, 10, ecmax)
         x = brentq(self.C_T, x1, x2, args=(ecmax,))
         return x
 
-    def Mu(self, xu: float, ecmax: float) -> float:
-        # Assuming area of tension steel to such as to produce a tension force equal to C
-        C, M = self.C(xu, ecmax)
-        return M + C * (self.eff_d(xu) - xu)
-
-    def analyse(self, ecmax: float) -> Tuple[float, float]:
-        xu = self.xu(ecmax)
-        Mu = self.Mu(xu, ecmax)
-        return xu, Mu
+    def Mu(self, xu: float, ecmax: float = ecu) -> float:
+        # Assuming area of tension steel to be such as to produce a tension force equal to C
+        _, Mc = self.C(xu, ecmax)
+        _, Mt = self.T(xu, ecmax)
+        M = Mc + Mt
+        return M
 
     def tauc(self, xu: float) -> float:
         return self.conc.tauc(self.pt(xu))
 
     def __repr__(self) -> str:
-        ecmax = self.conc.stress_block.ecu
+        ecmax = self.csb.ecu
         xu = self.xu(ecmax)
         return self.report(xu, ecmax)
 
@@ -156,36 +126,54 @@ class RectBeamSection(Section):
         return False
 
     def report(self, xu: float, ecmax: float) -> str:  # pragma: no cover
-        self.adjust_x(xu)
-        d = self.long_steel.report(xu, self.conc, self.long_steel.rebar, ecmax)
+        self.calc_xc()
+        self.calc_stress_type(xu)
+        k = xu / self.D
+        ecy = self.csb.ecy
+        # d = self.long_steel.report(xu, self.csb, self.conc, ecmax)
         s = f"RECTANGULAR BEAM SECTION: {self.b} x {self.D}\n"
-        s += f"FLEXURE\nEquilibrium NA = {xu:.2f} (ec,max = {ecmax:.6f})\n"
-        s += f"Concrete: {self.conc}\n"
-        Fc = self.b * self.conc.area(0, 1, self.conc.fd) * xu / 1e3
-        Mc = self.conc.moment(0, 1, self.conc.fd) * self.b * xu ** 2 / 1e6
-        s += f"{' ':>8}{'dc':>6}{'xc':>6}{'Bars':>12}{'Area':>10}{'Stress':>8}{'x NA':>10}{'Strain':>12}"
-        s += f"{'fs':>10}{'fc':>10}{'Force':>10}{'Moment':>10}\n"
-        s += f"{'Concrete':>8}{'C':>42}{xu:10.2f}{ecmax:12.4e}{' ':>10}"
-        s += f"{self.conc.fd:10.2f}{Fc:10.2f}{Mc:10.2f}\n"
+        s += (
+            f"FLEXURE\nEquilibrium NA = {xu:.2f} (k = {k:.2f}) (ec,max = {ecmax:.6f})\n"
+        )
+        fcc = self.csb._fc_(ecmax) * self.conc.fd
+        Fc = self.b * self.csb.C(0, k, k, ecmax) * self.conc.fd * self.D
+        Mc = self.csb.M(0, k, k) * self.conc.fd * self.b * self.D ** 2
+        hdr1 = f"{'fck':>6} {' ':>8} {' ':>12} {'ec_max':>12} {'Type':>4} "
+        hdr1 += f"{' ':>8} {'f_cc':>6} {'C (kN)':>8} {'M (kNm)':>8}"
+        s += hdr1 + "\n" + underline(hdr1) + "\n"
+        s += f"{self.conc.fck:6.2f} {' ':>8} {' ':>12} {ecmax:12.8f} {'C':>4} {' ':>8} {fcc:6.2f} "
+        s += f"{Fc / 1e3:8.2f} {Mc/ 1e6:8.2f}\n{underline(hdr1)}\n\n"
         Ft = 0.0
         Mt = 0.0
-        for L in d:
-            s += f"{'Rebar':>8}{L['dc']:6}{L['xc']:6}{L['bars']:>12}{L['area']:10.2f}{L['type']:>8}"
-            s += f"{abs(float(L['x'])):10.2f}{L['es']:12.4e}{L['fs']:10.2f}"
-            if L["type"] == "C":
-                s += f"{L['fc']:10.2f}"
-                Fc += float(L["F"]) / 1e3
-                Mc += float(L["M"]) / 1e6
-            else:
-                s += f"{' ':>10}"
-                Ft += float(L["F"]) / 1e3
-                Mt += float(L["M"]) / 1e6
-            F = float(L["F"]) / 1e3
-            M = float(L["M"]) / 1e6
-            s += f"{F:10.2f}{M:10.2f}\n"
-        s += f"{' ':>92}{'-'*10}{'-'*10}\n"
-        C_T = Fc - Ft if not isclose(Fc, Ft) else 0.0
-        s += f"{C_T:102.2f}{(Mc + Mt):10.2f}\n"
+        hdr2 = f"{'fy':>6} {'Bars':>12} {'xc':>8} {'Strain':>12} {'Type':>4} {'f_sc':>8} {'f_cc':>6}"
+        hdr2 += f" {'C (kN)':>8} {'M (kNm)':>8}"
+        s += f"{hdr2}\n{underline(hdr2)}\n"
+        for L in self.long_steel.layers:
+            z = k - (L._xc / self.D)
+            esc = self.csb.ec(z, k) * ecy
+            stress_type = L.stress_type(xu)
+            fsc = L.rebar.fs(esc)
+            s += f"{L.rebar.fy:6.0f} {L.bar_list():>12} {L._xc:8.2f} {esc:12.8f} "
+            s += f"{StressLabel[stress_type][0]:>4} {fsc:8.2f} "
+            if stress_type == StressType.STRESS_COMPRESSION:
+                fcc = self.csb.fc(z, k, ecmax) * self.conc.fd
+                c = L.area * (fsc - fcc)
+                s += f"{fcc:6.2f} "
+            elif L._stress_type == StressType.STRESS_TENSION:
+                c = L.area * fsc
+                s += f"{' ':>6} "
+
+            m = c * (k * self.D - L._xc)
+            s += f"{c/1e3:8.2f} {m/1e6:8.2f}\n"
+            Ft += c
+            Mt += m
+        s += f"{underline(hdr2)}\n"
+        if len(self.long_steel.layers) > 1:
+            C_M = f"{Ft/1e3:8.2f} {Mt/1e6:8.2f}"
+            s += f"{' '*62} {C_M}\n{' '*62} {underline(C_M, '=')}\n"
+        F = 0.0 if isclose(Fc + Ft, 0, abs_tol=1e-10) else Fc + Ft
+        C_M = f"{F/1e3:8.2f} {(Mc + Mt)/1e6:8.2f}"
+        s += f"{' ':>62} {C_M}\n{' ':>62}\n"
         s += f"SHEAR\n{self.shear_steel}\n"
         s += f"CAPACITY\n{'Mu = ':>5}{self.Mu(xu, ecmax)/1e6:.2f} kNm\n"
         vuc, vus = self.Vu(xu)
@@ -194,24 +182,16 @@ class RectBeamSection(Section):
         return s
 
     def eff_d(self, xu: float) -> float:
-        a = 0.0
-        m = 0.0
-        for L in sorted(self.long_steel.layers):
-            if L._xc >= xu:
-                _a = L.area
-                _m = _a * L._xc
-                a += _a
-                m += _m
-        return m / a
+        _, ct = self.long_steel.centroid(xu)
+        return ct
 
     def pt(self, xu: float) -> float:
-        d = self.eff_d(xu)
         ast = 0.0
         for L in sorted(self.long_steel.layers):
             if L._xc > xu:
                 ast += L.area
+        d = self.eff_d(xu)
         pt = ast / (self.b * d) * 100
-        # print("xxx", d, ast, pt)
         return pt
 
     def Vu(self, xu: float) -> Tuple[float, List[float]]:
@@ -222,8 +202,12 @@ class RectBeamSection(Section):
         d = self.eff_d(xu)
         vuc = tauc * self.b * d
         vus = self.shear_steel.Vus(d)
-        # print("===", vuc, vus)
         return vuc, vus
+
+    def analyse(self, ecmax: float = ecu) -> Tuple[float, float]:
+        xu = self.xu(ecmax)
+        Mu = self.Mu(xu, ecmax)
+        return xu, Mu
 
 
 """Class to repersent flanged section"""
@@ -236,12 +220,13 @@ class FlangedBeamSection(RectBeamSection):
         D: float,
         bf: float,
         Df: float,
+        csb: LSMStressBlock,
         conc: Concrete,
         long_steel: RebarGroup,
         shear_steel: ShearRebarGroup,
         clear_cover: float,
     ):
-        super().__init__(bw, D, conc, long_steel, shear_steel, clear_cover)
+        super().__init__(bw, D, csb, conc, long_steel, shear_steel, clear_cover)
         self.bf = bf
         self.Df = Df
 
@@ -253,109 +238,115 @@ class FlangedBeamSection(RectBeamSection):
     def bw(self, _bw) -> None:
         self.b = _bw
 
-    def Cw(self, xu: float, ecmax: float) -> Tuple[float, float]:
-        area = self.conc.area(0, 1, self.conc.fd)
-        moment = self.conc.moment(0, 1, self.conc.fd)
+    def Cw(self, xu: float, ecmax: float = ecu) -> Tuple[float, float]:
+        k = xu / self.D
+        area = self.csb.C(0, k, k, ecmax) * self.conc.fd
+        moment = self.csb.M(0, k, k, ecmax) * self.conc.fd
 
-        C = area * xu * self.bw
-        M = moment * xu ** 2 * self.bw
+        C = area * self.bw * self.D
+        M = moment * self.bw * self.D ** 2
         return C, M
 
-    def Cf(self, xu: float) -> Tuple[float, float]:
+    def Cf(self, xu: float, ecmax: float = ecu) -> Tuple[float, float]:
         df = xu if xu <= self.Df else self.Df
-        x1 = xu - df
-        area = self.conc.area(x1 / xu, 1, self.conc.fd)
-        moment = self.conc.moment(x1 / xu, 1, self.conc.fd)
-
-        C = area * xu * (self.bf - self.bw)
-        M = moment * xu ** 2 * (self.bf - self.bw)
+        k = xu / self.D
+        z1 = (xu - df) / self.D
+        z2 = k
+        area = self.csb.C(z1, z2, k, ecmax) * self.conc.fd
+        moment = self.csb.M(z1, z2, k, ecmax) * self.conc.fd
+        C = area * self.D * (self.bf - self.bw)
+        M = moment * self.D ** 2 * (self.bf - self.bw)
         return C, M
 
-    def C(self, xu: float, ecmax: float) -> Tuple[float, float]:
+    def C_M(self, xu: float, ecmax: float = ecu) -> Tuple[float, float]:
         # Compression force and moment due to concrete of web
         C1, M1 = self.Cw(xu, ecmax)
+        C2, M2 = self.Cf(xu, ecmax)
         # Compression force and moment due to compression reinforcement bars
         if self.has_compr_steel(xu):
-            C2, M2 = self.long_steel.force_compression(xu, self.conc, ecmax)
+            C3, M3 = self.long_steel.force_compression(xu, self.csb, self.conc, ecmax)
         else:
-            C2 = M2 = 0.0
-
-        # Compression force and moment due to concrete of flange
-        C3, M3 = self.Cf(xu)
+            C3 = M3 = 0.0
 
         # Sum it all up
         C = C1 + C2 + C3
         M = M1 + M2 + M3
         return C, M
 
-    def Mu(self, xu: float, ecmax: float) -> float:
-        d = self.eff_d(xu)
-        # Based on compression force C, assuming the right amount of tension steel
-        C, M = self.C(xu, ecmax)
-        Mu = M + C * (d - xu)
+    def Mu(self, xu: float, ecmax: float = ecu) -> float:
+        # Cc and Ct must be equal for beams, if not, NA chosen does not conform to equilibrium
+        Cc, Mc = self.C_M(xu, ecmax)
+        Ct, Mt = self.T(xu, ecmax)
+        Mu = Mc + Mt
         return Mu
 
     def __repr__(self) -> str:
-        ecmax = self.conc.stress_block.ecu
+        ecmax = self.csb.ecu
         xu = self.xu(ecmax)
         return self.report(xu, ecmax)
 
-    def C_T(self, x: float, ecmax: float) -> float:
-        C, _ = self.C(x, ecmax)
-        T, _ = self.T(x, ecmax)
-        # if C and T:
+    def C_T(self, xu: float, ecmax: float = ecu) -> float:
+        C, _ = self.C_M(xu, ecmax)
+        T, _ = self.T(xu, ecmax)
         return C - T
-        # else:
-        #     return None
 
-    def xu(self, ecmax: float) -> float:
-        # x1, x2 = rootsearch(self.C_T, self.t_steel.layers[0].dc, self.D, 10, ecmax)
+    def xu(self, ecmax: float = ecu) -> float:
         x1, x2 = rootsearch(self.C_T, 10, self.D, 10, ecmax)
         x = brentq(self.C_T, x1, x2, args=(ecmax,))
         return x
 
-    def analyse(self, ecmax: float) -> Tuple[float, float]:
-        xu = self.xu(ecmax)
-        Mu = self.Mu(xu, ecmax)
-        return xu, Mu
-
-    def report(self, xu: float, ecmax: float) -> str:  # pragma: no cover
-        self.adjust_x(xu)
-        d = self.long_steel.report(xu, self.conc, self.long_steel.rebar, ecmax)
+    def report(self, xu: float, ecmax: float = ecu) -> str:  # pragma: no cover
+        self.calc_xc()
+        self.calc_stress_type(xu)
+        k = xu / self.D
+        ecy = self.csb.ecy
         s = f"FLANGED BEAM SECTION - Web: {self.b} x {self.D}, Flange: {self.bf} x {self.Df}\n"
         s += f"FLEXURE\nEquilibrium NA = {xu:.2f} (ec,max = {ecmax:.6f})\n"
         s += f"Concrete: {self.conc}\n"
         Fcw, Mcw = self.Cw(xu, ecmax)
         Fcf, Mcf = self.Cf(xu)
-        Fcw /= 1e3
-        Fcf /= 1e3
-        Mcw /= 1e6
-        Mcf /= 1e6
         Fc = Fcw + Fcf
         Mc = Mcw + Mcf
-        s += f"{' ':>8}{'dc':>6}{'xc':>6}{'Bars':>12}{'Area':>10}{'Stress':>8}{'x NA':>10}{'Strain':>12}"
-        s += f"{'fs':>10}{'fc':>10}{'Force':>10}{'Moment':>10}\n"
-        s += f"{'Concrete':>8}{' ':>38}{'C':>4}{xu:10.2f}{ecmax:12.4e}{' ':>10}"
-        s += f"{self.conc.fd:10.2f}{Fc:10.2f}{Mc:10.2f}\n"
+        hdr1 = f"{'fck':>6} {'Breadth':>10} {'Depth':>10} {'ec_min':>12}  {'ec_max':>12} {'Type':>6} "
+        hdr1 += f"{'C (kN)':>8} {'M (kNm)':>8}"
+        # Web
+        s += hdr1 + "\n" + underline(hdr1) + "\n"
+        s += f"{self.conc.fck:6.0f} {self.bw:10.2f} {self.D:10.2f} {0:12.8f}  {ecmax:12.8f} {'C':>6} "
+        s += f"{Fcw/1e3:8.2f} {Mcw/1e6:8.2f}\n"
+        # Flange
+        s += f"{self.conc.fck:6.0f} {self.bf:10.2f} {self.Df:10.2f} {' ':>12}  {ecmax:12.8f} {'C':>6} "
+        s += f"{Fcf/1e3:8.2f} {Mcf/1e6:8.2f}\n"
+        s += f"{underline(hdr1)}\n"
+        s += f"{' ':>62} {(Fcw+Fcf)/1e3:8.2f} {(Mcw+Mcf)/1e6:8.2f}\n"
+        hdr2 = f"{'fy':>6} {'Bars':>12} {'xc':>8} {'Strain':>12} {'Type':>4} {'f_sc':>8} {'f_cc':>6}"
+        hdr2 += f" {'C (kN)':>8} {'M (kNm)':>8}"
+        s += f"\n{hdr2}\n{underline(hdr2)}\n"
         Ft = 0.0
         Mt = 0.0
-        for L in d:
-            s += f"{'Rebar':>8}{L['dc']:6}{L['xc']:6}{L['bars']:>12}{L['area']:10.2f}{L['type']:>8}"
-            s += f"{abs(float(L['x'])):10.2f}{L['es']:12.4e}{L['fs']:10.2f}"
-            if L["type"] == "C":
-                s += f"{L['fc']:10.2f}"
-                Fc += float(L["F"]) / 1e3
-                Mc += float(L["M"]) / 1e6
+        for L in self.long_steel.layers:
+            z = k - (L._xc / self.D)
+            esc = self.csb.ec(z, k) * ecy
+            stress_type = L.stress_type(xu)
+            fsc = L.rebar.fs(esc)
+            s += f"{L.rebar.fy:6.0f} {L.bar_list():>12} {L._xc:8.2f} {esc:12.8f} "
+            s += f"{StressLabel[stress_type][0]:>4} {fsc:8.2f} "
+            if stress_type == StressType.STRESS_COMPRESSION:
+                fcc = self.csb.fc(z, k, ecmax) * self.conc.fd
+                c = L.area * (fsc - fcc)
+                s += f"{fcc:6.2f} "
             else:
-                s += f"{' ':>10}"
-                Ft += float(L["F"]) / 1e3
-                Mt += float(L["M"]) / 1e6
-            F = float(L["F"]) / 1e3
-            M = float(L["M"]) / 1e6
-            s += f"{F:10.2f}{M:10.2f}\n"
-        s += f"{' ':>92}{'-'*10}{'-'*10}\n"
-        C_T = Fc - Ft if not isclose(Fc, Ft) else 0.0
-        s += f"{C_T:102.2f}{(Mc + Mt):10.2f}\n"
+                c = L.area * fsc
+                s += f"{' ':>6} "
+            m = c * (k * self.D - L._xc)
+            s += f"{c/1e3:8.2f} {m/1e6:8.2f}\n"
+            Ft += c
+            Mt += m
+        s += f"{underline(hdr2)}\n"
+        if len(self.long_steel.layers) > 1:
+            C_M = f"{Ft/1e3:8.2f} {Mt/1e6:8.2f}"
+            s += f"{' ':>62} {C_M}\n{' ':>62} {underline(C_M, '=')}\n"
+        F = 0.0 if isclose(Fcw + Fcf + Ft, 0, abs_tol=1e-10) else Fcw + Fcf + Ft
+        s += f"{' ':>62} {F/1e3:8.2f} {(Mc + Mt)/1e6:8.2f}\n"
         s += f"SHEAR\n{self.shear_steel}\n"
         s += f"CAPACITY\n{'Mu = ':>5}{self.Mu(xu, ecmax)/1e6:.2f} kNm\n"
         vuc, vus = self.Vu(xu)
@@ -364,17 +355,22 @@ class FlangedBeamSection(RectBeamSection):
         return s
 
 
-class RectColumnSection(Section):
+class RectColumnSection:
     def __init__(
         self,
         b: float,
         D: float,
+        csb: LSMStressBlock,
         conc: Concrete,
         long_steel: RebarGroup,
         lat_ties: LateralTies,
         clear_cover: float,
     ):
-        super().__init__(DesignForceType.COLUMN, conc, long_steel, clear_cover)
+        self.design_force_type = DesignForceType.COLUMN
+        self.csb = csb
+        self.conc = conc
+        self.long_steel = long_steel
+        self.clear_cover = clear_cover
         self.b = b
         self.D = D
         self.long_steel = long_steel
@@ -384,22 +380,104 @@ class RectColumnSection(Section):
     def Asc(self) -> float:
         return self.long_steel.area
 
-    def __repr__(self):
-        s = f"Rectangular Column {self.b} x {self.D}\n"
-        return s
-
-    def area(self, xu: float) -> float:
-        k = xu / self.D
-        return self.conc.stress_block.area(k - 1, k, k)
-
-    def C(self, xu: float):
-        k = xu / self.D
-        if k <= 1:  # NA within the section
-            C = 0.0
-        else:  # NA outside the section
-            a = self.area(xu)
-            C = a * self.b
-        return C
-
     def k(self, xu: float) -> float:
         return xu / self.D
+
+    def C_M(self, xu: float) -> Tuple[float, float]:
+        self.long_steel.calc_xc(self.D)
+        k = self.k(xu)
+        if xu <= self.D:
+            z1 = 0.0
+            z2 = k
+        else:
+            z1 = k - 1
+            z2 = k
+        a = self.csb.C(z1, z2, k)
+        Cc = a * self.conc.fd * self.b * self.D
+        m = self.csb.M(z1, z2, k)
+        Mc = m * self.conc.fd * self.b * self.D ** 2
+        Cs = 0.0
+        Ms = 0.0
+        for L in self.long_steel.layers:
+            asc = L.area
+            x = xu - L.xc
+            z = x / self.D
+            esc = self.csb.ec(z, k) * self.csb.ecy
+            fsc = L.rebar.fs(esc)
+            fcc = self.csb.fc(z, k) * self.conc.fd
+            if fsc >= 0:
+                _Cs = asc * (fsc - fcc)
+            else:
+                _Cs = asc * fsc
+            Cs += _Cs
+            Ms += _Cs * abs(x)
+        return Cc + Cs, Mc + Ms
+
+    def __repr__(self) -> str:
+        s = f"Rectangular Column {self.b} x {self.D}\n"
+        s += f"Concrete: {self.conc} Clear Cover: {self.clear_cover}\n"
+        self.long_steel.calc_xc(self.D)
+        s += f"{'fy':>6} {'Bars':>8} {'xc':>8}\n"
+        for L in self.long_steel.layers:
+            s += f"{L.rebar.fy:6.0f} {L.bar_list():>8} {L._xc:8.2f}\n"
+        return s
+
+    def report(self, xu: float) -> str:
+        k = xu / self.D
+        ecy = self.csb.ecy
+        s = f"Rectangular Column {self.b} x {self.D} xu = {xu:.2f} (k = {k:.2f})\n"
+        s += f"Concrete: {self.conc} Clear Cover: {self.clear_cover}\n"
+        # Concrete
+        fd = self.conc.fd
+        if k <= 1:
+            z1 = 0.0
+        else:
+            z1 = k - 1
+        z2 = k
+        ecmin = self.csb.ec(z1, k) * ecy
+        ecmax = self.csb.ec(z2, k) * ecy
+        fsc1 = self.csb.fc(z1, k) * fd
+        fsc2 = self.csb.fc(z2, k) * fd
+        Cc = self.csb.C(z1, z2, k) * fd * self.b * self.D
+        Mc = self.csb.M(z1, z2, k) * fd * self.b * self.D ** 2
+        hdr1 = f"{'fck':>6} {' ':>8} {'ecmin':>12} {'ecmax':>12} {'Type':>4} {'fsc1':>8} {'fsc2':>6} "
+        hdr1 += f"{'Cc':>8} {'Mc':>8}"
+        s += f"\n{header(hdr1)}\n"
+        # s += header(hdr1) + "\n"
+        s += f"{self.conc.fck:6.2f} {' ':>8} {ecmin:12.8f} {ecmax:12.8f} {'C':>4} {fsc1:8.2f} {fsc2:6.2f} "
+        s += f"{Cc/1e3:8.2f} {Mc/1e6:8.2f}\n{'-'*len(hdr1)}\n"
+        # Longitudinal steel
+        self.long_steel.calc_xc(self.D)
+        self.long_steel.calc_stress_type(xu)
+        hdr2 = f"{'fy':>6} {'Bars':>12} {'xc':>8} {'Strain':>12} {'Type':>4} {'fsc':>8} {'fcc':>6} "
+        hdr2 += f"{'C (kN)':>8} {'M (kNm)':>8}"
+        s += f"\n{header(hdr2)}\n"
+        ecy = self.csb.ecy
+        cc = 0.0
+        mm = 0.0
+        for L in self.long_steel.layers:
+            z = k - (L._xc / self.D)
+            esc = self.csb.ec(z, k) * ecy
+            str_type = L.stress_type(xu)
+            fsc = L.rebar.fs(esc)
+            if str_type == 1:
+                fcc = self.csb.fc(z, k) * self.conc.fd
+                c = L.area * (fsc - fcc)
+            else:
+                c = L.area * fsc
+                fcc = None
+            m = c * (k * self.D - L._xc)
+            s += f"{L.rebar.fy:6.0f} {L.bar_list():>12} {L._xc:8.2f} {esc:12.8f} {StressLabel[str_type][0]:>4} "
+            if str_type == 1:
+                s += f"{fsc:8.2f} {fcc:6.2f}"
+            else:
+                s += f"{fsc:8.2f} {'--':>6}"
+            s += f" {c/1e3:8.2f} {m/1e6:8.2f}\n"
+            cc += c
+            mm += m
+        s += "-" * len(hdr2) + "\n"
+        s += f"{' '*62} {cc/1e3:8.2f} {mm/1e6:8.2f}\n"
+        C, M = self.C_M(xu)
+        hdr3 = f"{C/1e3:8.2f} {M/1e6:8.2f}"
+        s += f"{' ':>62} {underline(hdr3, '=')}\n{' ':>62} {hdr3}\n"
+        return s

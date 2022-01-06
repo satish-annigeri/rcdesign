@@ -1,2 +1,0 @@
-class RCDException(Exception):
-    pass

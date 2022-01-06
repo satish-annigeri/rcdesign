@@ -5,6 +5,14 @@ from numpy import sign
 from typing import Callable
 
 
+def underline(s: str, ch: str = "-") -> str:
+    return ch * len(s)
+
+
+def header(s: str, ch: str = "-") -> str:
+    return s + "\n" + underline(s, ch)
+
+
 def func(x: float, *args) -> float:
     # return a*x**2 + c*x - 4
     # return x**3 - 10*x**2 + 5

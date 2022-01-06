@@ -1,6 +1,6 @@
 from math import isclose
 
-from rcdesign.utils import func, rootsearch, ceiling, floor
+from rcdesign.utils import func, rootsearch, ceiling, floor, underline, header
 
 
 def test_rootsearch01():
@@ -47,3 +47,10 @@ def test_floor03():
 
 def test_floor04():
     assert isclose(floor(125.0, 25), 125.0)
+
+
+def test_uline():
+    assert underline("Satish Annigeri") == "---------------"
+    assert underline("Satish Annigeri", "=") == "==============="
+    assert header("Satish Annigeri") == "Satish Annigeri\n---------------"
+    assert header("Satish Annigeri", "=") == "Satish Annigeri\n==============="
