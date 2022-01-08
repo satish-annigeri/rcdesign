@@ -82,8 +82,6 @@ class RectBeamSection:
         self.calc_stress_type(xu)
         Fc = Mc = Ft = Mt = 0.0
         # Compression force - concrete
-        # Fcc = self.csb.C(0, 1, ecmax) * self.conc.fd * self.b * xu
-        # Mcc = self.csb.M(0, 1, ecmax) * self.conc.fd * self.b * xu ** 2
         k = xu / self.D
         Fcc = self.csb.C(0, k, k, ecmax) * self.conc.fd * self.b * self.D
         Mcc = self.csb.M(0, k, k, ecmax) * self.conc.fd * self.b * self.D ** 2
@@ -125,7 +123,7 @@ class RectBeamSection:
                 return True
         return False
 
-    def report(self, xu: float, ecmax: float) -> str:  # pragma: no cover
+    def report(self, xu: float, ecmax: float = ecu) -> str:  # pragma: no cover
         self.calc_xc()
         self.calc_stress_type(xu)
         k = xu / self.D
@@ -465,7 +463,7 @@ class RectColumnSection:
                 c = L.area * (fsc - fcc)
             else:
                 c = L.area * fsc
-                fcc = None
+                fcc = 0.0
             m = c * (k * self.D - L._xc)
             s += f"{L.rebar.fy:6.0f} {L.bar_list():>12} {L._xc:8.2f} {esc:12.8f} {StressLabel[str_type][0]:>4} "
             if str_type == 1:
