@@ -15,7 +15,7 @@ The attributes of a class to represent concrete stress block for limit state met
 2. `ecy`: Yield strain $\epsilon_{cy}=0.002$, and
 3. `ecu`: Ultimate strain $\epsilon_{cu}=0.0035$
 
-Similarly, a class to repesent the stress block for working stress method of design could be implemented.
+Similarly, a class to repesent the stress block for working stress method of design could be implemented later.
 
 ## Concrete
 The attributes of concrete that will be represented are:
@@ -97,3 +97,8 @@ The only attribute of `ShearRebarGroup` is:
 
 1. `shear_reinforcement`, which is a list of one or more shear reinforcement types, such as vertical stirrups, inclined stirrups, single group of bent-up bars or a series of bent-up bars.
 
+## LateralTie
+Lateral ties in columns help to confine concrete in a column section and play a critical role in enhacing ductility of column sections. They are not expected to carry any stress. The attributes of a lateral tie are:
+1. `rebar`: Object of type `Rebar` repersenting the reinforcement bar used as the lateral tie
+2. `bar_dia`: Diameter of the lateral tie
+3. `spacing`: Spacing between lateral ties

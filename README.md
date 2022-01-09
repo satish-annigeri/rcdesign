@@ -33,13 +33,13 @@ On Windows, do the following:
 > venv\Scripts\activate
 > python -m pip install -U pip
 > pip install rcdesign numpy sympy scipy
-> python -m rcdesign.example
+> python -m rcdesign
 ```
 
-If installation is successful, the example problem must run and you should see the output.
+If installation is successful, the example problems must run and you should see the output.
 
 ## Install from Source on github
-To install from github, you can clone the github repository and give it a try. If you are not familiar with the workflow for working with a source repository, you can follow the steps below.
+To install from github, clone the github repository and give it a try. If you are not familiar with the workflow for working with a source repository, follow these steps.
 
 ### Preliminary checks
 Check the version of Python you are using. You will require version 3.7 or later. To print the version of Python, use the command
@@ -54,7 +54,7 @@ Python 3.9.7
 ```
 
 ### Clone the repository
-When you clone the `rcdesign` repository from github, a new directory named `rcdesign` will be created in the current working directory. Therefore change over to the a suitable directory which will become the parent directory of the clone. Clone the repository using `git`
+When you clone the `rcdesign` repository from github, a new directory named `rcdesign` will be created in the current working directory. Therefore change over to a suitable directory within which to clone the repository. Clone the repository using `git`
 ```bash
 $ git clone https://github.com/satish-annigeri/rcdesign.git
 ```
@@ -76,7 +76,7 @@ $ source env/bin/activate
 (env) $_
 ```
 
-If you are using Windows operating system, the command is
+For Windows operating system, the command is
 ```bash
 > env\Scripts\activate
 (env) >_
@@ -103,11 +103,12 @@ Check code coverage.
 ```bash
 (env) $ pytest --cov=rcdesign tests/
 ```
-You can also use `nox` to run the tests.
+You can also use `nox` to run the tests. Install `nox` using `pip`, if necessary.
 ```bash
+(env) $ pip install nox
 (env) $ nox
 ```
-When you are done using the virtual environment, you can deactivate with the command `deactivate` at the command prompt in all operating systems.
+When you are done using the virtual environment, you can deactivate it with the command `deactivate` at the command prompt in all operating systems.
 
 
 ## A Simple Example
@@ -116,63 +117,47 @@ Run the built-in example with the following command.
 (env) $ python -m rcdesign.example
 ```
 
-Alternately, you can create the following Python script `example.py` and run it.
+Alternately, you can create the following Python script `example.py`, which is in fact the first example in the `__main__.py` file of the `rcdesign` package.
 ```python
-from rcdesign.is456.material.concrete import ConcreteLSMFlexure, Concrete
-from rcdesign.is456.material.rebar import RebarHYSD, RebarLayer, RebarGroup, Stirrups
+from rcdesign.is456.stressblock import LSMStressBlock
+from rcdesign.is456.concrete import Concrete
+from rcdesign.is456.rebar import (
+    RebarHYSD,
+    RebarLayer,
+    RebarGroup,
+    ShearRebarGroup,
+    Stirrups,
+)
 from rcdesign.is456.section import RectBeamSection
 
-
-sb = ConcreteLSMFlexure("IS456 LSM")
-m20 = Concrete("M20", 20, sb)
+sb = LSMStressBlock("LSM Flexure")
+m20 = Concrete("M20", 20)
 fe415 = RebarHYSD("Fe 415", 415)
 
-t1 = RebarLayer([20, 16, 20], -35)
-steel = RebarGroup(fe415, [t1])
-sh_st = Stirrups(fe415, 2, 8, 150)
+t1 = RebarLayer(fe415, [20, 16, 20], -35)
+steel = RebarGroup([t1])
+sh_st = ShearRebarGroup([Stirrups(fe415, 2, 8, 150)])
 
-sec = RectBeamSection(230, 450, m20, steel, sh_st, 25)
-print(sec)
-xu = sec.xu(0.0035)
-print(f"xu = {xu:.2f}")
-print(sec.report(xu, 0.0035))
-```
+sec = RectBeamSection(230, 450, sb, m20, steel, sh_st, 25)
+xu = sec.xu(0.0035)RECTANGULAR BEAM SECTION: 230 x 450
+FLEXURE
+Equilibrium NA = 179.94 (k = 0.40) (ec_max = 0.003500)
+   fck                             ec_max Type            f_cc   C (kN)  M (kNm)
+--------------------------------------------------------------------------------
+ 20.00                         0.00350000    C            8.93   299.30    31.45
+--------------------------------------------------------------------------------
 
-Run the script:
-```bash
-$ python example.py
-```
+    fy         Bars       xc       Strain Type     f_sc   f_cc   C (kN)  M (kNm)
+--------------------------------------------------------------------------------
+   415    1-16;2-20   415.00  -0.00457204    T  -360.87         -299.30    70.35
+--------------------------------------------------------------------------------
+                                                                   0.00   101.81
+SHEAR
+Vertical Stirrups: Fe 415 2-8 @ 150 c/c (Asv = 100.53)
 
-In either case, you must see the result output to the screen.
-```term
-Size: 230 x 450
-Tension Steel: Rebar Group Fe 415 in 1 layer
-        dc        xc        Bars      Area
-    -35.00    415.00   1-16;2-20    829.38
-                    ----------------------
-                           Total    829.38
-
-xu = 179.94
-Rectangular Beam Section 230 x 450  (xu = 179.94)
-Concrete: 20, Tension Steel: 415.00
-Units: Distance in mm, Area in mm^2, Force in kN, Moment about NA in kNm
-Flexure Capacity
-Concrete in Compression
-                                                              C (kN) M (kNm)
-                                                              299.30   31.45
-                --------                                    ----------------
-                    0.00                                      299.30   31.45
-Tension Steel
-      dc    Bars    Area       x      Strain    f_st          T (kN) M (kNm)
-   -35.01-16;2-20  829.38  235.06  4.5720e-03  360.87          299.30   70.35
-                --------                                    ----------------
-                  829.38                                      299.30   70.35
-                                                            ================
-                                                                 0.0  101.81
-Shear Capacity
-Shear reinforcement: Vertical Stirrups 2-8 @ 150 c/c
-pst = 0.87%, d = 415.00, tau_c (N/mm^2) = 0.59
-Vuc (kN) = 100.37, Vus = 56.46, Vu (kN) = 156.83
+CAPACITY
+Mu = 101.81 kNm
+Vu = 156.83 kN
 ```
 
 ## Contribute
@@ -193,54 +178,72 @@ Contributions are welcome. Contributions can be in a variety of forms:
 At present `rcdesign` **can do** the following:
 
 1. Analyse reinforced concrete rectangular and flanged sections subjected to bending and shear as per the Limit State Method according to IS&nbsp;456:2000, the Indian standard code of practice for plain and reinforced concrete. This calculates the ultimate strength of the section in bending and shear depending on the materials, section size and main (longitudinal) and shear reinforcement.
-2. Model stress strain relationship of 
-    1. concrete in flexure as per IS&nbsp;456:2000&nbsp;(38.1), and 2. reinforcement bars with
-        - mild steel bars with well defined yield point
-        - cold worked deformed bars
-3. Model layers of reinforcement bars placed parallel to the edge of the section at a given distance from the compression (or tension edge). Bars can be of different diameters but must be of the same type.
-4. Model group of layers of reinforcement bars. All bars in agroup must be of the same type and layers of reinforcement must be placed parallel to the edge of the section.
-5. Model shear reinforcement in the form of vertical stirrups, inclined stirrups and bent-up bars.
-6. Model rectangular and flanged sections. Sections must be of a given concrete. Main (longitudinal) reinforcement to resist bending must be provided as a single group of reinforcement layers, possibly with one or more layers in the compression zone and one or more layers in the tension zone. However, note that the position of the neutral axis is dependent on the sectiion size and the amount and location of main reinforcement. Only after an analysis of the section will it be clear whether a given layer of reinforcement in the group lies in the compression or tension zone.
+2. Analyses reinforced concrete rectangular sections subjected to axial compression and bending about one axis parallel to the first (usually the short) edge, as per limit state method of IS&nbsp;456:2000.
+3. Represent stress strain relationship for: 
+    1. concrete in flexure as per IS&nbsp;456:2000&nbsp;(38.1),
+    2. concrete under axial compression and flexure as per IS&nbsp;456:2000&nbsp;(39.1),
+    2. reinforcement bars:
+        1. mild steel bars with well defined yield point
+        2. cold worked deformed bars
+4. Represent layers of reinforcement bars placed parallel to the edge of the section at a given distance from the compression (or tension edge). Bars can be of different diameters but must be of the same type.
+5. Represent group of layers of reinforcement bars. All bars in agroup must be of the same type and layers of reinforcement must be placed parallel to the edge of the section.
+6. Represent group of shear reinforcement in the form of vertical stirrups, inclined stirrups and bent-up bars. 
+
+Rectangular and flanged sections must be of a given grade of concrete. Main (longitudinal) reinforcement to resist bending must be provided as a single group of reinforcement layers, possibly with one or more layers in the compression zone in addition to one or more layers in the tension zone. However, since the position of the neutral axis is dependent on the section size and the amount and location of main reinforcement, whether a layer of reinforcement lies in the tension zone or the compression zone will be known after an analysis of the section.
 
 At present, `rcdesign` **cannot do** the following:
-1. Does not analyse sections subjected to axial compression (with or without bending about an axis parallel to one of the edges). This is on the TO&nbsp;DO list.
-2. Does not design sections, either for bending, shear and torsion or for axial compression with or without bending about one or both axes.
-3. Does not verify whether the section meets the detailing requirements of IS&nbsp;456:2000&nbsp;(26).
-4. Does not analyse or design sections as per Working Stress Method of IS&nbsp;456:2000&nbsp;(Annexure&nbsp;N).
-5. Does not design reinforced concrete elements such as beams and columns. At present, the scope of the package is restricted to analysis and design of sections of beams and columns. This is a distant goal, but no promises.
+1. Cannot design sections, either for bending, shear and torsion or for axial compression with or without bending about one or both axes.
+3. Cannot verify whether the section meets the detailing requirements of IS&nbsp;456:2000&nbsp;(26).
+4. Cannot analyse or design sections as per Working Stress Method of IS&nbsp;456:2000&nbsp;(Annexure&nbsp;N).
+5. Cannot design reinforced concrete elements such as beams and columns. At present, the scope of the package is restricted to analysis and design of sections of beams and columns. This is a distant goal, but no promises.
 
 Some or all of the above features will be gradually included. Contributions in accomplishing these are welcome.
 
 ## Current Status
 
-The package is in early development and has undergone testing of the current code base for coverage. Limited examples have been solved and verified by hand.
+The package is in early development and may undergo backward incompatible changes. It has undergone testing of the current code base. Limited examples have been solved and verified by hand. Test coverage is currently 100% (excepting the example script).
 
 ### Classes
 The following classes have been implemented:
 
-1. An abstract base class **StressBlock** to represent a stress block. A derived class **ConcreteLSMFlexure** to represent the stress block for concrete in compression under limit state of flexure, derived from the abstract StressBlock class.
-3. A class **Concrete** to represent concrete which consists of a ConcreteLSMFlexure.
-4. An abstract class **Rebar** to represent reinforcement bars. Two derived classes **RebarMS** and **RebarHYSD** to represent mild steel bars and high yield strength deformed bars, respectively.
-5. A class **RebarLayer** to represent a single layer of reinforcement bars, defined as a list of bar diameters and the distance of the centre of the bars from the nearest edge. A class **RebarGroup** to represnt a list of layers of reinforcement bars.
-6. An abstract class **ShearReinforcement** to represent shear reinforcement. Two derived classes **Stirrups** and **BentupBars** to represent vertical/inclined stirrups and bent up bars, respectively.
-7. An abstract class **Section** to represnt a cross section. Two derived classes **RectBeamSection** and **FlangedBeamSection** to represnt rectangular and flanged sections subejcted to flexure and shear.
+1. A class **LSMStressBlock** to represent the stress block for concrete in compression under limit state of flexure, as well as limit state of combined axial compression and flexure as per IS&nbsp;456:2000.
+2. A class **Concrete** to represent concrete.
+3. An abstract class **Rebar** to represent reinforcement bars. Two derived classes **RebarMS** and **RebarHYSD** to represent mild steel bars and high yield strength deformed bars, respectively.
+4. A class **RebarLayer** to represent a single layer of reinforcement bars, defined as a list of bar diameters and the distance of the centre of the bars from the nearest edge. A class **RebarGroup** to represnt a list of layers of reinforcement bars.
+5. An abstract class **ShearReinforcement** to represent shear reinforcement. Two derived classes **Stirrups** and **BentupBars** to represent vertical/inclined stirrups and bent up bars, respectively.
+6. A class **ShearRebarGroup** to represent a group of shear reinforcement bars.
+7. A class **RectBeamSection** to represnt a reinforced concrete rectangular beam section. A derived class **FlangedBeamSection** to represnt flanged sections subejcted to flexure and shear, derived from **RectBeamSection**.
+8. A class *RectColumnSection** to represent a reinforced concrete rectangular coulmn section subjected to combined axial compression and bending about one axis.
 
 ### Methods
 Following funcationality has been implemented for the different classes:
 
-1. **ConcreteLSMFlexure**: Calculation of design stress, stress at a specified distance $x$ from neutral axis, area of stress block between two locations $x_1$ and $x_2$ from neutral axis and moment of stress block between the two locations with respect to depth $x_u$ of the neutral axis.
-2. **RebarMS** and **RebarHYSD**: Stress for a specified value of strain and design stress.
-3. **RebarLayer**: Area of bars in a layer.
-4. **RebarGroup**: Calculation of the sum of the following values aggregated after calculating the values individually for each layer:
+1. **LSMStressBlock**: Calculation of the following:
+    1. strain distribution,
+    2. stress for a given strain,
+    3. stress at a specified distance $x$ from neutral axis,
+    4. area of stress distribution between two locations $x_1$ and $x_2$ from neutral axis, and
+    5. moment of stress block between the two locations with respect to depth $x_u$ of the neutral axis.
+
+    These are implemented for both the following cases:
+
+    1. Flexure
+    2. Combined axial compression and bending about one axis.
+2. **Concrete**: Calculation of design stress $f_d$, shear stress $\tau_c$ and maximum shear stress $\tau_{c,max}$.
+3. **RebarMS** and **RebarHYSD**: Stress for a specified value of strain and design stress.
+4. **RebarLayer**: Area of bars in a layer.
+5. **RebarGroup**: Calculation of the sum of the following values aggregated after calculating the values individually for each layer:
     * Area of reinforcing bars in the group,
     * Force in reinforcing bars in the group, in tension and in compression,
     * Moment of force in reinforcing bars in the group about the neutral axis, in tension and in compression
-5. **RectBeamSection** and **FlangedBeamSection**: Calculation of:
+6. **RectBeamSection** and **FlangedBeamSection**: Calculation of:
     * Total compression force and the corresponding moment about the neutral axis for a specified neutral axis location $x_u$, considering concrete in compression and compression reinforcement bars, if present,
     * Total tension force and the corresponding moment about the neutral axis due to a group of tension reinforcement bars,
     * Position of the neutral axis $x_u$, calculated iteratively to satisfy equilibrium,
     * Shear force capacity of a section for a given shear reinforcement in the form of vertical or inclined stirrups,
     * Spacing of vertical or inclined stirrups for a given design shear force
+7. **RectColumnSection**: Calculation of:
+    * Total axial compression force and bending moment about the neutral axis for a given position of the neutral axis.
 
 ### Testing
 Testing  has been implemented using `pytest` and unit tests have been implemented for the following classes:
@@ -250,13 +253,22 @@ Testing  has been implemented using `pytest` and unit tests have been implemente
 3. **RebarLayer** and **RebarGroup**
 4. **ShearReinforcement** and **Stirrups**
 5. **RectBeamSection** and **FlangedBeamSection**
+6. **RectColumnSection**
 
-Code coverage through tests using `pytest-cov` at the current time is 100%. Analysis of rectangular and flanged beam sections with and without compression reinforcement, for flexure and shear, has been completed. Several examples have been solved and verified by hand to consider different cases.
+Code coverage through tests using `pytest-cov` at the current time is 100%, excepting the example script and the methods that implement `__repe__()` and `report()`.
 
-Automated testing can be donw using. Verify that `nox` is installed with the command
+Analysis of rectangular and flanged beam sections with and without compression reinforcement, for flexure and shear, has been completed. Several examples have been solved and verified by hand to consider different cases.
+
+Analysis of rectangular column sections for combined axial compression and bending about one axis has been completed. An example has been solved and verified by hand.
+
+Automated testing can be done using. Check to ensure that `nox` is installed using the command
 ```bash
 (env) $ nox --version
 2021.6.12
+```
+If required, install `nox` with the command:
+```bash
+(env) $pip install nox
 ```
 
 ### Documentation
@@ -264,14 +276,13 @@ Automated testing can be donw using. Verify that `nox` is installed with the com
 
 ## Future Plans
 
-Immediate plans include the analysis and design at the *section* level:
+Immediate plans include the design of *sections*:
 
-1. Design sections subjected to bending, shear and torsion.
-1. Analysis of rectangular *sections* subjected to axial compression and bending about one axis.
+1. Design of rectangular and flanged sections subjected to bending, shear and torsion.
 2. Write user and API documentation using Sphinx.
-2. Design of rectangular and flanged *sections* subjected to bending, shear and torsion.
-3. Design of column *sections*.
-4. Detailing of *sections* subjected to bending, shear and torsion.
+3. Design of rectangular column *sections*.
+4. Detailing of rectangular beam *sections* subjected to bending, shear and torsion.
+5. Design of rectangular column *sections* subjected to combined axial compression and bending.
 5. Implementing a stress block to represent *working stress method*.
 
 Long term plans include:

@@ -25,7 +25,6 @@ steel = RebarGroup([t1])
 sh_st = ShearRebarGroup([Stirrups(fe415, 2, 8, 150)])
 
 sec = RectBeamSection(230, 450, sb, m20, steel, sh_st, 25)
-print(sec)
 xu = sec.xu(0.0035)
 print(f"xu = {xu:.2f}")
 print(sec.report(xu, 0.0035))

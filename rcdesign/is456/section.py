@@ -14,7 +14,7 @@ from rcdesign.is456.concrete import Concrete
 from rcdesign.is456.rebar import (
     RebarGroup,
     ShearRebarGroup,
-    LateralTies,
+    LateralTie,
     StressType,
     StressLabel,
 )
@@ -128,10 +128,9 @@ class RectBeamSection:
         self.calc_stress_type(xu)
         k = xu / self.D
         ecy = self.csb.ecy
-        # d = self.long_steel.report(xu, self.csb, self.conc, ecmax)
         s = f"RECTANGULAR BEAM SECTION: {self.b} x {self.D}\n"
         s += (
-            f"FLEXURE\nEquilibrium NA = {xu:.2f} (k = {k:.2f}) (ec,max = {ecmax:.6f})\n"
+            f"FLEXURE\nEquilibrium NA = {xu:.2f} (k = {k:.2f}) (ec_max = {ecmax:.6f})\n"
         )
         fcc = self.csb._fc_(ecmax) * self.conc.fd
         Fc = self.b * self.csb.C(0, k, k, ecmax) * self.conc.fd * self.D
@@ -146,7 +145,7 @@ class RectBeamSection:
         hdr2 = f"{'fy':>6} {'Bars':>12} {'xc':>8} {'Strain':>12} {'Type':>4} {'f_sc':>8} {'f_cc':>6}"
         hdr2 += f" {'C (kN)':>8} {'M (kNm)':>8}"
         s += f"{hdr2}\n{underline(hdr2)}\n"
-        for L in self.long_steel.layers:
+        for L in sorted(self.long_steel.layers):
             z = k - (L._xc / self.D)
             esc = self.csb.ec(z, k) * ecy
             stress_type = L.stress_type(xu)
@@ -171,7 +170,7 @@ class RectBeamSection:
             s += f"{' '*62} {C_M}\n{' '*62} {underline(C_M, '=')}\n"
         F = 0.0 if isclose(Fc + Ft, 0, abs_tol=1e-10) else Fc + Ft
         C_M = f"{F/1e3:8.2f} {(Mc + Mt)/1e6:8.2f}"
-        s += f"{' ':>62} {C_M}\n{' ':>62}\n"
+        s += f"{' ':>62} {C_M}\n"
         s += f"SHEAR\n{self.shear_steel}\n"
         s += f"CAPACITY\n{'Mu = ':>5}{self.Mu(xu, ecmax)/1e6:.2f} kNm\n"
         vuc, vus = self.Vu(xu)
@@ -299,7 +298,7 @@ class FlangedBeamSection(RectBeamSection):
         k = xu / self.D
         ecy = self.csb.ecy
         s = f"FLANGED BEAM SECTION - Web: {self.b} x {self.D}, Flange: {self.bf} x {self.Df}\n"
-        s += f"FLEXURE\nEquilibrium NA = {xu:.2f} (ec,max = {ecmax:.6f})\n"
+        s += f"FLEXURE\nEquilibrium NA = {xu:.2f} (ec_max = {ecmax:.6f})\n"
         s += f"Concrete: {self.conc}\n"
         Fcw, Mcw = self.Cw(xu, ecmax)
         Fcf, Mcf = self.Cf(xu)
@@ -321,7 +320,7 @@ class FlangedBeamSection(RectBeamSection):
         s += f"\n{hdr2}\n{underline(hdr2)}\n"
         Ft = 0.0
         Mt = 0.0
-        for L in self.long_steel.layers:
+        for L in sorted(self.long_steel.layers):
             z = k - (L._xc / self.D)
             esc = self.csb.ec(z, k) * ecy
             stress_type = L.stress_type(xu)
@@ -361,7 +360,7 @@ class RectColumnSection:
         csb: LSMStressBlock,
         conc: Concrete,
         long_steel: RebarGroup,
-        lat_ties: LateralTies,
+        lat_ties: LateralTie,
         clear_cover: float,
     ):
         self.design_force_type = DesignForceType.COLUMN
@@ -412,7 +411,7 @@ class RectColumnSection:
         return Cc + Cs, Mc + Ms
 
     def __repr__(self) -> str:
-        s = f"Rectangular Column {self.b} x {self.D}\n"
+        s = f"RECTANGULAR COLUMN {self.b} x {self.D}\n"
         s += f"Concrete: {self.conc} Clear Cover: {self.clear_cover}\n"
         self.long_steel.calc_xc(self.D)
         s += f"{'fy':>6} {'Bars':>8} {'xc':>8}\n"
@@ -423,7 +422,7 @@ class RectColumnSection:
     def report(self, xu: float) -> str:
         k = xu / self.D
         ecy = self.csb.ecy
-        s = f"Rectangular Column {self.b} x {self.D} xu = {xu:.2f} (k = {k:.2f})\n"
+        s = f"RECTANGULAR COLUMN {self.b} x {self.D} xu = {xu:.2f} (k = {k:.2f})\n"
         s += f"Concrete: {self.conc} Clear Cover: {self.clear_cover}\n"
         # Concrete
         fd = self.conc.fd
@@ -453,7 +452,7 @@ class RectColumnSection:
         ecy = self.csb.ecy
         cc = 0.0
         mm = 0.0
-        for L in self.long_steel.layers:
+        for L in sorted(self.long_steel.layers):
             z = k - (L._xc / self.D)
             esc = self.csb.ec(z, k) * ecy
             str_type = L.stress_type(xu)

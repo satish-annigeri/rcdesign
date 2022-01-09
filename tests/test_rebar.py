@@ -6,7 +6,6 @@ from rcdesign.is456.stressblock import LSMStressBlock, LSMStressBlock
 from rcdesign.is456 import ecy, ecu
 from rcdesign.is456.concrete import Concrete
 from rcdesign.is456.rebar import (
-    LateralTies,
     RebarMS,
     RebarHYSD,
     RebarLayer,
@@ -15,6 +14,7 @@ from rcdesign.is456.rebar import (
     ShearRebarType,
     Stirrups,
     BentupBars,
+    LateralTie,
     ShearRebarGroup,
 )
 
@@ -385,5 +385,5 @@ class TestShearRebarGroup:
 class TestLateralTies:
     def test_01(self):
         fe415 = RebarHYSD("Fe 415", 415)
-        lat_tie = LateralTies(fe415, 8, 150)
+        lat_tie = LateralTie(fe415, 8, 150)
         assert (lat_tie.bar_dia == 8) and (lat_tie.spacing == 150)

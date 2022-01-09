@@ -10,7 +10,7 @@ from rcdesign.is456.rebar import (
     Stirrups,
     BentupBars,
     ShearRebarGroup,
-    LateralTies,
+    LateralTie,
     StressType,
 )
 from rcdesign.is456.concrete import Concrete
@@ -468,7 +468,7 @@ class TestRectColumnSection:
         L2 = RebarLayer(fe415, [16, 16], D / 2)
         L3 = RebarLayer(fe415, [16, 16, 16], -50)
         long_st = RebarGroup([L1, L2, L3])
-        lat_ties = LateralTies(fe415, 8, 150)
+        lat_ties = LateralTie(fe415, 8, 150)
         colsec = RectColumnSection(b, D, csb, m20, long_st, lat_ties, 35)
         assert colsec.Asc == pi / 4 * (8 * 16 ** 2)
         assert colsec.k(1000) == 2
@@ -483,7 +483,7 @@ class TestRectColumnSection:
         L2 = RebarLayer(fe415, [16, 16], D / 2)
         L3 = RebarLayer(fe415, [16, 16, 16], -50)
         long_st = RebarGroup([L1, L2, L3])
-        lat_ties = LateralTies(fe415, 8, 150)
+        lat_ties = LateralTie(fe415, 8, 150)
         colsec = RectColumnSection(b, D, csb, m20, long_st, lat_ties, 35)
         xu = 675
         k = xu / D  # k = 1.5
@@ -508,7 +508,7 @@ class TestRectColumnSection:
         L2 = RebarLayer(fe415, [16, 16], D / 2)
         L3 = RebarLayer(fe415, [16, 16, 16], -50)
         long_st = RebarGroup([L1, L2, L3])
-        lat_ties = LateralTies(fe415, 8, 150)
+        lat_ties = LateralTie(fe415, 8, 150)
         colsec = RectColumnSection(b, D, csb, m20, long_st, lat_ties, 35)
         xu = 300
         k = xu / D  # k = 2 / 3
@@ -534,7 +534,7 @@ class TestRectColumnSection:
         L2 = RebarLayer(fe415, [16, 16], D / 2)
         L3 = RebarLayer(fe415, [16, 16, 16], -50)
         long_st = RebarGroup([L1, L2, L3])
-        lat_ties = LateralTies(fe415, 8, 150)
+        lat_ties = LateralTie(fe415, 8, 150)
         colsec = RectColumnSection(b, D, csb, m20, long_st, lat_ties, 35)
         k = 2.0
         xu = k * D

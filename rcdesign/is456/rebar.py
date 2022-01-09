@@ -627,7 +627,7 @@ class ShearRebarGroup:
         return s
 
 
-class LateralTies:
+class LateralTie:
     def __init__(self, rebar: Rebar, bar_dia: int, spacing: float):
         self.rebar = rebar
         self.bar_dia = bar_dia
