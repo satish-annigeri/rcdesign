@@ -114,10 +114,11 @@ When you are done using the virtual environment, you can deactivate it with the 
 ## A Simple Example
 Run the built-in example with the following command.
 ```bash
-(env) $ python -m rcdesign.example
+(env) $ python -m rcdesign
 ```
 
 Alternately, you can create the following Python script `example.py`, which is in fact the first example in the `__main__.py` file of the `rcdesign` package.
+
 ```python
 from rcdesign.is456.stressblock import LSMStressBlock
 from rcdesign.is456.concrete import Concrete
@@ -140,6 +141,11 @@ sh_st = ShearRebarGroup([Stirrups(fe415, 2, 8, 150)])
 
 sec = RectBeamSection(230, 450, sb, m20, steel, sh_st, 25)
 xu = sec.xu(0.0035)RECTANGULAR BEAM SECTION: 230 x 450
+```
+
+Check the output.
+
+```bash
 FLEXURE
 Equilibrium NA = 179.94 (k = 0.40) (ec_max = 0.003500)
    fck                             ec_max Type            f_cc   C (kN)  M (kNm)
@@ -170,7 +176,7 @@ Contributions are welcome. Contributions can be in a variety of forms:
 
 ## Links
 - Documentation: [Documentation](https://rcdesign.readthedocs.io/en/latest/)
-- PyPI release: 0.2.0
+- PyPI release: [0.4.0](https://pypi.org/project/rcdesign/)
 - Github repository: https://github.com/satish-annigeri/rcdesign
 
 ## What `rcdesign` can and cannot do
