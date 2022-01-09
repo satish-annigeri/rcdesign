@@ -117,7 +117,7 @@ Run the built-in example with the following command.
 (env) $ python -m rcdesign
 ```
 
-Alternately, you can create the following Python script `example.py`, which is in fact the first example in the `__main__.py` file of the `rcdesign` package.
+Alternately, you can create the following Python script `example.py`, which is in fact the first example in the `__main__.py` file of the `rcdesign` package, and run the script.
 
 ```python
 from rcdesign.is456.stressblock import LSMStressBlock
@@ -146,6 +146,9 @@ xu = sec.xu(0.0035)RECTANGULAR BEAM SECTION: 230 x 450
 Check the output.
 
 ```bash
+Example 1
+
+RECTANGULAR BEAM SECTION: 230 x 450
 FLEXURE
 Equilibrium NA = 179.94 (k = 0.40) (ec_max = 0.003500)
    fck                             ec_max Type            f_cc   C (kN)  M (kNm)
@@ -164,6 +167,34 @@ Vertical Stirrups: Fe 415 2-8 @ 150 c/c (Asv = 100.53)
 CAPACITY
 Mu = 101.81 kNm
 Vu = 156.83 kN
+
+================================================================================
+
+Example 2
+
+RECTANGULAR BEAM SECTION: 230 x 450
+FLEXURE
+Equilibrium NA = 136.21 (k = 0.30) (ec_max = 0.003500)
+   fck                             ec_max Type            f_cc   C (kN)  M (kNm)
+--------------------------------------------------------------------------------
+ 20.00                         0.00350000    C            8.93   226.56    18.02
+--------------------------------------------------------------------------------
+
+    fy         Bars       xc       Strain Type     f_sc   f_cc   C (kN)  M (kNm)
+--------------------------------------------------------------------------------
+   415         2-16    35.00   0.00260065    C   347.70   8.93   136.23    13.79
+   415         2-16   380.00  -0.00626432    T  -360.87         -145.11    35.38
+   415         3-16   415.00  -0.00716367    T  -360.87         -217.67    60.68
+--------------------------------------------------------------------------------
+                                                                -226.56   109.85
+                                                               =================
+                                                                   0.00   127.87
+SHEAR
+Vertical Stirrups: Fe 415 2-8 @ 150 c/c (Asv = 100.53)
+
+CAPACITY
+Mu = 127.87 kNm
+Vu = 156.19 kN
 ```
 
 ## Contribute
