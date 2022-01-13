@@ -131,9 +131,7 @@ class RectBeamSection:
         ecy = self.csb.ecy
         hdr0 = f"RECTANGULAR BEAM SECTION: {self.b} x {self.D}"
         s = f"{header(hdr0, '~')}\n"
-        s += (
-            f"{header('FLEXURE', '=')}\nEquilibrium NA = {xu:.2f} (k = {k:.2f}) (ec_max = {ecmax:.6f})\n\n"
-        )
+        s += f"{header('FLEXURE', '=')}\nEquilibrium NA = {xu:.2f} (k = {k:.2f}) (ec_max = {ecmax:.6f})\n\n"
         fcc = self.csb._fc_(ecmax) * self.conc.fd
         Fc = self.b * self.csb.C(0, k, k, ecmax) * self.conc.fd * self.D
         Mc = self.csb.M(0, k, k) * self.conc.fd * self.b * self.D ** 2
@@ -176,26 +174,31 @@ class RectBeamSection:
         s += f"{header('SHEAR', '=')}\n"
         tauc = self.conc.tauc(self.pt(xu))
         area = self.b * self.eff_d(xu)
-        vuc = area*tauc
+        vuc = area * tauc
         hdr3 = f"{'Type':>14} {' ':>14} {'tau_c':>6} {'Area (mm^2)':>16} {' ':>8} {' ':>8} {'V_uc (kN)':>8}"
         s += f"{header(hdr3)}\n"
         s += f"{'Concrete':>14} {' ':>14} {tauc:6.2f} {area:16.2f} {' ':>8} {' ':>8} {vuc/1e3:8.2f}\n"
         s += f"{underline(hdr3)}\n"
-        hdr4= f"{'Type':>14} {'Variant':>14} {'f_y':>6} {'Bars':>16} {'s_v':>8} {'A_sv':>8} {'V_us (kN)':>8}"
+        hdr4 = f"{'Type':>14} {'Variant':>14} {'f_y':>6} {'Bars':>16} {'s_v':>8} {'A_sv':>8} {'V_us (kN)':>8}"
         s += f"{header(hdr4)}\n"
         vus = 0.0
         for sh_rein in self.shear_steel.shear_reinforcement:
             data = sh_rein.report(self.eff_d(xu))
             s += f"{data['label']:>14} {data['type']:>14} {data['fy']:6} "
-            if data['sh_type'] in [ShearRebarType.SHEAR_REBAR_VERTICAL_STIRRUP, ShearRebarType.SHEAR_REBAR_INCLINED_STIRRUP]:
+            if data["sh_type"] in [
+                ShearRebarType.SHEAR_REBAR_VERTICAL_STIRRUP,
+                ShearRebarType.SHEAR_REBAR_INCLINED_STIRRUP,
+            ]:
                 bar_info = f"{data['legs']}-{data['bar_dia']}#"
             else:
                 bar_info = f"{data['bars']}"
             s += f"{bar_info:>16} {data['sv']:8.1f} {data['Asv']:8.2f} {data['Vus']/1e3:8.2f}\n"
-            vus += data['Vus']
+            vus += data["Vus"]
         vu = f"{(vuc + vus)/1e3:8.2f}"
         s += f"{' ':>71} {underline(vu, '=')}\n{' ':>71} {vu}\n"
-        s += f"{header('CAPACITY', '=')}\n{'Mu = ':>5}{self.Mu(xu, ecmax)/1e6:.2f} kNm\n"
+        s += (
+            f"{header('CAPACITY', '=')}\n{'Mu = ':>5}{self.Mu(xu, ecmax)/1e6:.2f} kNm\n"
+        )
         Vuc, Vus = self.Vu(xu)
         Vu = Vuc + sum(Vus)
         s += f"{'Vu = ':>5}{Vu/1e3:.2f} kN\n"
@@ -367,30 +370,35 @@ class FlangedBeamSection(RectBeamSection):
             s += f"{' ':>62} {C_M}\n{' ':>62} {underline(C_M, '=')}\n"
         F = 0.0 if isclose(Fcw + Fcf + Ft, 0, abs_tol=1e-10) else Fcw + Fcf + Ft
         s += f"{' ':>62} {F/1e3:8.2f} {(Mc + Mt)/1e6:8.2f}\n"
-        
+
         s += f"{header('SHEAR', '=')}\n"
         tauc = self.conc.tauc(self.pt(xu))
         area = self.b * self.eff_d(xu)
-        vuc = area*tauc
+        vuc = area * tauc
         hdr3 = f"{'Type':>14} {' ':>14} {'tau_c':>6} {'Area (mm^2)':>16} {' ':>8} {' ':>8} {'V_uc (kN)':>8}"
         s += f"{header(hdr3)}\n"
         s += f"{'Concrete':>14} {' ':>14} {tauc:6.2f} {area:16.2f} {' ':>8} {' ':>8} {vuc/1e3:8.2f}\n"
         s += f"{underline(hdr3)}\n"
-        hdr4= f"{'Type':>14} {'Variant':>14} {'f_y':>6} {'Bars':>16} {'s_v':>8} {'A_sv':>8} {'V_us (kN)':>8}"
+        hdr4 = f"{'Type':>14} {'Variant':>14} {'f_y':>6} {'Bars':>16} {'s_v':>8} {'A_sv':>8} {'V_us (kN)':>8}"
         s += f"{header(hdr4)}\n"
         vus = 0.0
         for sh_rein in self.shear_steel.shear_reinforcement:
             data = sh_rein.report(self.eff_d(xu))
             s += f"{data['label']:>14} {data['type']:>14} {data['fy']:6} "
-            if data['sh_type'] in [ShearRebarType.SHEAR_REBAR_VERTICAL_STIRRUP, ShearRebarType.SHEAR_REBAR_INCLINED_STIRRUP]:
+            if data["sh_type"] in [
+                ShearRebarType.SHEAR_REBAR_VERTICAL_STIRRUP,
+                ShearRebarType.SHEAR_REBAR_INCLINED_STIRRUP,
+            ]:
                 bar_info = f"{data['legs']}-{data['bar_dia']}#"
             else:
                 bar_info = f"{data['bars']}"
             s += f"{bar_info:>16} {data['sv']:8.1f} {data['Asv']:8.2f} {data['Vus']/1e3:8.2f}\n"
-            vus += data['Vus']
+            vus += data["Vus"]
         vu = f"{(vuc + vus)/1e3:8.2f}"
         s += f"{' ':>71} {underline(vu, '=')}\n{' ':>71} {vu}\n"
-        s += f"{header('CAPACITY', '=')}\n{'Mu = ':>5}{self.Mu(xu, ecmax)/1e6:.2f} kNm\n"
+        s += (
+            f"{header('CAPACITY', '=')}\n{'Mu = ':>5}{self.Mu(xu, ecmax)/1e6:.2f} kNm\n"
+        )
         Vuc, Vus = self.Vu(xu)
         Vu = Vuc + sum(Vus)
         s += f"{'Vu = ':>5}{Vu/1e3:.2f} kN\n"
@@ -522,4 +530,6 @@ class RectColumnSection:
         C, M = self.C_M(xu)
         hdr3 = f"{C/1e3:8.2f} {M/1e6:8.2f}"
         s += f"{' ':>62} {underline(hdr3, '=')}\n{' ':>62} {hdr3}\n"
+        s += f"{header('CAPACITY', '=')}\n"
+        s += f"Pu = {C/1e3:10.2f} kN\nMu = {M/1e6:10.2f} kNm\n e = {M/C:10.2f} mm\n"
         return s

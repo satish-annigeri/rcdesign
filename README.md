@@ -1,5 +1,5 @@
 # `rcdesign`
-<img alt="PyPI - License" src="https://img.shields.io/pypi/l/rcdesign"> [![PyPI version shields.io](https://img.shields.io/pypi/v/rcdesign.svg)](https://pypi.python.org/pypi/rcdesign/) [![Documentation Status](https://readthedocs.org/projects/rcdesign/badge/?version=latest)](http://rcdesign.readthedocs.io/?badge=latest) [![PyPI download month](https://img.shields.io/pypi/dm/rcdesign.svg)](https://pypi.python.org/pypi/rcdesign/) 
+<img alt="PyPI - License" src="https://img.shields.io/pypi/l/rcdesign"> [![PyPI version shields.io](https://img.shields.io/pypi/v/rcdesign.svg)](https://pypi.python.org/pypi/rcdesign/) [![Documentation Status](https://readthedocs.org/projects/rcdesign/badge/?version=latest)](http://rcdesign.readthedocs.io/?badge=latest) [![PyPI download month](https://img.shields.io/pypi/dm/rcdesign.svg)](https://pypi.python.org/pypi/rcdesign/) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 `rcdesign` is a Python package for analysis and design of reinforced concrete sections as per IS&nbsp;456:2000, the Indian Standard code of practice for plain and reinforced concrete.
 
@@ -110,14 +110,24 @@ You can also use `nox` to run the tests. Install `nox` using `pip`, if necessary
 ```
 When you are done using the virtual environment, you can deactivate it with the command `deactivate` at the command prompt in all operating systems.
 
-
-## A Simple Example
+## Examples
+### Built-in Example
 Run the built-in example with the following command.
 ```bash
 (env) $ python -m rcdesign
 ```
 
-Alternately, you can create the following Python script `example.py`, which is in fact the first example in the `__main__.py` file of the `rcdesign` package, and run the script.
+### Examples from `tests` Directory
+Run the examples in the `tests` directory with the following command from the command prompt:
+```bash
+(env) $ python -m tests.example01
+(env) $ python -m tests.example02
+...
+(env) $ python -m tests.example09
+```
+
+### Your Own Example
+Alternately, you can create the following Python script `example.py`, which is in fact the first example in the `__main__.py` file of the `rcdesign` package (the built-in example), and run the script.
 
 ```python
 from rcdesign.is456.stressblock import LSMStressBlock
