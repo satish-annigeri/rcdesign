@@ -475,7 +475,8 @@ class RectColumnSection:
     def report(self, xu: float) -> str:
         k = xu / self.D
         ecy = self.csb.ecy
-        s = f"RECTANGULAR COLUMN {self.b} x {self.D} xu = {xu:.2f} (k = {k:.2f})\n"
+        hdr0 = f"RECTANGULAR COLUMN {self.b} x {self.D} xu = {xu:.2f} (k = {k:.2f})"
+        s = f"{header(hdr0, '~')}\n"
         s += f"Concrete: {self.conc} Clear Cover: {self.clear_cover}\n"
         # Concrete
         fd = self.conc.fd
