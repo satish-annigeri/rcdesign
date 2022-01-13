@@ -4,7 +4,7 @@ and groups of reinforcement layers"""
 from enum import IntEnum
 from math import pi, sin, cos, isclose, copysign
 
-from typing import Tuple, List, Union, Dict, Optional
+from typing import Tuple, List, Union, Dict, Optional, Any
 
 from abc import ABC, abstractmethod
 import numpy as np
@@ -454,6 +454,10 @@ class ShearReinforcement(ABC):  # pragma: no cover
     def get_type(self):
         pass
 
+    @abstractmethod
+    def report(self, d: float) -> dict:
+        pass
+
 
 """Vertical or inclined stirrups as shear reinforcement"""
 
@@ -537,6 +541,10 @@ class Stirrups(ShearReinforcement):
         else:
             return ShearRebarType.SHEAR_REBAR_INCLINED_STIRRUP
 
+    def report(self, d: float) -> dict:
+        data = {'sh_type': self.get_type(), 'label': 'Stirrups', 'type': 'Vertical', 'fy': self.rebar.fy, 'bar_dia': self.bar_dia, 'legs': self.nlegs, 'sv': self._sv, 'alpha': self._alpha_deg, 'Asv': self.Asv, 'Vus': self.Vus(d)}
+        return data
+
 
 """Single group (sv == 0) or a series of parallel (sv != 0) bent-up bars as shear reinforcement"""
 
@@ -585,6 +593,13 @@ class BentupBars(ShearReinforcement):
         s += f" (Asv = {self.Asv:.2f})"
         return s
 
+    def report(self, d: float) -> dict:
+        if self._sv == 0:
+            bupbar_type = 'Single group'
+        else:
+            bupbar_type = 'Series'
+        data = {'sh_type': self.get_type(), 'label': 'Bentup bars', 'type': bupbar_type, 'fy': self.rebar.fy, 'bars': self.bars, 'sv': self._sv, 'alpha': self._alpha_deg, 'Asv': self.Asv, 'Vus': self.Vus(d)}
+        return data
 
 class ShearRebarGroup:
     def __init__(self, shear_reinforcement: List[ShearReinforcement]):

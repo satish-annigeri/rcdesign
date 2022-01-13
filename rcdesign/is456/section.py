@@ -15,6 +15,7 @@ from rcdesign.is456.rebar import (
     RebarGroup,
     ShearRebarGroup,
     LateralTie,
+    ShearRebarType,
     StressType,
     StressLabel,
 )
@@ -128,9 +129,10 @@ class RectBeamSection:
         self.calc_stress_type(xu)
         k = xu / self.D
         ecy = self.csb.ecy
-        s = f"RECTANGULAR BEAM SECTION: {self.b} x {self.D}\n"
+        hdr0 = f"RECTANGULAR BEAM SECTION: {self.b} x {self.D}"
+        s = f"{header(hdr0, '~')}\n"
         s += (
-            f"FLEXURE\nEquilibrium NA = {xu:.2f} (k = {k:.2f}) (ec_max = {ecmax:.6f})\n"
+            f"{header('FLEXURE', '=')}\nEquilibrium NA = {xu:.2f} (k = {k:.2f}) (ec_max = {ecmax:.6f})\n\n"
         )
         fcc = self.csb._fc_(ecmax) * self.conc.fd
         Fc = self.b * self.csb.C(0, k, k, ecmax) * self.conc.fd * self.D
@@ -171,11 +173,32 @@ class RectBeamSection:
         F = 0.0 if isclose(Fc + Ft, 0, abs_tol=1e-10) else Fc + Ft
         C_M = f"{F/1e3:8.2f} {(Mc + Mt)/1e6:8.2f}"
         s += f"{' ':>62} {C_M}\n"
-        s += f"SHEAR\n{self.shear_steel}\n"
-        s += f"CAPACITY\n{'Mu = ':>5}{self.Mu(xu, ecmax)/1e6:.2f} kNm\n"
-        vuc, vus = self.Vu(xu)
-        vu = vuc + sum(vus)
-        s += f"{'Vu = ':>5}{vu/1e3:.2f} kN\n"
+        s += f"{header('SHEAR', '=')}\n"
+        tauc = self.conc.tauc(self.pt(xu))
+        area = self.b * self.eff_d(xu)
+        vuc = area*tauc
+        hdr3 = f"{'Type':>14} {' ':>14} {'tau_c':>6} {'Area (mm^2)':>16} {' ':>8} {' ':>8} {'V_uc (kN)':>8}"
+        s += f"{header(hdr3)}\n"
+        s += f"{'Concrete':>14} {' ':>14} {tauc:6.2f} {area:16.2f} {' ':>8} {' ':>8} {vuc/1e3:8.2f}\n"
+        s += f"{underline(hdr3)}\n"
+        hdr4= f"{'Type':>14} {'Variant':>14} {'f_y':>6} {'Bars':>16} {'s_v':>8} {'A_sv':>8} {'V_us (kN)':>8}"
+        s += f"{header(hdr4)}\n"
+        vus = 0.0
+        for sh_rein in self.shear_steel.shear_reinforcement:
+            data = sh_rein.report(self.eff_d(xu))
+            s += f"{data['label']:>14} {data['type']:>14} {data['fy']:6} "
+            if data['sh_type'] in [ShearRebarType.SHEAR_REBAR_VERTICAL_STIRRUP, ShearRebarType.SHEAR_REBAR_INCLINED_STIRRUP]:
+                bar_info = f"{data['legs']}-{data['bar_dia']}#"
+            else:
+                bar_info = f"{data['bars']}"
+            s += f"{bar_info:>16} {data['sv']:8.1f} {data['Asv']:8.2f} {data['Vus']/1e3:8.2f}\n"
+            vus += data['Vus']
+        vu = f"{(vuc + vus)/1e3:8.2f}"
+        s += f"{' ':>71} {underline(vu, '=')}\n{' ':>71} {vu}\n"
+        s += f"{header('CAPACITY', '=')}\n{'Mu = ':>5}{self.Mu(xu, ecmax)/1e6:.2f} kNm\n"
+        Vuc, Vus = self.Vu(xu)
+        Vu = Vuc + sum(Vus)
+        s += f"{'Vu = ':>5}{Vu/1e3:.2f} kN\n"
         return s
 
     def eff_d(self, xu: float) -> float:
@@ -297,9 +320,9 @@ class FlangedBeamSection(RectBeamSection):
         self.calc_stress_type(xu)
         k = xu / self.D
         ecy = self.csb.ecy
-        s = f"FLANGED BEAM SECTION - Web: {self.b} x {self.D}, Flange: {self.bf} x {self.Df}\n"
-        s += f"FLEXURE\nEquilibrium NA = {xu:.2f} (ec_max = {ecmax:.6f})\n"
-        s += f"Concrete: {self.conc}\n"
+        hdr0 = f"FLANGED BEAM SECTION - Web: {self.b} x {self.D}, Flange: {self.bf} x {self.Df}"
+        s = f"{header(hdr0, '~')}\n"
+        s += f"{header('FLEXURE', '=')}\nEquilibrium NA = {xu:.2f} (ec_max = {ecmax:.6f})\n\n"
         Fcw, Mcw = self.Cw(xu, ecmax)
         Fcf, Mcf = self.Cf(xu)
         Fc = Fcw + Fcf
@@ -344,11 +367,33 @@ class FlangedBeamSection(RectBeamSection):
             s += f"{' ':>62} {C_M}\n{' ':>62} {underline(C_M, '=')}\n"
         F = 0.0 if isclose(Fcw + Fcf + Ft, 0, abs_tol=1e-10) else Fcw + Fcf + Ft
         s += f"{' ':>62} {F/1e3:8.2f} {(Mc + Mt)/1e6:8.2f}\n"
-        s += f"SHEAR\n{self.shear_steel}\n"
-        s += f"CAPACITY\n{'Mu = ':>5}{self.Mu(xu, ecmax)/1e6:.2f} kNm\n"
-        vuc, vus = self.Vu(xu)
-        vu = vuc + sum(vus)
-        s += f"{'Vu = ':>5}{vu/1e3:.2f} kN\n"
+        
+        s += f"{header('SHEAR', '=')}\n"
+        tauc = self.conc.tauc(self.pt(xu))
+        area = self.b * self.eff_d(xu)
+        vuc = area*tauc
+        hdr3 = f"{'Type':>14} {' ':>14} {'tau_c':>6} {'Area (mm^2)':>16} {' ':>8} {' ':>8} {'V_uc (kN)':>8}"
+        s += f"{header(hdr3)}\n"
+        s += f"{'Concrete':>14} {' ':>14} {tauc:6.2f} {area:16.2f} {' ':>8} {' ':>8} {vuc/1e3:8.2f}\n"
+        s += f"{underline(hdr3)}\n"
+        hdr4= f"{'Type':>14} {'Variant':>14} {'f_y':>6} {'Bars':>16} {'s_v':>8} {'A_sv':>8} {'V_us (kN)':>8}"
+        s += f"{header(hdr4)}\n"
+        vus = 0.0
+        for sh_rein in self.shear_steel.shear_reinforcement:
+            data = sh_rein.report(self.eff_d(xu))
+            s += f"{data['label']:>14} {data['type']:>14} {data['fy']:6} "
+            if data['sh_type'] in [ShearRebarType.SHEAR_REBAR_VERTICAL_STIRRUP, ShearRebarType.SHEAR_REBAR_INCLINED_STIRRUP]:
+                bar_info = f"{data['legs']}-{data['bar_dia']}#"
+            else:
+                bar_info = f"{data['bars']}"
+            s += f"{bar_info:>16} {data['sv']:8.1f} {data['Asv']:8.2f} {data['Vus']/1e3:8.2f}\n"
+            vus += data['Vus']
+        vu = f"{(vuc + vus)/1e3:8.2f}"
+        s += f"{' ':>71} {underline(vu, '=')}\n{' ':>71} {vu}\n"
+        s += f"{header('CAPACITY', '=')}\n{'Mu = ':>5}{self.Mu(xu, ecmax)/1e6:.2f} kNm\n"
+        Vuc, Vus = self.Vu(xu)
+        Vu = Vuc + sum(Vus)
+        s += f"{'Vu = ':>5}{Vu/1e3:.2f} kN\n"
         return s
 
 
