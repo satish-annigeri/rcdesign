@@ -60,6 +60,9 @@ class TestRebarLayer:
         L1.xc = 450
         assert L1.xc == 450 - 35
         assert L1.dc == -35
+        b = 230
+        cl_cov = 25
+        assert L1.spacing(230, 25) == (b - 2 * (cl_cov) - (2 * 20 + 16)) / 2
 
     def test_02(self):
         D = 450

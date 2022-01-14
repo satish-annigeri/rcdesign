@@ -316,6 +316,9 @@ class RebarLayer:
     def __ge__(self, b) -> bool:
         return self._xc >= b._xc
 
+    def spacing(self, b: float, clear_cover: float) -> float:
+        return (b - (2 * clear_cover) - sum(self.dia)) / (len(self.dia) - 1)
+
 
 """Group of reinforcement bars"""
 
@@ -542,7 +545,18 @@ class Stirrups(ShearReinforcement):
             return ShearRebarType.SHEAR_REBAR_INCLINED_STIRRUP
 
     def report(self, d: float) -> dict:
-        data = {'sh_type': self.get_type(), 'label': 'Stirrups', 'type': 'Vertical', 'fy': self.rebar.fy, 'bar_dia': self.bar_dia, 'legs': self.nlegs, 'sv': self._sv, 'alpha': self._alpha_deg, 'Asv': self.Asv, 'Vus': self.Vus(d)}
+        data = {
+            "sh_type": self.get_type(),
+            "label": "Stirrups",
+            "type": "Vertical",
+            "fy": self.rebar.fy,
+            "bar_dia": self.bar_dia,
+            "legs": self.nlegs,
+            "sv": self._sv,
+            "alpha": self._alpha_deg,
+            "Asv": self.Asv,
+            "Vus": self.Vus(d),
+        }
         return data
 
 
@@ -595,11 +609,22 @@ class BentupBars(ShearReinforcement):
 
     def report(self, d: float) -> dict:
         if self._sv == 0:
-            bupbar_type = 'Single group'
+            bupbar_type = "Single group"
         else:
-            bupbar_type = 'Series'
-        data = {'sh_type': self.get_type(), 'label': 'Bentup bars', 'type': bupbar_type, 'fy': self.rebar.fy, 'bars': self.bars, 'sv': self._sv, 'alpha': self._alpha_deg, 'Asv': self.Asv, 'Vus': self.Vus(d)}
+            bupbar_type = "Series"
+        data = {
+            "sh_type": self.get_type(),
+            "label": "Bentup bars",
+            "type": bupbar_type,
+            "fy": self.rebar.fy,
+            "bars": self.bars,
+            "sv": self._sv,
+            "alpha": self._alpha_deg,
+            "Asv": self.Asv,
+            "Vus": self.Vus(d),
+        }
         return data
+
 
 class ShearRebarGroup:
     def __init__(self, shear_reinforcement: List[ShearReinforcement]):
