@@ -548,3 +548,69 @@ class TestRectColumnSection:
         m = mm + fsc1 * abs(xu - 50) + fsc2 * abs(xu - 225) + fsc3 * abs(xu - 400)
         assert isclose(C, c)
         assert isclose(M, m)
+
+
+from math import pi, sqrt, isclose, ceil
+
+from rcdesign.is456.design import Beam
+
+xumax_d = lambda fy: 0.0035 / (fy / (1.15 * 2e5) + 0.0055)
+
+mulim_const = (
+    lambda fy: (17 * 0.67) / (21 * 1.5) * xumax_d(fy) * (1 - 99 / 238 * xumax_d(fy))
+)
+
+d_req = lambda fck, fy, b, Mu: sqrt(Mu / (fck * b * mulim_const(fy)))
+
+
+def reqd_xu_d(fck, b, d, Mu):
+    aa = 1.0
+    bb = -(238 / 99)
+    cc = (Mu / (fck * b * d ** 2)) * (21 / 17) * (1.5 / 0.67) * (238 / 99)
+    xu_d = (-bb - sqrt(bb ** 2 - 4 * aa * cc)) / (2 * aa)
+    return xu_d
+
+
+def reqd_ast(fck, fy, b, d, Mu):
+    xu = reqd_xu_d(fck, b, d, Mu) * d
+    ast = Mu / (fy / 1.15 * (d - 99 / 238 * xu))
+    return ast
+
+
+def reqd_ast2(conc, rebar, d, dc, xu, Mu2):
+    fdc = conc.fd
+    fds = rebar.fd
+    esc = 0.0035 / xu * (xu - dc)
+    fsc = rebar.fs(esc)
+    ee = esc / 0.002
+    fcc = (2 * ee - ee ** 2) * fdc if ee < 0.002 else fdc
+    ast2 = Mu2 / (fds * (d - dc))
+    asc = ast2 * fds / (fsc - fcc)
+    return ast2, asc
+
+
+class TestDesign:
+    def test_01(self):
+        b = 230
+        D = 450
+        fe415 = RebarHYSD("Fe 415", 415)
+        csb = LSMStressBlock("LSM Flexure")
+        m20 = Concrete("M20", 20)
+        L1 = RebarLayer(fe415, [16, 16, 16], -31)
+        main_st = RebarGroup([L1])
+        vstirrups = Stirrups(fe415, 2, 8, 150)
+        shear_st = ShearRebarGroup([vstirrups])
+        rsec = RectBeamSection(b, D, csb, m20, main_st, shear_st, 25)
+        fck = m20.fck
+        fy = fe415.fy
+        d = D - 25 - 16 / 2
+        Mu = 100e6
+        assert rsec.design_singly(16, Mu) == (reqd_ast(fck, fy, b, d, Mu), 0.0)
+        Mu = 125e6
+        xumax = xumax_d(fy) * d
+        Mulim = mulim_const(fy) * fck * b * d ** 2
+        Mu2 = Mu - Mulim if Mu > Mulim else 0.0
+        ast1, _ = rsec.design_singly(16, Mulim)
+        ast2, asc = reqd_ast2(m20, fe415, d, 25 + 16 / 2, xumax, Mu2)
+        Ast, Asc = rsec.design_singly(16, Mu)
+        assert (Ast, Asc) == (ast1 + ast2, asc)

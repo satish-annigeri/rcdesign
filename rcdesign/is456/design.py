@@ -14,7 +14,8 @@ class Beam:
 
     def Mulim_const(self, fy: float) -> float:
         xumax_d = self.xumax_d(fy)
-        return (17 / 21) * (0.67 / self.gamma_mc) * (1 - 99 / 238 * xumax_d)
+        k = (17 / 21) * (0.67 / self.gamma_mc) * xumax_d * (1 - 99 / 238 * xumax_d)
+        return k
 
     def reqd_d(self, fck: float, fy: float, b: float, Mu: float) -> float:
         Mulim_fckbd2 = self.Mulim_const(fy)
@@ -25,7 +26,6 @@ class Beam:
         bb = -238 / 99
         cc = (21 / 17) * (1.5 / 0.67) * (238 / 99) * (Mu / (fck * b * d ** 2))
         xu_d = (-bb - sqrt(bb ** 2 - 4 * aa * cc)) / (2 * aa)
-        print("===", aa, bb, cc, xu_d)
         return xu_d
 
     def reqd_Ast(self, fck: float, fy: float, b: float, d: float, Mu: float) -> float:

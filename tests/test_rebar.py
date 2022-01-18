@@ -110,7 +110,7 @@ class TestRebarLayer:
         fsc = fe415.fs(ec)
         fcc = m20.fd * csb._fc_(ec)
         C = asc * (fsc - fcc)
-        d = {"x": x, "esc": ec, "f_sc": fsc, "f_cc": fcc, "C": C, "M": C * x}
+        d = {"x": x, "esc": ec, "f_s": fsc, "f_c": fcc, "C": C, "M": C * x}
         f, m, res = L1.force_compression(xu, csb, m20, ecmax)
         assert isclose(f, C)
         assert isclose(m, C * x)

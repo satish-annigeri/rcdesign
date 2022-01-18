@@ -19,6 +19,7 @@ from rcdesign.is456.rebar import (
     StressType,
     StressLabel,
 )
+from rcdesign.is456.design import Beam
 from rcdesign.utils import rootsearch, underline, header
 
 
@@ -136,14 +137,14 @@ class RectBeamSection:
         Fc = self.b * self.csb.C(0, k, k, ecmax) * self.conc.fd * self.D
         Mc = self.csb.M(0, k, k) * self.conc.fd * self.b * self.D ** 2
         hdr1 = f"{'fck':>6} {' ':>8} {' ':>12} {'ec_max':>12} {'Type':>4} "
-        hdr1 += f"{' ':>8} {'f_cc':>6} {'C (kN)':>8} {'M (kNm)':>8}"
+        hdr1 += f"{' ':>8} {'f_c':>6} {'F (kN)':>8} {'M (kNm)':>8}"
         s += hdr1 + "\n" + underline(hdr1) + "\n"
         s += f"{self.conc.fck:6.2f} {' ':>8} {' ':>12} {ecmax:12.8f} {'C':>4} {' ':>8} {fcc:6.2f} "
         s += f"{Fc / 1e3:8.2f} {Mc/ 1e6:8.2f}\n{underline(hdr1)}\n\n"
         Ft = 0.0
         Mt = 0.0
-        hdr2 = f"{'fy':>6} {'Bars':>12} {'xc':>8} {'Strain':>12} {'Type':>4} {'f_sc':>8} {'f_cc':>6}"
-        hdr2 += f" {'C (kN)':>8} {'M (kNm)':>8}"
+        hdr2 = f"{'fy':>6} {'Bars':>12} {'xc':>8} {'Strain':>12} {'Type':>4} {'f_s':>8} {'f_c':>6}"
+        hdr2 += f" {'F (kN)':>8} {'M (kNm)':>8}"
         s += f"{hdr2}\n{underline(hdr2)}\n"
         for L in sorted(self.long_steel.layers):
             z = k - (L._xc / self.D)
@@ -231,6 +232,33 @@ class RectBeamSection:
         xu = self.xu(ecmax)
         Mu = self.Mu(xu, ecmax)
         return xu, Mu
+
+    def design_singly(self, bar_dia: float, Mu: float) -> Tuple[float, float]:
+        beam = Beam()
+        fck = self.conc.fck
+        bottom_layer = self.long_steel.layers[-1]
+        fy = bottom_layer.rebar.fy
+        fd = bottom_layer.rebar.fd
+        d = self.D - self.clear_cover - bar_dia / 2
+        dc = self.clear_cover + bar_dia / 2
+        Mulim = beam.Mulim_const(fy) * fck * self.b * d ** 2
+        if Mu < Mulim:
+            s = "Singly reinforced"
+            ast = beam.reqd_Ast(fck, fy, self.b, d, Mu)
+            asc = 0.0
+        else:
+            s = "Doubly reinforced"
+            ast1 = beam.reqd_Ast(fck, fy, self.b, d, Mulim)
+            Mu2 = Mu - Mulim
+            ast2 = Mu2 / (fd * (d - dc))
+            ast = ast1 + ast2
+            xu = beam.xumax_d(fy) * d
+            esc = self.csb.ecu / xu * (xu - dc)
+            fsc = bottom_layer.rebar.fs(esc)
+            fcc = self.csb._fc_(esc) * self.conc.fd
+            asc = ast2 * fd / (fsc - fcc)
+            print("---", xu, d, esc, fsc, fcc, ast1, ast2, ast, asc)
+        return ast, asc
 
 
 """Class to repersent flanged section"""
@@ -341,7 +369,7 @@ class FlangedBeamSection(RectBeamSection):
         s += f"{Fcf/1e3:8.2f} {Mcf/1e6:8.2f}\n"
         s += f"{underline(hdr1)}\n"
         s += f"{' ':>62} {(Fcw+Fcf)/1e3:8.2f} {(Mcw+Mcf)/1e6:8.2f}\n"
-        hdr2 = f"{'fy':>6} {'Bars':>12} {'xc':>8} {'Strain':>12} {'Type':>4} {'f_sc':>8} {'f_cc':>6}"
+        hdr2 = f"{'fy':>6} {'Bars':>12} {'xc':>8} {'Strain':>12} {'Type':>4} {'f_s':>8} {'f_c':>6}"
         hdr2 += f" {'C (kN)':>8} {'M (kNm)':>8}"
         s += f"\n{hdr2}\n{underline(hdr2)}\n"
         Ft = 0.0

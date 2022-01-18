@@ -17,11 +17,18 @@ from rcdesign.is456.stressblock import LSMStressBlock
 
 
 class RebarType(IntEnum):
+    REBAR_UNDEFINED = 0
     REBAR_MS = 1
     REBAR_HYSD = 2
+    REBAR_CUSTOM = 3
 
 
-RebarLabel = {RebarType.REBAR_MS: "Mild Steel", RebarType.REBAR_HYSD: "HYSD"}
+RebarLabel = {
+    RebarType.REBAR_UNDEFINED: "Not defined",
+    RebarType.REBAR_MS: "Mild Steel",
+    RebarType.REBAR_HYSD: "HYSD",
+    RebarType.REBAR_CUSTOM: "Custom type",
+}
 
 
 class StressType(IntEnum):
@@ -61,16 +68,17 @@ class Rebar(ABC):  # pragma: no cover
         self.gamma_m = gamma_m
         self.density = density
         self.Es = Es
+        self.rebar_type = RebarType.REBAR_UNDEFINED
 
     @property
-    def fd(self):
+    def fd(self) -> float:
         return self.fy / self.gamma_m
 
-    def es_min(self):
+    def es_min(self) -> float:
         return self.fd / self.Es + 0.002
 
     @abstractmethod
-    def fs(self, es):
+    def fs(self, es: float) -> float:
         pass
 
 
@@ -81,9 +89,10 @@ well defined yield point"""
 class RebarMS(Rebar):
     def __init__(self, label: str, fy: float):
         super().__init__(label, fy)
+        self.rebar_type = RebarType.REBAR_MS
 
     def __repr__(self):
-        return f"{self.label:>6}: Type={'MS':4} fy={self.fy} fd={self.fd:.2f}"
+        return f"{self.label:>6}: Type={RebarLabel[self.rebar_type]} fy={self.fy} fd={self.fd:.2f}"
 
     def fs(self, es: float) -> float:
         _es = abs(es)
@@ -93,9 +102,6 @@ class RebarMS(Rebar):
             return es * self.Es
         else:
             return copysign(self.fd, es)
-
-    # def fs(self, es: float) -> float:
-    #     return self._fs(es)
 
 
 """High yield strength deformed bars as defined in IS456:2000 with piece-wise
@@ -112,12 +118,13 @@ class RebarHYSD(Rebar):
 
     def __init__(self, label: str, fy: float):
         super().__init__(label, fy)
+        self.rebar_type = RebarType.REBAR_HYSD
         self.es = RebarHYSD.inel.copy()
         self.es[:, 0] = self.es[:, 0] * self.fy / self.gamma_m
         self.es[:, 1] = self.es[:, 0] / self.Es + self.es[:, 1]
 
     def __repr__(self) -> str:
-        return f"{self.label:>6}: Type={'HYSD'} fy={self.fy} fd={self.fd:.2f}"
+        return f"{self.label:>6}: Type={RebarLabel[self.rebar_type]} fy={self.fy} fd={self.fd:.2f}"
 
     def fs(self, es: float) -> float:
         _es = abs(es)
@@ -139,9 +146,6 @@ class RebarHYSD(Rebar):
             else:
                 fs = fd2
             return copysign(fs, es)
-
-    # def fs(self, es: float) -> float:
-    #     return self._fs(es)
 
 
 """Layer of reinforcement bars"""
@@ -225,7 +229,7 @@ class RebarLayer:
         fcc = conc.fd * csb._fc_(esc)  # Stress in concrete
         _f = self.area * (fsc - fcc)
         _m = _f * x
-        result = {"x": x, "esc": esc, "f_sc": fsc, "f_cc": fcc, "C": _f, "M": _m}
+        result = {"x": x, "esc": esc, "f_s": fsc, "f_c": fcc, "C": _f, "M": _m}
         return _f, _m, result
 
     def force_tension(self, xu: float, ecmax: float = ecu) -> Tuple[float, float, Dict]:
@@ -245,7 +249,7 @@ class RebarLayer:
         conc: Concrete,
         rebar: Rebar,
         ecmax: float = ecu,
-    ) -> Dict[str, Union[float, str, int]]:  # pragma: no cover
+    ) -> Dict[str, Any]:  # pragma: no cover
         x = self.x(xu)
 
         if x >= 0:  # Compression
@@ -318,6 +322,27 @@ class RebarLayer:
 
     def spacing(self, b: float, clear_cover: float) -> float:
         return (b - (2 * clear_cover) - sum(self.dia)) / (len(self.dia) - 1)
+
+    def asdict(
+        self, xu: float, sb: LSMStressBlock, conc: Concrete, ecmax: float = ecu
+    ) -> dict:
+        x = self.x(xu)
+        es = ecmax / xu * x
+        fsc = self.rebar.fs(es)
+        fcc = sb._fc_(es) * conc.fd
+        F = self.area * (fsc - fcc)
+        d = {
+            "fy": self.rebar.fy,
+            "Bars": self.bar_list(),
+            "xc": self.xc,
+            "Strain": es,
+            "Type": StressLabel[self.stress_type(xu)][0].capitalize(),
+            "f_s": fsc,
+            "f_c": fcc,
+            "F": F,
+            "M": F * x,
+        }
+        return d
 
 
 """Group of reinforcement bars"""

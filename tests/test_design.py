@@ -4,7 +4,9 @@ from rcdesign.is456.design import Beam
 
 xumax_d = lambda fy: 0.0035 / (fy / (1.15 * 2e5) + 0.0055)
 
-mulim_const = lambda fy: (17 * 0.67) / (21 * 1.5) * (1 - 99 / 238 * xumax_d(fy))
+mulim_const = (
+    lambda fy: (17 * 0.67) / (21 * 1.5) * xumax_d(fy) * (1 - 99 / 238 * xumax_d(fy))
+)
 
 d_req = lambda fck, fy, b, Mu: sqrt(Mu / (fck * b * mulim_const(fy)))
 
@@ -14,7 +16,6 @@ def reqd_xu_d(fck, b, d, Mu):
     bb = -(238 / 99)
     cc = (Mu / (fck * b * d ** 2)) * (21 / 17) * (1.5 / 0.67) * (238 / 99)
     xu_d = (-bb - sqrt(bb ** 2 - 4 * aa * cc)) / (2 * aa)
-    print("***", aa, bb, cc, xu_d)
     return xu_d
 
 
