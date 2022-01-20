@@ -24,7 +24,7 @@ class RebarType(IntEnum):
 
 
 RebarLabel = {
-    RebarType.REBAR_UNDEFINED: "Not defined",
+    RebarType.REBAR_UNDEFINED: "Undefined",
     RebarType.REBAR_MS: "Mild Steel",
     RebarType.REBAR_HYSD: "HYSD",
     RebarType.REBAR_CUSTOM: "Custom type",
