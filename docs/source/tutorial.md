@@ -5,6 +5,11 @@ Install `rcdesign` from PyPI using `pip` as explained in [Installation](installa
 (env) $ python -m rcdesign
 ```
 
+An example script `example00.py` in the `tests` directory can be executed as follows
+```bash
+(env) $python -m tests.example00
+```
+
 ## Singly reinforced rectangular section
 Consider a rectangular reinforced concrete section with the following details:
 1. Size: 230x450 mm overall with 25mm clear cover

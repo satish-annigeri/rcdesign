@@ -100,4 +100,14 @@ You can also use `nox` to run the tests.
 ``` console
 (env) $ nox
 ```
+
+### Examples from `tests` Directory
+Run the examples in the `tests` directory with the following command from the command prompt:
+```bash
+(env) $ python -m tests.example00
+(env) $ python -m tests.example01
+...
+(env) $ python -m tests.example09
+```
+
 When you are done using the virtual environment, you can deactivate with the command `deactivate` at the command prompt in all operating systems.

@@ -1,14 +1,12 @@
 [run]
 omit =
     example*.py
+    __main__*.py
 
 [report]
-omit =
-    example*.py
-    __main__.py
-
 exclude_lines =
     pragma: no cover
     def __repr__
     def __str__
     def report
+    if __name__ == .__main__.:
