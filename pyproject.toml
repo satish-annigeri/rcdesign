@@ -53,3 +53,9 @@ Documentation = "https://github.com/satish-annigeri/rcdesign#readme"
 Issues = "https://github.com/satish-annigeri/rcdesign/issues"
 Source = "https://github.com/satish-annigeri/rcdesign"
 Home = "https://github.com/satish-annigeri/rcdesign"
+
+[tool.flit.sdist]
+exclude = [
+    ".github/",
+    "docs/",
+]
