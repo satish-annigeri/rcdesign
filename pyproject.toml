@@ -58,4 +58,9 @@ Home = "https://github.com/satish-annigeri/rcdesign"
 exclude = [
     ".github/",
     "docs/",
+    "CODE_OF_CONDUCT.md",
+    "CONTRIBUTING.md",
+    "noxfile.py",
+    ".gitignore",
+    ".coveragerc",
 ]
