@@ -1,20 +1,55 @@
-[tool.poetry]
-name = "rcdesign"
-version = "0.2.0"
-description = "A Python package for analysis and design of reinforced concrete sections according to IS456:2000"
-authors = ["Satish Annigeri <satish.annigeri@gmail.com>"]
-license = "MIT License"
-
-[tool.poetry.dependencies]
-python = ">=3.7,<3.10"
-
-[tool.poetry.dev-dependencies]
-flake8 = "^3.9.2"
-black = "^21.9b0"
-
 [build-system]
-requires = [
-    "setuptools>=42",
-    "wheel"
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "rcdesign"
+description = 'A Python package for reinforced concrete analysis and design as per IS 456:2000'
+readme = "README.md"
+requires-python = ">=3.7"
+authors = [{name = "Satish Annigeri", email = "satish.annigeri@gmail.com"}]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
 ]
-build-backend = "setuptools.build_meta"
+dynamic = ["version"]
+license = {file = "LICENSE.md"}
+dependencies = [
+  "numpy",
+  "scipy",
+  "sympy",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest >=2.7.3",
+    "pytest-cov",
+]
+doc = [
+    "sphinx",
+    "myst-parser",
+    "sphinx-rtd-theme",
+]
+dev = [
+    "flake8",
+    "black",
+]
+
+[project.urls]
+Documentation = "https://github.com/satish-annigeri/rcdesign#readme"
+Issues = "https://github.com/satish-annigeri/rcdesign/issues"
+Source = "https://github.com/satish-annigeri/rcdesign"
+Home = "https://github.com/satish-annigeri/rcdesign"
