@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Any
 from sympy import symbols, nsimplify, integrate
 from sympy.core.mul import Mul
 
@@ -36,7 +36,7 @@ class LSMStressBlock:
         else:
             return z
 
-    def _ec(self, _k: float, ecmax: float = ecu) -> Mul:
+    def _ec(self, _k: float, ecmax: float = ecu) -> Mul | Any:
         ecmax = self.isvalid_ecmax(ecmax)
         z, k = symbols("z k")
         if _k < 0:  # Invalid values for k
@@ -58,11 +58,11 @@ class LSMStressBlock:
             return 0.0
         ec_ecy = ec / self.ecy
         if ec_ecy < 1:
-            return 2 * ec_ecy - ec_ecy ** 2
+            return 2 * ec_ecy - ec_ecy**2
         else:
             return 1.0
 
-    def _fc(self, z: float, k: float, ecmax: float = ecu) -> Mul:
+    def _fc(self, z: float, k: float, ecmax: float = ecu) -> Mul | Any:
         ecmax = self.isvalid_ecmax(ecmax)
         if k < 0:  # Invalid values for k
             raise ValueError
@@ -74,7 +74,7 @@ class LSMStressBlock:
                 fc = nsimplify(0)
             elif ec < 1:
                 ec_ecy = self._ec(k, ecmax)
-                fc = (2 * ec_ecy - ec_ecy ** 2).evalf(subs={"k": k})
+                fc = (2 * ec_ecy - ec_ecy**2).evalf(subs={"k": k})
             else:
                 fc = nsimplify(1)
         return fc
@@ -83,7 +83,7 @@ class LSMStressBlock:
         fc = self._fc(z, k, ecmax)
         return float(fc.evalf(subs={"z": z}))
 
-    def C(self, z1: float, z2: float, k: float, ecmax: float = ecu) -> float:
+    def C(self, z1: float, z2: float, k: float, ecmax: float = ecu) -> float | Any:
         ecmax = self.isvalid_ecmax(ecmax)
         z = symbols("z")
         k = self.isvalid_k(k)
@@ -115,7 +115,7 @@ class LSMStressBlock:
             Cr = integrate(fcr, (z, zz, z2))
         return Cp + Cr
 
-    def M(self, z1: float, z2: float, k: float, ecmax: float = ecu) -> float:
+    def M(self, z1: float, z2: float, k: float, ecmax: float = ecu) -> float | Any:
         ecmax = self.isvalid_ecmax(ecmax)
         z = symbols("z")
         k = self.isvalid_k(k)

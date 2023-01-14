@@ -30,7 +30,7 @@ class Concrete:
     def fd(self) -> float:
         return 0.67 * self.fck / self.gamma_m
 
-    def tauc(self, pt) -> float:
+    def tauc(self, pt: float) -> float:
         if pt < 0.15:
             pt = 0.15
         if pt > 3:

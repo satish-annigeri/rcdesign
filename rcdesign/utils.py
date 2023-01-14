@@ -13,10 +13,10 @@ def header(s: str, ch: str = "-") -> str:
     return s + "\n" + underline(s, ch)
 
 
-def func(x: float, *args) -> float:
+def func(x: float, *args: float) -> float:
     # return a*x**2 + c*x - 4
     # return x**3 - 10*x**2 + 5
-    return args[0] ** 3 + args[1] * x ** 2 + args[2] * x + args[3]
+    return args[0] ** 3 + args[1] * x**2 + args[2] * x + args[3]
 
 
 def rootsearch(func: Callable, xstart: float, xstop: float, numint: int, *args):

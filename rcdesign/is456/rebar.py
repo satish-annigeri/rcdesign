@@ -62,7 +62,14 @@ ShearRebarLabel = {
 
 
 class Rebar(ABC):  # pragma: no cover
-    def __init__(self, label: str, fy: float, gamma_m=1.15, density=78.5, Es=2e5):
+    def __init__(
+        self,
+        label: str,
+        fy: float,
+        gamma_m: float = 1.15,
+        density: float = 78.5,
+        Es: float = 2e5,
+    ):
         self.label = label
         self.fy = fy
         self.gamma_m = gamma_m
@@ -165,7 +172,7 @@ class RebarLayer:
 
     @property
     def area(self) -> float:
-        return sum([d ** 2 for d in self.dia]) * pi / 4
+        return sum([d**2 for d in self.dia]) * pi / 4
 
     @property
     def dc(self) -> float:
@@ -499,13 +506,13 @@ class Stirrups(ShearReinforcement):
         _sv: float = 0.0,
         _alpha_deg: float = 90,
     ):
-        super().__init__(rebar, _nlegs * pi * _bar_dia ** 2 / 4, _sv)
+        super().__init__(rebar, _nlegs * pi * _bar_dia**2 / 4, _sv)
         self._nlegs = _nlegs
         self._bar_dia = _bar_dia
         self._alpha_deg = _alpha_deg
 
     def _Asv(self) -> float:
-        self.__Asv = self.nlegs * pi * self.bar_dia ** 2 / 4
+        self.__Asv = self.nlegs * pi * self.bar_dia**2 / 4
         return self.__Asv
 
     @property
@@ -519,7 +526,7 @@ class Stirrups(ShearReinforcement):
     @nlegs.setter
     def nlegs(self, n) -> float:
         self._nlegs = n
-        self.__Asv = self.nlegs * pi * self.bar_dia ** 2 / 4
+        self.__Asv = self.nlegs * pi * self.bar_dia**2 / 4
         return self.__Asv
 
     @property
@@ -529,7 +536,7 @@ class Stirrups(ShearReinforcement):
     @bar_dia.setter
     def bar_dia(self, dia) -> None:
         self._bar_dia = dia
-        self.__Asv = self.nlegs * pi * self.bar_dia ** 2 / 4
+        self.__Asv = self.nlegs * pi * self.bar_dia**2 / 4
 
     @property
     def sv(self) -> float:
@@ -557,11 +564,11 @@ class Stirrups(ShearReinforcement):
         return s
 
     def Vus(self, d: float) -> float:
-        Vus = self.rebar.fd * self.Asv * d / self._sv
+        V_us = self.rebar.fd * self.Asv * d / self._sv
         if self._alpha_deg != 90:
             alpha_rad = self._alpha_deg * pi / 180
-            Vus *= sin(alpha_rad) + cos(alpha_rad)
-        return Vus
+            V_us *= sin(alpha_rad) + cos(alpha_rad)
+        return V_us
 
     def get_type(self) -> int:
         if self._alpha_deg == 90:
@@ -592,14 +599,14 @@ class BentupBars(ShearReinforcement):
     def __init__(
         self, rebar: Rebar, bars: List[int], _alpha_deg: float = 45, _sv: float = 0.0
     ):
-        super().__init__(rebar, pi / 4 * sum([x ** 2 for x in bars]), _sv)
+        super().__init__(rebar, pi / 4 * sum([x**2 for x in bars]), _sv)
         self.bars = bars
         self._alpha_deg = _alpha_deg
 
     def _Asv(self) -> float:
         area = 0.0
         for bar_dia in self.bars:
-            area += bar_dia ** 2
+            area += bar_dia**2
         self.__Asv = pi / 4 * area
         return self.__Asv
 
@@ -608,13 +615,13 @@ class BentupBars(ShearReinforcement):
         return self._Asv()
 
     def Vus(self, d: float = 0.0) -> float:
-        Vus = self.rebar.fd * self.Asv
+        V_us = self.rebar.fd * self.Asv
         alpha_rad = self._alpha_deg * pi / 180
         if self._sv == 0:  # Single group of parallel bars
-            Vus *= sin(alpha_rad)
+            V_us *= sin(alpha_rad)
         else:  # Series of bars bent-up at different sections
-            Vus *= d / self._sv * (sin(alpha_rad) + cos(alpha_rad))
-        return Vus
+            V_us *= d / self._sv * (sin(alpha_rad) + cos(alpha_rad))
+        return V_us
 
     def get_type(self) -> int:
         if self._sv == 0:

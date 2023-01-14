@@ -2,7 +2,7 @@
 
 from math import isclose
 from enum import Enum
-from typing import Tuple, List
+from typing import Tuple, List, Any
 
 # from dataclasses import dataclass
 # from abc import ABC, abstractmethod
@@ -86,7 +86,7 @@ class RectBeamSection:
         # Compression force - concrete
         k = xu / self.D
         Fcc = self.csb.C(0, k, k, ecmax) * self.conc.fd * self.b * self.D
-        Mcc = self.csb.M(0, k, k, ecmax) * self.conc.fd * self.b * self.D ** 2
+        Mcc = self.csb.M(0, k, k, ecmax) * self.conc.fd * self.b * self.D**2
         # Compression force - compression steel
         Fsc, Msc, Fst, Mst = self.long_steel.force_moment(
             xu, self.csb, self.conc, ecmax
@@ -97,7 +97,7 @@ class RectBeamSection:
         Mc = Mcc + Msc
         return Fc, Mc, Ft, Mt
 
-    def xu(self, ecmax: float = ecu) -> float:
+    def xu(self, ecmax: float = ecu) -> float | Any:
         dc_max = 10
 
         x1, x2 = rootsearch(self.C_T, dc_max, self.D, 10, ecmax)
@@ -135,7 +135,7 @@ class RectBeamSection:
         s += f"{header('FLEXURE', '=')}\nEquilibrium NA = {xu:.2f} (k = {k:.2f}) (ec_max = {ecmax:.6f})\n\n"
         fcc = self.csb._fc_(ecmax) * self.conc.fd
         Fc = self.b * self.csb.C(0, k, k, ecmax) * self.conc.fd * self.D
-        Mc = self.csb.M(0, k, k) * self.conc.fd * self.b * self.D ** 2
+        Mc = self.csb.M(0, k, k) * self.conc.fd * self.b * self.D**2
         hdr1 = f"{'fck':>6} {' ':>8} {' ':>12} {'ec_max':>12} {'Type':>4} "
         hdr1 += f"{' ':>8} {'f_c':>6} {'F (kN)':>8} {'M (kNm)':>8}"
         s += hdr1 + "\n" + underline(hdr1) + "\n"
@@ -241,7 +241,7 @@ class RectBeamSection:
         fd = bottom_layer.rebar.fd
         d = self.D - self.clear_cover - bar_dia / 2
         dc = self.clear_cover + bar_dia / 2
-        Mulim = beam.Mulim_const(fy) * fck * self.b * d ** 2
+        Mulim = beam.Mulim_const(fy) * fck * self.b * d**2
         if Mu < Mulim:
             s = "Singly reinforced"
             ast = beam.reqd_Ast(fck, fy, self.b, d, Mu)
@@ -295,7 +295,7 @@ class FlangedBeamSection(RectBeamSection):
         moment = self.csb.M(0, k, k, ecmax) * self.conc.fd
 
         C = area * self.bw * self.D
-        M = moment * self.bw * self.D ** 2
+        M = moment * self.bw * self.D**2
         return C, M
 
     def Cf(self, xu: float, ecmax: float = ecu) -> Tuple[float, float]:
@@ -306,7 +306,7 @@ class FlangedBeamSection(RectBeamSection):
         area = self.csb.C(z1, z2, k, ecmax) * self.conc.fd
         moment = self.csb.M(z1, z2, k, ecmax) * self.conc.fd
         C = area * self.D * (self.bf - self.bw)
-        M = moment * self.D ** 2 * (self.bf - self.bw)
+        M = moment * self.D**2 * (self.bf - self.bw)
         return C, M
 
     def C_M(self, xu: float, ecmax: float = ecu) -> Tuple[float, float]:
@@ -341,7 +341,7 @@ class FlangedBeamSection(RectBeamSection):
         T, _ = self.T(xu, ecmax)
         return C - T
 
-    def xu(self, ecmax: float = ecu) -> float:
+    def xu(self, ecmax: float = ecu) -> float | Any:
         x1, x2 = rootsearch(self.C_T, 10, self.D, 10, ecmax)
         x = brentq(self.C_T, x1, x2, args=(ecmax,))
         return x
@@ -473,7 +473,7 @@ class RectColumnSection:
         a = self.csb.C(z1, z2, k)
         Cc = a * self.conc.fd * self.b * self.D
         m = self.csb.M(z1, z2, k)
-        Mc = m * self.conc.fd * self.b * self.D ** 2
+        Mc = m * self.conc.fd * self.b * self.D**2
         Cs = 0.0
         Ms = 0.0
         for L in self.long_steel.layers:
@@ -518,7 +518,7 @@ class RectColumnSection:
         fsc1 = self.csb.fc(z1, k) * fd
         fsc2 = self.csb.fc(z2, k) * fd
         Cc = self.csb.C(z1, z2, k) * fd * self.b * self.D
-        Mc = self.csb.M(z1, z2, k) * fd * self.b * self.D ** 2
+        Mc = self.csb.M(z1, z2, k) * fd * self.b * self.D**2
         hdr1 = f"{'fck':>6} {' ':>8} {'ecmin':>12} {'ecmax':>12} {'Type':>4} {'fsc1':>8} {'fsc2':>6} "
         hdr1 += f"{'Cc':>8} {'Mc':>8}"
         s += f"\n{header(hdr1)}\n"

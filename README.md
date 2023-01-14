@@ -20,7 +20,7 @@ $ mkdir rcd_tutorial
 $ cd rcd_tutorial
 $ python -m venv .venv
 $ .venv/bin/activate
-$ _
+(.venv) $ _
 ```
 
 On Windows, do the following:
@@ -29,14 +29,14 @@ On Windows, do the following:
 > cd rcd_tutorial
 > python -m venv .venv
 > .venv\Scripts\activate
-> (.venv) _
+> (.venv) > _
 ```
 
 Install using `pip`
 ```bash
 $ (.venv) pip install -U rcdesign
 $ (.venv) python -c "from rcdesign import __version__;print(__version____)
-$ 0.4.5
+$ 0.4.7
 ```
 
 Run the two built-in examples problem and study the output.
@@ -127,7 +127,7 @@ Contributions are welcome. Contributions can be in a variety of forms:
 
 ## Links
 - Documentation: [Documentation](https://rcdesign.readthedocs.io/en/latest/)
-- PyPI release: [0.4.0](https://pypi.org/project/rcdesign/)
+- PyPI release: [0.4.7](https://pypi.org/project/rcdesign/)
 - Github repository: https://github.com/satish-annigeri/rcdesign
 
 ## References
