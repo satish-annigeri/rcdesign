@@ -36,7 +36,7 @@ Install using `pip`
 ```bash
 $ (.venv) pip install -U rcdesign
 $ (.venv) python -c "from rcdesign import __version__;print(__version____)
-$ 0.4.8
+$ 0.4.9
 ```
 
 Run the two built-in examples problem and study the output.
@@ -127,7 +127,7 @@ Contributions are welcome. Contributions can be in a variety of forms:
 
 ## Links
 - Documentation: [Documentation](https://rcdesign.readthedocs.io/en/latest/)
-- PyPI release: [0.4.8](https://pypi.org/project/rcdesign/)
+- PyPI release: [0.4.9](https://pypi.org/project/rcdesign/)
 - Github repository: https://github.com/satish-annigeri/rcdesign
 
 ## References

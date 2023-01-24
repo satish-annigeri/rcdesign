@@ -611,7 +611,7 @@ class BentupBars(ShearReinforcement):
         return self.__Asv
 
     @property
-    def Asv(self):
+    def Asv(self) -> float:
         return self._Asv()
 
     def Vus(self, d: float = 0.0) -> float:
