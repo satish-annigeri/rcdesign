@@ -1,4 +1,4 @@
-from typing import Tuple, Any
+from typing import Any
 from sympy import symbols, nsimplify, integrate
 from sympy.core.mul import Mul
 

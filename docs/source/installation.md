@@ -35,7 +35,7 @@ Install using `pip`
 ```bash
 $ (.venv) pip install -U rcdesign
 $ (.venv) python -c "from rcdesign import __version__;print(__version____)
-$ 0.4.5
+$ 0.4.8
 ```
 
 Run the two built-in examples problem and study the output.

@@ -8,7 +8,7 @@ from typing import Tuple, List, Any
 # from abc import ABC, abstractmethod
 from scipy.optimize import brentq
 
-from rcdesign.is456 import ecy, ecu
+from rcdesign.is456 import ecu
 from rcdesign.is456.stressblock import LSMStressBlock
 from rcdesign.is456.concrete import Concrete
 from rcdesign.is456.rebar import (
@@ -243,11 +243,9 @@ class RectBeamSection:
         dc = self.clear_cover + bar_dia / 2
         Mulim = beam.Mulim_const(fy) * fck * self.b * d**2
         if Mu < Mulim:
-            s = "Singly reinforced"
             ast = beam.reqd_Ast(fck, fy, self.b, d, Mu)
             asc = 0.0
         else:
-            s = "Doubly reinforced"
             ast1 = beam.reqd_Ast(fck, fy, self.b, d, Mulim)
             Mu2 = Mu - Mulim
             ast2 = Mu2 / (fd * (d - dc))
@@ -356,7 +354,6 @@ class FlangedBeamSection(RectBeamSection):
         s += f"{header('FLEXURE', '=')}\nEquilibrium NA = {xu:.2f} (ec_max = {ecmax:.6f})\n\n"
         Fcw, Mcw = self.Cw(xu, ecmax)
         Fcf, Mcf = self.Cf(xu)
-        Fc = Fcw + Fcf
         Mc = Mcw + Mcf
         hdr1 = f"{'fck':>6} {'Breadth':>10} {'Depth':>10} {'ec_min':>12}  {'ec_max':>12} {'Type':>6} "
         hdr1 += f"{'C (kN)':>8} {'M (kNm)':>8}"
