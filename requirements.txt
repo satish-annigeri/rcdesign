@@ -5,3 +5,4 @@ sphinx
 sphinx-rtd-theme
 myst-parser
 linkify-it-py
+setuptools>=65.5.1 # not directly required, pinned by Snyk to avoid a vulnerability
