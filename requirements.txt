@@ -14,3 +14,7 @@ scipy==1.7.3
     # via rcdesign (pyproject.toml)
 sympy==1.10.1
     # via rcdesign (pyproject.toml)
+sphinx
+sphinx-rtd-theme
+myst-parser
+linkify-it-py
