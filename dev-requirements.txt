@@ -70,7 +70,7 @@ mypy-extensions==1.0.0
     # via black
 myst-parser==0.18.1
     # via rcdesign (pyproject.toml)
-numpy==1.21.6
+numpy==1.22.0
     # via
     #   rcdesign (pyproject.toml)
     #   scipy

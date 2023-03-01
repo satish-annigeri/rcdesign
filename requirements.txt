@@ -6,7 +6,7 @@
 #
 mpmath==1.2.1
     # via sympy
-numpy==1.21.6
+numpy==1.22.0
     # via
     #   rcdesign (pyproject.toml)
     #   scipy
