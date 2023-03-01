@@ -2,9 +2,9 @@
 
 from math import isclose
 from enum import Enum
-from typing import Tuple, List, Any
+from typing import Tuple, List, Any, Union
+from dataclasses import dataclass
 
-# from dataclasses import dataclass
 # from abc import ABC, abstractmethod
 from scipy.optimize import brentq
 
@@ -36,26 +36,18 @@ class DesignForceType(Enum):
 """Class to repersent a rectangular beam section"""
 
 
+@dataclass
 class RectBeamSection:
-    def __init__(
-        self,
-        b: float,
-        D: float,
-        csb: LSMStressBlock,
-        conc: Concrete,
-        long_steel: RebarGroup,
-        shear_steel: ShearRebarGroup,
-        clear_cover: float,
-    ):
-        self.design_force_type = DesignForceType.BEAM
-        self.csb = csb
-        self.conc = conc
-        self.long_steel = long_steel
-        self.clear_cover = clear_cover
-        self.b = b
-        self.D = D
+    b: float
+    D: float
+    csb: LSMStressBlock
+    conc: Concrete
+    long_steel: RebarGroup
+    shear_steel: ShearRebarGroup
+    clear_cover: float
 
-        self.shear_steel = shear_steel
+    def __post_init__(self):
+        self.design_force_type = DesignForceType.BEAM
         self.calc_xc()
 
     def calc_xc(self) -> None:
@@ -97,7 +89,7 @@ class RectBeamSection:
         Mc = Mcc + Msc
         return Fc, Mc, Ft, Mt
 
-    def xu(self, ecmax: float = ecu) -> float | Any:
+    def xu(self, ecmax: float = ecu) -> Union[float, Any]:
         dc_max = 10
 
         x1, x2 = rootsearch(self.C_T, dc_max, self.D, 10, ecmax)
@@ -160,6 +152,8 @@ class RectBeamSection:
             elif L._stress_type == StressType.STRESS_TENSION:
                 c = L.area * fsc
                 s += f"{' ':>6} "
+            else:
+                c = 0.0
 
             m = c * (k * self.D - L._xc)
             s += f"{c/1e3:8.2f} {m/1e6:8.2f}\n"
@@ -339,7 +333,7 @@ class FlangedBeamSection(RectBeamSection):
         T, _ = self.T(xu, ecmax)
         return C - T
 
-    def xu(self, ecmax: float = ecu) -> float | Any:
+    def xu(self, ecmax: float = ecu) -> Union[float, Any]:
         x1, x2 = rootsearch(self.C_T, 10, self.D, 10, ecmax)
         x = brentq(self.C_T, x1, x2, args=(ecmax,))
         return x
@@ -430,26 +424,18 @@ class FlangedBeamSection(RectBeamSection):
         return s
 
 
+@dataclass
 class RectColumnSection:
-    def __init__(
-        self,
-        b: float,
-        D: float,
-        csb: LSMStressBlock,
-        conc: Concrete,
-        long_steel: RebarGroup,
-        lat_ties: LateralTie,
-        clear_cover: float,
-    ):
+    b: float
+    D: float
+    csb: LSMStressBlock
+    conc: Concrete
+    long_steel: RebarGroup
+    lat_ties: LateralTie
+    clear_cover: float
+
+    def __post_init__(self):
         self.design_force_type = DesignForceType.COLUMN
-        self.csb = csb
-        self.conc = conc
-        self.long_steel = long_steel
-        self.clear_cover = clear_cover
-        self.b = b
-        self.D = D
-        self.long_steel = long_steel
-        self.lat_ties = lat_ties
 
     @property
     def Asc(self) -> float:

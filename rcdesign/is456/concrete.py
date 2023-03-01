@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from math import sqrt
 import numpy as np
 
@@ -5,18 +6,12 @@ import numpy as np
 """Concrete class with stress-strain properties as defined in IS456:2000"""
 
 
+@dataclass
 class Concrete:
-    def __init__(
-        self,
-        label: str,
-        fck: float,
-        gamma_m: float = 1.5,
-        density: float = 25.0,
-    ):
-        self.label = label
-        self.fck = fck
-        self.gamma_m = gamma_m
-        self.density = density
+    label: str
+    fck: float
+    gamma_m: float = 1.5
+    density: float = 25.0
 
     def __repr__(self) -> str:
         s = f"fck = {self.fck:.2f} N/mm^2, fd = {self.fd:.2f} N/mm^2"

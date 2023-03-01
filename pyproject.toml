@@ -34,19 +34,15 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-test = [
+dev = [
+    "flake8",
+    "black",
     "pytest >=2.7.3",
     "pytest-cov",
-]
-doc = [
     "sphinx",
     "myst-parser",
     "sphinx-rtd-theme",
     "linkify-it-py",
-]
-dev = [
-    "flake8",
-    "black",
 ]
 
 [project.urls]

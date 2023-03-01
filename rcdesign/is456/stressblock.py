@@ -1,17 +1,18 @@
-from typing import Any
+from dataclasses import dataclass
+from typing import Any, Union
 from sympy import symbols, nsimplify, integrate
 from sympy.core.mul import Mul
 
-from rcdesign.is456 import ecy, ecu
+import rcdesign.is456 as is456
 
 # from rcdesign.stressblock import StressBlock
 
 
+@dataclass
 class LSMStressBlock:
-    def __init__(self, label: str = "IS 456 LSM", ecy: float = ecy, ecu: float = ecu):
-        self.label = label
-        self.ecy = ecy
-        self.ecu = ecu
+    label: str = "IS 456 LSM"
+    ecy: float = is456.ecy
+    ecu: float = is456.ecu
 
     def __repr__(self):
         s = self.label
@@ -36,7 +37,7 @@ class LSMStressBlock:
         else:
             return z
 
-    def _ec(self, _k: float, ecmax: float = ecu) -> Mul | Any:
+    def _ec(self, _k: float, ecmax: float = ecu) -> Union[Mul, Any]:
         ecmax = self.isvalid_ecmax(ecmax)
         z, k = symbols("z k")
         if _k < 0:  # Invalid values for k
@@ -62,7 +63,7 @@ class LSMStressBlock:
         else:
             return 1.0
 
-    def _fc(self, z: float, k: float, ecmax: float = ecu) -> Mul | Any:
+    def _fc(self, z: float, k: float, ecmax: float = ecu) -> Union[Mul, Any]:
         ecmax = self.isvalid_ecmax(ecmax)
         if k < 0:  # Invalid values for k
             raise ValueError
@@ -83,7 +84,9 @@ class LSMStressBlock:
         fc = self._fc(z, k, ecmax)
         return float(fc.evalf(subs={"z": z}))
 
-    def C(self, z1: float, z2: float, k: float, ecmax: float = ecu) -> float | Any:
+    def C(
+        self, z1: float, z2: float, k: float, ecmax: float = ecu
+    ) -> Union[float, Any]:
         ecmax = self.isvalid_ecmax(ecmax)
         z = symbols("z")
         k = self.isvalid_k(k)
@@ -115,7 +118,9 @@ class LSMStressBlock:
             Cr = integrate(fcr, (z, zz, z2))
         return Cp + Cr
 
-    def M(self, z1: float, z2: float, k: float, ecmax: float = ecu) -> float | Any:
+    def M(
+        self, z1: float, z2: float, k: float, ecmax: float = ecu
+    ) -> Union[float, Any]:
         ecmax = self.isvalid_ecmax(ecmax)
         z = symbols("z")
         k = self.isvalid_k(k)

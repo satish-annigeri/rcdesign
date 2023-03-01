@@ -1,6 +1,7 @@
 """Classes to represent reinforcement bars, layers of reinforcement bars
 and groups of reinforcement layers"""
 
+from dataclasses import dataclass, field
 from enum import IntEnum
 from math import pi, sin, cos, isclose, copysign
 
@@ -61,21 +62,14 @@ ShearRebarLabel = {
 # Rebar class
 
 
+@dataclass
 class Rebar(ABC):  # pragma: no cover
-    def __init__(
-        self,
-        label: str,
-        fy: float,
-        gamma_m: float = 1.15,
-        density: float = 78.5,
-        Es: float = 2e5,
-    ):
-        self.label = label
-        self.fy = fy
-        self.gamma_m = gamma_m
-        self.density = density
-        self.Es = Es
-        self.rebar_type = RebarType.REBAR_UNDEFINED
+    label: str
+    fy: float
+    gamma_m: float = 1.15
+    density: float = 78.5
+    Es: float = 2e5
+    rebar_type: RebarType = RebarType.REBAR_HYSD
 
     @property
     def fd(self) -> float:
@@ -158,12 +152,14 @@ class RebarHYSD(Rebar):
 """Layer of reinforcement bars"""
 
 
+@dataclass
 class RebarLayer:
-    def __init__(self, rebar: Rebar, dia: List[int], _dc: float):
-        self.rebar = rebar
-        self.dia = dia
-        self._dc = _dc
-        self._xc: float = _dc
+    rebar: Rebar
+    dia: List[int] = field(default_factory=list)
+    _dc: float = 0.0
+
+    def __post_init__(self):
+        self._xc: float = self._dc
         self._stress_type: StressType = StressType.STRESS_NEUTRAL
 
     @property
@@ -355,9 +351,11 @@ class RebarLayer:
 """Group of reinforcement bars"""
 
 
+@dataclass
 class RebarGroup:
-    def __init__(self, layers: List[RebarLayer]):
-        self.layers = layers  # List of layers of bars, in any order from edge
+    layers: List[RebarLayer] = field(
+        default_factory=list
+    )  # List of layers of bars, in any order from edge
 
     @property
     def area(self) -> float:
@@ -471,11 +469,11 @@ class RebarGroup:
 """Shear reinforcement"""
 
 
+@dataclass
 class ShearReinforcement(ABC):  # pragma: no cover
-    def __init__(self, rebar: Rebar, _Asv: float = 0.0, _sv: float = 0.0):
-        self.rebar = rebar
-        self.__Asv = _Asv
-        self._sv = _sv
+    rebar: Rebar
+    _Asv_: float = 0.0
+    _sv: float = 0.0
 
     @abstractmethod
     def _Asv(self):
@@ -512,8 +510,8 @@ class Stirrups(ShearReinforcement):
         self._alpha_deg = _alpha_deg
 
     def _Asv(self) -> float:
-        self.__Asv = self.nlegs * pi * self.bar_dia**2 / 4
-        return self.__Asv
+        self._Asv_ = self.nlegs * pi * self.bar_dia**2 / 4
+        return self._Asv_
 
     @property
     def Asv(self):
@@ -607,8 +605,8 @@ class BentupBars(ShearReinforcement):
         area = 0.0
         for bar_dia in self.bars:
             area += bar_dia**2
-        self.__Asv = pi / 4 * area
-        return self.__Asv
+        self._Asv_ = pi / 4 * area
+        return self._Asv_
 
     @property
     def Asv(self) -> float:
@@ -699,11 +697,11 @@ class ShearRebarGroup:
         return s
 
 
+@dataclass
 class LateralTie:
-    def __init__(self, rebar: Rebar, bar_dia: int, spacing: float):
-        self.rebar = rebar
-        self.bar_dia = bar_dia
-        self.spacing = spacing
+    rebar: Rebar
+    bar_dia: int
+    spacing: float
 
     def __repr__(self):
         s = f"Lateral Ties: {self.rebar} - {self.bar_dia}"
