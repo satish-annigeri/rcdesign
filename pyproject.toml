@@ -34,11 +34,14 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+test = [
+    "pytest >=2.7.3",
+    "pytest-cov",
+    "pytest-env",
+]
 dev = [
     "flake8",
     "black",
-    "pytest >=2.7.3",
-    "pytest-cov",
     "sphinx",
     "myst-parser",
     "sphinx-rtd-theme",
@@ -69,4 +72,23 @@ warn_unused_configs = true
 exclude = [
     "conf.py",
     "noxfile.py",
+]
+
+[tool.pytest.ini_options]
+addopts = "--cov --cov-report term-missing --cov-fail-under 95"
+
+[tool.coverage.run]
+source = ["."]
+omit = [
+    "example*.py",
+    "__main__*.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "def __str__",
+    "def report",
+    "if __name__ == .__main__.:",
 ]
