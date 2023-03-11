@@ -1,30 +1,31 @@
 from math import isclose
 import pytest
-from sympy import symbols, nsimplify, integrate
 
-from rcdesign.is456.stressblock import LSMStressBlock
+# from sympy import symbols, nsimplify, integrate
+
+from rcdesign.is456.stressblock import LSMStressBlock, WSMStressBlock
 from rcdesign.is456 import ecy, ecu
 
 
 def a_p(z1: float, z2: float, k: float) -> float:
     zcy = k - 3 / 7
-    return (z2 ** 2 - z1 ** 2) / zcy - (z2 ** 3 - z1 ** 3) / (3 * zcy ** 2)
+    return (z2**2 - z1**2) / zcy - (z2**3 - z1**3) / (3 * zcy**2)
 
 
 def m_p(z1: float, z2: float, k: float) -> float:
     zcy = k - 3 / 7
-    m = (2 / 3) * (z2 ** 3 - z1 ** 3) / zcy - (1 / 4) * (z2 ** 4 - z1 ** 4) / (zcy ** 2)
+    m = (2 / 3) * (z2**3 - z1**3) / zcy - (1 / 4) * (z2**4 - z1**4) / (zcy**2)
     return m
 
 
 def m_r(z1: float, z2: float) -> float:
-    return (z2 ** 2 - z1 ** 2) / 2
+    return (z2**2 - z1**2) / 2
 
 
 class TestLSMStressBlock:
     def test_01(self):
         sb = LSMStressBlock()
-        k = 1.5
+        # k = 1.5
 
         assert sb._fc_(-0.0001) == 0
         assert sb._fc_(0.0036) == 0
@@ -64,13 +65,13 @@ class TestLSMStressBlock:
         k = 1.5  # NA outside the section
         z = k - 1
         ec = z / (k - 3 / 7)
-        assert sb.fc(z, k) == 2 * ec - ec ** 2
+        assert sb.fc(z, k) == 2 * ec - ec**2
         z = k
         ec = z / (k - 3 / 7)
-        assert sb.fc(k, k) == 2 * ec - ec ** 2 if ec < 1 else 1
+        assert sb.fc(k, k) == 2 * ec - ec**2 if ec < 1 else 1
         z = k / 2
         ec = z / (k - 3 / 7)
-        assert sb.fc(z, k) == 2 * ec - ec ** 2 if ec < 1 else 1
+        assert sb.fc(z, k) == 2 * ec - ec**2 if ec < 1 else 1
 
         k = 1.0  # NA at edge of the section
         assert sb.fc(0, k) == 0
@@ -79,7 +80,7 @@ class TestLSMStressBlock:
         assert sb.fc(4 / 7, k) == 1
         z = k / 2
         ec = z / k * ecu / ecy
-        assert sb.fc(z, k) == 2 * ec - ec ** 2 if ec < 1 else 1
+        assert sb.fc(z, k) == 2 * ec - ec**2 if ec < 1 else 1
 
         k = 0.9  # NA inside the section
         assert sb.fc(0, k) == 0
@@ -88,7 +89,7 @@ class TestLSMStressBlock:
         assert sb.fc(k * 4 / 7 + 0.0001, k) == 1
         z = 0.45
         ec = z / k * ecu / ecy
-        assert isclose(sb.fc(0.5 * k, k), 2 * ec - ec ** 2)
+        assert isclose(sb.fc(0.5 * k, k), 2 * ec - ec**2)
 
     def test_05(self):
         sb = LSMStressBlock("LSM Compression")
@@ -131,3 +132,53 @@ class TestLSMStressBlock:
         assert isclose(sb.M(k - 1, k, k), m1 + m2)
         with pytest.raises(ValueError):
             assert sb.M(k - 1 - 0.001, k, k)
+
+
+class TestWSMStressBlock:
+    def test_01(self):
+        fcbc = 5.0
+        fst = 190.0
+        sb = WSMStressBlock(fcbc, fst)
+        assert sb.fcbc == fcbc
+        assert sb.fst == fst
+        assert isclose(sb.m, 280.0 / (3 * fcbc))
+        sb.fcbc = 10.0
+        assert sb.fcbc == 10.0
+        sb.fst = 240.0
+        assert sb.fst == 240.0
+
+    def test_02(self):
+        fcbc = 5.0
+        fst = 190.0
+        sb = WSMStressBlock(fcbc, fst)
+        m = sb.m
+        kb = (m * fcbc) / (m * fcbc + fst)
+        assert isclose(sb.kb(), kb)
+
+    def test_03(self):
+        fcbc = 5.0
+        fst = 190.0
+        d = 1.0
+        sb = WSMStressBlock(fcbc, fst)
+        m = sb.m
+        kb = (m * fcbc) / (m * fcbc + fst)
+        jb = 1 - kb / 3.0
+        assert isclose(sb.jb(d), jb)
+
+    def test_04(self):
+        fcbc = 5.0
+        fst = 190.0
+        b = 1.0
+        d = 1.0
+        sb = WSMStressBlock(fcbc, fst)
+        xb = sb.kb(d)
+        Qb = b * xb * fcbc / 2.0 * (d - xb / 3.0)
+        assert isclose(sb.Qb(b, d), Qb)
+
+    def test_05(self):
+        fcbc = 5.0
+        fst = 190.0
+        d = 1.0
+        sb = WSMStressBlock(fcbc, fst)
+        xb = sb.m * fcbc * d / (fst + sb.m * fcbc)
+        assert isclose(sb.xb(d), xb)

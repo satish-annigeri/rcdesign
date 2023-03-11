@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from typing import Any, Union
+from math import sqrt
 from sympy import symbols, nsimplify, integrate
 from sympy.core.mul import Mul
 
@@ -116,7 +117,7 @@ class LSMStressBlock:
             fcr = self._fc(z2, k, ecmax)
             Cp = integrate(fcp, (z, z1, zz))
             Cr = integrate(fcr, (z, zz, z2))
-        return Cp + Cr
+        return Cp + Cr  # type: ignore
 
     def M(
         self, z1: float, z2: float, k: float, ecmax: float = ecu
@@ -150,4 +151,71 @@ class LSMStressBlock:
             fcr = self._fc(z2, k, ecmax)
             Mp = integrate(fcp * z, (z, z1, zz))
             Mr = integrate(fcr * z, (z, zz, z2))
-        return Mp + Mr
+        return Mp + Mr  # type: ignore
+
+
+@dataclass
+class WSMStressBlock:
+    _fcbc: float
+    _fst: float
+
+    @property
+    def fcbc(self) -> float:
+        return self._fcbc
+
+    @fcbc.setter
+    def fcbc(self, _fcbc: float) -> None:
+        self._fcbc = _fcbc
+
+    @property
+    def fst(self) -> float:
+        return self._fst
+
+    @fst.setter
+    def fst(self, _fst: float) -> None:
+        self._fst = _fst
+
+    @property
+    def m(self) -> float:
+        return 280.0 / (3 * self.fcbc)
+
+    def kb(self, d: float = 1.0) -> float:
+        m = self.m
+        return (m * self.fcbc) / (m * self.fcbc + self.fst) * d
+
+    def jb(self, d: float = 1.0) -> float:
+        return d * (1 - self.kb(d) / 3.0)
+
+    def Qb(self, b: float = 1.0, d: float = 1.0) -> float:
+        xb = self.kb(d)
+        # print(b, xb, fcbc, d)
+        return b * xb * self.fcbc / 2.0 * (d - xb / 3.0)
+
+    def xb(self, d):
+        m = self.m
+        return m * self.fcbc * d / (self.fst + m * self.fcbc)
+
+    def x(self, b: float, d: float, Ast: float) -> float:
+        m = self.m
+        ca = b / 2.0
+        cb = m * Ast
+        cc = -m * Ast * d
+        return (-cb + sqrt(cb**2 - 4 * ca * cc)) / (2 * ca)
+
+    def reqd_Asc_Ast(self, b, d, dd: float, M):
+        Mb = self.Qb(b, d)
+        if M <= Mb:
+            x = (1.5 - sqrt(1.5**2 - (6 * M / (self.fcbc * b * d**2)))) * d
+            Ast = b * x * self.fcbc / (2 * self.fst)
+            Asc = 0.0
+            # print('Singly', x, Ast, Asc, M/1e6, Mb/1e6)
+        else:
+            xb = self.kb(d)
+            Ast1 = b * xb * self.fcbc / (2 * self.fst)
+            M2 = M - Mb
+            Ast2 = M2 / (self.fst * (d - dd))
+            Ast = Ast1 + Ast2
+            m = self.m
+            Asc = (m * Ast2 * (d - xb)) / ((1.5 * m - 1) * (xb - dd))
+            # print('Doubly', xb, Asc, Ast, M/1e6, Mb/1e6)
+        return Asc, Ast
