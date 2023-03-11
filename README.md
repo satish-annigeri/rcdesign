@@ -5,117 +5,18 @@
 
 [Documentation](https://rcdesign.readthedocs.io/en/latest/)
 
-# Installation
-## Install from PyPI using `pip`
-### Requirements
-* Python 3.7+
-* numpy
-* scipy
-* sympy
-
-### Install from PyPI
-Create a separate directory and install a virtual environment. Activate the virtual environment and install required packages. On *nix systems, do the following:
+## Installing
+Install using [`pip`](https://pip.pypa.io/en/stable/getting-started/).
 ```bash
-$ mkdir rcd_tutorial
-$ cd rcd_tutorial
-$ python -m venv .venv
-$ .venv/bin/activate
-(.venv) $ _
+$ pip install rcdesign
 ```
 
-On Windows, do the following:
-```bash
-> mkdir rcd_tutorial
-> cd rcd_tutorial
-> python -m venv .venv
-> .venv\Scripts\activate
-> (.venv) > _
-```
+## Run the built-in examples
 
-Install using `pip`
+Run the two built-in example problems and study the output.
 ```bash
-$ (.venv) pip install -U rcdesign
-$ (.venv) python -c "from rcdesign import __version__;print(__version____)
-$ 0.4.9
+$ python -m rcdesign
 ```
-
-Run the two built-in examples problem and study the output.
-```bash
-$ (.venv) python -m rcdesign
-```
-
-## Install from Source on github
-
-### Clone the repository
-Choose a suitable directory where you wish to clone the source code from github.  Clone the repository using `git`
-```bash
-$ git clone https://github.com/satish-annigeri/rcdesign.git
-```
-When you clone the `rcdesign` repository from github, a new directory named `rcdesign` will be created in the current working directory. Change over to the directory `rcdesign` that is created with the command
-```bash
-$ cd rcdesign
-```
-List the directory contents and verify the directory structure.
-
-### Create a virtual environment
-Create a virtual environment inside the `rcdesign` directory with the following command
-```bash
-$ python -m venv .venv
-```
-Activate the virtual environment with the command
-```bash
-$ source env/bin/activate
-(.venv) $ _
-```
-
-For Windows operating system, the command is
-```bash
-> .venv\Scripts\activate
-(.venv) > _
-```
-
-### Install required packages
-Install required packages into the virtual environment with `pip`
-```bash
-(.venv) $ pip install -U rcdesign[test]
-```
-This will install pytest and pytest-cov required to run the tests.
-
-### Run tests
-
-Run the tests with `pytest`
-```bash
-(.venv) $ pytest tests
-```
-Check code coverage.
-```bash
-(.venv) $ pytest --cov=rcdesign tests
-```
-You can also use `nox` to run the tests. Install `nox` using `pip`, if necessary.
-```bash
-(.venv) $ pip install nox
-(.venv) $ nox
-```
-When you are done using the virtual environment, you can deactivate it with the command `deactivate` at the command prompt in all operating systems.
-
-## Examples
-### Built-in Example
-Run the built-in example with the following command.
-```bash
-(.venv) $ python -m rcdesign
-```
-
-### Examples from `tests` Directory
-Run the additional examples in the `tests` directory with the following command from the command prompt:
-```bash
-(.venv) $ python -m tests.example01
-(.venv) $ python -m tests.example02
-...
-(.venv) $ python -m tests.example09
-```
-
-### Your Own Example
-Refer the [documentation](https://rcdesign.readthedocs.io/en/latest/) to write your own scripts.
 
 ## Contribute
 Contributions are welcome. Contributions can be in a variety of forms:
@@ -127,7 +28,7 @@ Contributions are welcome. Contributions can be in a variety of forms:
 
 ## Links
 - Documentation: [Documentation](https://rcdesign.readthedocs.io/en/latest/)
-- PyPI release: [0.4.9](https://pypi.org/project/rcdesign/)
+- PyPI release: [0.4.11](https://pypi.org/project/rcdesign/)
 - Github repository: https://github.com/satish-annigeri/rcdesign
 
 ## References
