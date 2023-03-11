@@ -5,15 +5,15 @@
 
 Welcome to rcdesign's documentation!
 ====================================
-|License Badge| |Version Badge| |Docs Badge| |Downloads Badge|
+|License Badge| |Version Badge| |Docs Badge| |Downloads Badge| |Code Style|
 
 .. toctree::
    :caption: Table of Contents
-   :maxdepth: 1
+   :maxdepth: 2
 
    installation.md
    tutorial.md
-   theory.md
+   theory/index
    apiref.md
 
 
@@ -34,3 +34,5 @@ Indices and tables
     :alt: PyPI - License
 .. |Downloads Badge| image:: https://img.shields.io/pypi/dm/rcdesign
     :alt: PyPI - Downloads
+.. |Code Style| image:: https://img.shields.io/badge/code%20style-black-000000.svg
+    :alt: Code Style
