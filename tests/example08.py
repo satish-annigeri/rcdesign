@@ -19,4 +19,3 @@ lat_ties = LateralTie(fe500, 8, 230)
 colsec = RectColumnSection(b, D, csb, m20, long_st, lat_ties, 42)
 xu = 240
 print(colsec.report(xu))
-print(xu / D, colsec.C_M(xu))
