@@ -87,8 +87,8 @@ class TestRectBeamSection:
         )
         assert rsec.long_steel.layers[1].stress_type(xu) == StressType.STRESS_TENSION
         # Manual calculation for effective depth
-        ast1 = 2 * 16 ** 2 * pi / 4
-        ast2 = 3 * 20 ** 2 * pi / 4
+        ast1 = 2 * 16**2 * pi / 4
+        ast2 = 3 * 20**2 * pi / 4
         ast = ast1 + ast2
         x1 = D - 70
         x2 = D - 35
@@ -136,7 +136,7 @@ class TestRectBeamSection:
         shear_st = Stirrups(fe415, 2, 8, 150)
         rsec = RectBeamSection(b, D, csb, m20, main_st, shear_st, 25)
         rsec.calc_xc()
-        ast = 3 * pi / 4 * 20 ** 2
+        ast = 3 * pi / 4 * 20**2
         d = D - 35
         pt = (ast) / (b * d) * 100
         xu = 75
@@ -162,14 +162,14 @@ class TestRectBeamSection:
         ecmax = ecu
         Fc, Mc, Ft, Mt = rsec.F_M(xu, ecmax)
         fcc = (17 / 21) * m20.fd * b * xu
-        mcc = 139 / 294 * m20.fd * b * xu ** 2
+        mcc = 139 / 294 * m20.fd * b * xu**2
         xc = xu - rsec.long_steel.layers[0].xc
-        a = pi / 4 * 2 * 16 ** 2
+        a = pi / 4 * 2 * 16**2
         fsc, msc = calc_fsc(ecy, ecmax, xu, xc, a, fe415, m20)
         xt1 = rsec.long_steel.layers[1].xc - xu
         xt2 = rsec.long_steel.layers[2].xc - xu
-        ast1 = pi / 4 * 2 * 16 ** 2
-        ast2 = pi / 4 * 3 * 16 ** 2
+        ast1 = pi / 4 * 2 * 16**2
+        ast2 = pi / 4 * 3 * 16**2
         fst1, mst1 = calc_fst(ecmax, xu, xt1, ast1, fe415)
         fst2, mst2 = calc_fst(ecmax, xu, xt2, ast2, fe415)
         ft = fst1 + fst2
@@ -192,14 +192,14 @@ class TestRectBeamSection:
 
         Mu = rsec.Mu(calc_xu, ecmax)
         fcc = (17 / 21) * m20.fd * b * calc_xu
-        mcc = 139 / 294 * m20.fd * b * calc_xu ** 2
+        mcc = 139 / 294 * m20.fd * b * calc_xu**2
         xc = calc_xu - rsec.long_steel.layers[0].xc
-        a = pi / 4 * 2 * 16 ** 2
+        a = pi / 4 * 2 * 16**2
         fsc, msc = calc_fsc(ecy, ecmax, calc_xu, xc, a, fe415, m20)
         xt1 = rsec.long_steel.layers[1].xc - calc_xu
         xt2 = rsec.long_steel.layers[2].xc - calc_xu
-        ast1 = pi / 4 * 2 * 16 ** 2
-        ast2 = pi / 4 * 3 * 16 ** 2
+        ast1 = pi / 4 * 2 * 16**2
+        ast2 = pi / 4 * 3 * 16**2
         fst1, mst1 = calc_fst(ecmax, calc_xu, xt1, ast1, fe415)
         fst2, mst2 = calc_fst(ecmax, calc_xu, xt2, ast2, fe415)
         ft = fst1 + fst2
@@ -216,7 +216,7 @@ class TestRectBeamSection:
         pt = (ast1 + ast2) * 100 / (b * d)
         tauc = m20.tauc(pt)
         vuc = tauc * b * d
-        vus = fe415.fd * 2 * pi / 4 * 8 ** 2 * d / 150
+        vus = fe415.fd * 2 * pi / 4 * 8**2 * d / 150
         assert Vuc + sum(Vus) == vuc + vus
 
 
@@ -241,12 +241,12 @@ class TestFlangedBeamSection:
         ecmax = ecu
         xu = 75  # xu < df
         ccw = 17 / 21 * m20.fd * b * xu
-        mcw = 139 / 294 * m20.fd * b * xu ** 2
+        mcw = 139 / 294 * m20.fd * b * xu**2
         Ccw, Mcw = tsec.Cw(xu, ecmax)
         assert isclose(Ccw, ccw)
         assert isclose(Mcw, mcw)
         ccf = 17 / 21 * m20.fd * (bf - b) * xu
-        mcf = 139 / 294 * m20.fd * (bf - b) * xu ** 2
+        mcf = 139 / 294 * m20.fd * (bf - b) * xu**2
         Ccf, Mcf = tsec.Cf(xu, ecmax)
         assert isclose(Ccf, ccf)
         assert isclose(Mcf, mcf)
@@ -255,7 +255,7 @@ class TestFlangedBeamSection:
         assert isclose(Mc, mcw + mcf)
         T, Mt = tsec.T(xu, ecmax)
         x = tsec.long_steel.layers[0].xc - xu
-        a = pi / 4 * (3 * 20 ** 2)
+        a = pi / 4 * (3 * 20**2)
         Fst, Mst = calc_fst(ecmax, xu, x, a, fe415)
         assert T == Fst
         assert Mt == Mst
@@ -280,12 +280,12 @@ class TestFlangedBeamSection:
         ecmax = ecu
         xu = 72.43  # xu < df
         ccw = 17 / 21 * m25.fd * b * xu
-        mcw = 139 / 294 * m25.fd * b * xu ** 2
+        mcw = 139 / 294 * m25.fd * b * xu**2
         Ccw, Mcw = tsec.Cw(xu, ecmax)
         assert isclose(Ccw, ccw)
         assert isclose(Mcw, mcw)
         ccf = 17 / 21 * m25.fd * (bf - b) * xu
-        mcf = 139 / 294 * m25.fd * (bf - b) * xu ** 2
+        mcf = 139 / 294 * m25.fd * (bf - b) * xu**2
         Ccf, Mcf = tsec.Cf(xu, ecmax)
         assert isclose(Ccf, ccf)
         assert isclose(Mcf, mcf)
@@ -295,8 +295,8 @@ class TestFlangedBeamSection:
         T, Mt = tsec.T(xu, ecmax)
         x1 = tsec.long_steel.layers[0].xc - xu
         x2 = tsec.long_steel.layers[1].xc - xu
-        a1 = pi / 4 * (2 * 18 ** 2)
-        a2 = pi / 4 * (3 * 20 ** 2)
+        a1 = pi / 4 * (2 * 18**2)
+        a2 = pi / 4 * (3 * 20**2)
         Fst1, Mst1 = calc_fst(ecmax, xu, x1, a1, fe415)
         Fst2, Mst2 = calc_fst(ecmax, xu, x2, a2, fe415)
         assert T == Fst1 + Fst2
@@ -379,7 +379,7 @@ class TestRectColumnSection:
         elif esc_ecy >= 1:
             fcc = conc.fd
         else:
-            fcc = (2 * esc_ecy - esc_ecy ** 2) * conc.fd
+            fcc = (2 * esc_ecy - esc_ecy**2) * conc.fd
         return asc * (fsc - fcc)
 
     def calc_c(self, z1: float, z2: float, k: float) -> float:
@@ -389,13 +389,13 @@ class TestRectColumnSection:
             z1, z2 = z2, z1
         zcy = k - 3 / 7
         if z2 <= zcy:
-            a1 = (z2 ** 2 - z1 ** 2) / zcy - (z2 ** 3 - z1 ** 3) / zcy ** 2 / 3
+            a1 = (z2**2 - z1**2) / zcy - (z2**3 - z1**3) / zcy**2 / 3
             a2 = 0.0
         elif z1 >= zcy:
             a1 = 0.0
             a2 = z2 - z1
         else:
-            a1 = (zcy ** 2 - z1 ** 2) / zcy - (zcy ** 3 - z1 ** 3) / zcy ** 2 / 3
+            a1 = (zcy**2 - z1**2) / zcy - (zcy**3 - z1**3) / zcy**2 / 3
             a2 = z2 - zcy
         return a1 + a2
 
@@ -406,18 +406,18 @@ class TestRectColumnSection:
             z1, z2 = z2, z1
         zcy = k - (3 / 7)
         if z2 <= zcy:
-            m1 = (2 / 3 * (z2 ** 3 - z1 ** 3) / zcy) - (
-                (z2 ** 4 - z1 ** 4) / zcy ** 2 / 4
+            m1 = (2 / 3 * (z2**3 - z1**3) / zcy) - (
+                (z2**4 - z1**4) / zcy**2 / 4
             )
             m2 = 0.0
         elif z1 >= zcy:
             m1 = 0.0
-            m2 = (z2 ** 2 - zcy ** 2) / 2
+            m2 = (z2**2 - zcy**2) / 2
         else:
-            m1 = (2 / 3 / zcy * (zcy ** 3 - z1 ** 3)) - (
-                (zcy ** 4 - z1 ** 4) / zcy ** 2 / 4
+            m1 = (2 / 3 / zcy * (zcy**3 - z1**3)) - (
+                (zcy**4 - z1**4) / zcy**2 / 4
             )
-            m2 = (z2 ** 2 - zcy ** 2) / 2
+            m2 = (z2**2 - zcy**2) / 2
         return m1 + m2
 
     def calc_cf(self, z1: float, z2: float, k: float) -> float:
@@ -427,13 +427,13 @@ class TestRectColumnSection:
             z1, z2 = z2, z1
         zcy = 4 / 7 * k
         if z2 <= zcy:
-            a1 = (z2 ** 2 - z1 ** 2) / zcy - (z2 ** 3 - z1 ** 3) / zcy ** 2 / 3
+            a1 = (z2**2 - z1**2) / zcy - (z2**3 - z1**3) / zcy**2 / 3
             a2 = 0.0
         elif z1 >= zcy:
             a1 = 0.0
             a2 = z2 - z1
         else:
-            a1 = (zcy ** 2 - z1 ** 2) / zcy - (zcy ** 3 - z1 ** 3) / zcy ** 2 / 3
+            a1 = (zcy**2 - z1**2) / zcy - (zcy**3 - z1**3) / zcy**2 / 3
             a2 = z2 - zcy
         return a1 + a2
 
@@ -444,18 +444,18 @@ class TestRectColumnSection:
             z1, z2 = z2, z1
         zcy = 4 / 7 * k
         if z2 <= zcy:
-            m1 = (2 / 3 * (z2 ** 3 - z1 ** 3) / zcy) - (
-                (z2 ** 4 - z1 ** 4) / zcy ** 2 / 4
+            m1 = (2 / 3 * (z2**3 - z1**3) / zcy) - (
+                (z2**4 - z1**4) / zcy**2 / 4
             )
             m2 = 0.0
         elif z1 >= zcy:
             m1 = 0.0
-            m2 = (z2 ** 2 - zcy ** 2) / 2
+            m2 = (z2**2 - zcy**2) / 2
         else:
-            m1 = (2 / 3 / zcy * (zcy ** 3 - z1 ** 3)) - (
-                (zcy ** 4 - z1 ** 4) / zcy ** 2 / 4
+            m1 = (2 / 3 / zcy * (zcy**3 - z1**3)) - (
+                (zcy**4 - z1**4) / zcy**2 / 4
             )
-            m2 = (z2 ** 2 - zcy ** 2) / 2
+            m2 = (z2**2 - zcy**2) / 2
         return m1 + m2
 
     def test_01(self):
@@ -470,7 +470,7 @@ class TestRectColumnSection:
         long_st = RebarGroup([L1, L2, L3])
         lat_ties = LateralTie(fe415, 8, 150)
         colsec = RectColumnSection(b, D, csb, m20, long_st, lat_ties, 35)
-        assert colsec.Asc == pi / 4 * (8 * 16 ** 2)
+        assert colsec.Asc == pi / 4 * (8 * 16**2)
         assert colsec.k(1000) == 2
 
     def test_02(self):
@@ -489,12 +489,13 @@ class TestRectColumnSection:
         k = xu / D  # k = 1.5
         C, M = colsec.C_M(xu)
         cc = self.calc_c(k - 1, k, k) * m20.fd * b * D
-        mm = self.calc_m(k - 1, k, k) * m20.fd * b * D ** 2
-        fsc1 = self.calc_Fsc(D, 3 * pi / 4 * 16 ** 2, xu, 50, m20, fe415)
-        fsc2 = self.calc_Fsc(D, 2 * pi / 4 * 16 ** 2, xu, D / 2, m20, fe415)
-        fsc3 = self.calc_Fsc(D, 3 * pi / 4 * 16 ** 2, xu, D - 50, m20, fe415)
+        mm = self.calc_m(k - 1, k, k) * m20.fd * b * D**2
+        fsc1 = self.calc_Fsc(D, 3 * pi / 4 * 16**2, xu, 50, m20, fe415)
+        fsc2 = self.calc_Fsc(D, 2 * pi / 4 * 16**2, xu, D / 2, m20, fe415)
+        fsc3 = self.calc_Fsc(D, 3 * pi / 4 * 16**2, xu, D - 50, m20, fe415)
         c = cc + fsc1 + fsc2 + fsc3
-        m = mm + fsc1 * abs(xu - 50) + fsc2 * abs(xu - 225) + fsc3 * abs(xu - 400)
+        m = mm + fsc1 * (xu - 50) + fsc2 * (xu - 225) + fsc3 * (xu - 400)
+        m = c * (m / c - (k - 0.5) * D)
         assert isclose(C, c)
         assert isclose(M, m)
 
@@ -514,15 +515,17 @@ class TestRectColumnSection:
         k = xu / D  # k = 2 / 3
         C, M = colsec.C_M(xu)
         cc = self.calc_cf(0, k, k) * m20.fd * b * D
-        mm = self.calc_mf(0, k, k) * m20.fd * b * D ** 2
-        fsc1 = self.calc_Fsc(D, 3 * pi / 4 * 16 ** 2, xu, 50, m20, fe415)
-        fsc2 = self.calc_Fsc(D, 2 * pi / 4 * 16 ** 2, xu, D / 2, m20, fe415)
-        fsc3 = self.calc_Fsc(D, 3 * pi / 4 * 16 ** 2, xu, D - 50, m20, fe415)
+        mm = self.calc_mf(0, k, k) * m20.fd * b * D**2
+        fsc1 = self.calc_Fsc(D, 3 * pi / 4 * 16**2, xu, 50, m20, fe415)
+        fsc2 = self.calc_Fsc(D, 2 * pi / 4 * 16**2, xu, D / 2, m20, fe415)
+        fsc3 = self.calc_Fsc(D, 3 * pi / 4 * 16**2, xu, D - 50, m20, fe415)
         c = cc + fsc1 + fsc2 + fsc3
-        m = mm + fsc1 * abs(xu - 50) + fsc2 * abs(xu - 225) + fsc3 * abs(xu - 400)
+        m = mm + fsc1 * (xu - 50) + fsc2 * (xu - 225) + fsc3 * (xu - 400)
+        m = c * (m / c - (k - 0.5) * D)
         assert isclose(C, c)
         assert isclose(M, m)
-        assert colsec.C_M(0)[0] == 0.0  # Test for k = 0
+        C, M = colsec.C_M(0)
+        assert C == 0 and M == 0  # Test for k = 0
 
     def test_04(self):
         b = 230
@@ -539,13 +542,14 @@ class TestRectColumnSection:
         k = 2.0
         xu = k * D
         cc = self.calc_c(k - 1, k, k) * m20.fd * b * D
-        mm = self.calc_m(k - 1, k, k) * m20.fd * b * D ** 2
-        fsc1 = self.calc_Fsc(D, 3 * pi / 4 * 16 ** 2, xu, 50, m20, fe415)
-        fsc2 = self.calc_Fsc(D, 2 * pi / 4 * 16 ** 2, xu, D / 2, m20, fe415)
-        fsc3 = self.calc_Fsc(D, 3 * pi / 4 * 16 ** 2, xu, D - 50, m20, fe415)
+        mm = self.calc_m(k - 1, k, k) * m20.fd * b * D**2
+        fsc1 = self.calc_Fsc(D, 3 * pi / 4 * 16**2, xu, 50, m20, fe415)
+        fsc2 = self.calc_Fsc(D, 2 * pi / 4 * 16**2, xu, D / 2, m20, fe415)
+        fsc3 = self.calc_Fsc(D, 3 * pi / 4 * 16**2, xu, D - 50, m20, fe415)
         C, M = colsec.C_M(xu)
         c = cc + fsc1 + fsc2 + fsc3
-        m = mm + fsc1 * abs(xu - 50) + fsc2 * abs(xu - 225) + fsc3 * abs(xu - 400)
+        m = mm + fsc1 * (xu - 50) + fsc2 * (xu - 225) + fsc3 * (xu - 400)
+        m = c * (m / c - (k - 0.5) * D)
         assert isclose(C, c)
         assert isclose(M, m)
 
@@ -566,8 +570,8 @@ d_req = lambda fck, fy, b, Mu: sqrt(Mu / (fck * b * mulim_const(fy)))
 def reqd_xu_d(fck, b, d, Mu):
     aa = 1.0
     bb = -(238 / 99)
-    cc = (Mu / (fck * b * d ** 2)) * (21 / 17) * (1.5 / 0.67) * (238 / 99)
-    xu_d = (-bb - sqrt(bb ** 2 - 4 * aa * cc)) / (2 * aa)
+    cc = (Mu / (fck * b * d**2)) * (21 / 17) * (1.5 / 0.67) * (238 / 99)
+    xu_d = (-bb - sqrt(bb**2 - 4 * aa * cc)) / (2 * aa)
     return xu_d
 
 
@@ -583,7 +587,7 @@ def reqd_ast2(conc, rebar, d, dc, xu, Mu2):
     esc = 0.0035 / xu * (xu - dc)
     fsc = rebar.fs(esc)
     ee = esc / 0.002
-    fcc = (2 * ee - ee ** 2) * fdc if ee < 0.002 else fdc
+    fcc = (2 * ee - ee**2) * fdc if ee < 0.002 else fdc
     ast2 = Mu2 / (fds * (d - dc))
     asc = ast2 * fds / (fsc - fcc)
     return ast2, asc
@@ -608,7 +612,7 @@ class TestDesign:
         assert rsec.design_singly(16, Mu) == (reqd_ast(fck, fy, b, d, Mu), 0.0)
         Mu = 125e6
         xumax = xumax_d(fy) * d
-        Mulim = mulim_const(fy) * fck * b * d ** 2
+        Mulim = mulim_const(fy) * fck * b * d**2
         Mu2 = Mu - Mulim if Mu > Mulim else 0.0
         ast1, _ = rsec.design_singly(16, Mulim)
         ast2, asc = reqd_ast2(m20, fe415, d, 25 + 16 / 2, xumax, Mu2)

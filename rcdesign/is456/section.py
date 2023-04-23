@@ -447,6 +447,9 @@ class RectColumnSection:
     def C_M(self, xu: float) -> Tuple[float, float]:
         self.long_steel.calc_xc(self.D)
         k = self.k(xu)
+        if k == 0:
+            return 0.0, 0.0
+
         if xu <= self.D:
             z1 = 0.0
             z2 = k

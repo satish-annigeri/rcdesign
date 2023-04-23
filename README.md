@@ -28,7 +28,7 @@ Contributions are welcome. Contributions can be in a variety of forms:
 
 ## Links
 - Documentation: [Documentation](https://rcdesign.readthedocs.io/en/latest/)
-- PyPI release: [0.4.13](https://pypi.org/project/rcdesign/)
+- PyPI release: [0.4.14](https://pypi.org/project/rcdesign/)
 - Github repository: https://github.com/satish-annigeri/rcdesign
 
 ## References
