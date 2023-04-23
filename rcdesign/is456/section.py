@@ -466,13 +466,12 @@ class RectColumnSection:
             esc = self.csb.ec(z, k) * self.csb.ecy
             fsc = L.rebar.fs(esc)
             fcc = self.csb.fc(z, k) * self.conc.fd
-            if fsc >= 0:
-                _Cs = asc * (fsc - fcc)
-            else:
-                _Cs = asc * fsc
+            _Cs = asc * (fsc - fcc)
             Cs += _Cs
-            Ms += _Cs * abs(x)
-        return Cc + Cs, Mc + Ms
+            Ms += _Cs * x
+        Pu = Cc + Cs
+        Mu = Mc + Ms
+        return Pu, Pu * ((Mu / Pu) - (k - 0.5) * self.D)
 
     def __repr__(self) -> str:
         s = f"RECTANGULAR COLUMN {self.b} x {self.D}\n"
@@ -515,8 +514,8 @@ class RectColumnSection:
         hdr2 += f"{'C (kN)':>8} {'M (kNm)':>8}"
         s += f"\n{header(hdr2)}\n"
         ecy = self.csb.ecy
-        cc = 0.0
-        mm = 0.0
+        Cs = 0.0
+        Ms = 0.0
         for L in sorted(self.long_steel.layers):
             z = k - (L._xc / self.D)
             esc = self.csb.ec(z, k) * ecy
@@ -528,20 +527,17 @@ class RectColumnSection:
             else:
                 c = L.area * fsc
                 fcc = 0.0
-            m = c * (k * self.D - L._xc)
+            m = c * z * self.D
             s += f"{L.rebar.fy:6.0f} {L.bar_list():>12} {L._xc:8.2f} {esc:12.8f} {StressLabel[str_type][0]:>4} "
-            if str_type == 1:
-                s += f"{fsc:8.2f} {fcc:6.2f}"
-            else:
-                s += f"{fsc:8.2f} {'--':>6}"
+            s += f"{fsc:8.2f} {fcc:6.2f}"
             s += f" {c/1e3:8.2f} {m/1e6:8.2f}\n"
-            cc += c
-            mm += m
+            Cs += c
+            Ms += m
         s += "-" * len(hdr2) + "\n"
-        s += f"{' '*62} {cc/1e3:8.2f} {mm/1e6:8.2f}\n"
+        s += f"{' '*62} {Cs/1e3:8.2f} {Ms/1e6:8.2f}\n"
         C, M = self.C_M(xu)
-        hdr3 = f"{C/1e3:8.2f} {M/1e6:8.2f}"
+        hdr3 = f"{(Cc+Cs)/1e3:8.2f} {(Mc+Ms)/1e6:8.2f}"
         s += f"{' ':>62} {underline(hdr3, '=')}\n{' ':>62} {hdr3}\n"
         s += f"{header('CAPACITY', '=')}\n"
-        s += f"Pu = {C/1e3:10.2f} kN\nMu = {M/1e6:10.2f} kNm\n e = {M/C:10.2f} mm\n"
+        s += f"Pu = {C/1e3:10.2f} kN\nMu = {M/1e6:10.2f} kNm (about centroidal axis)\n e = {M/C:10.2f} mm\n"
         return s
