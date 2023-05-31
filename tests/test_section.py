@@ -1,5 +1,5 @@
-from math import isclose, pi, sin, cos, sqrt
-from scipy.optimize import brentq
+from math import isclose, pi, sqrt  # , sin, cos
+# from scipy.optimize import brentq
 
 from rcdesign.is456 import ecy, ecu
 from rcdesign.is456.rebar import (
@@ -8,7 +8,7 @@ from rcdesign.is456.rebar import (
     RebarLayer,
     RebarGroup,
     Stirrups,
-    BentupBars,
+    # BentupBars,
     ShearRebarGroup,
     LateralTie,
     StressType,
@@ -22,7 +22,7 @@ from rcdesign.is456.section import (
     # FlangedBeamSection,
     # RectColumnSection,
 )
-from rcdesign.utils import floor, rootsearch
+# from rcdesign.utils import floor, rootsearch
 
 
 def calc_fsc(ecy, ecmax, xu, x, a, rebar, conc):
@@ -554,17 +554,18 @@ class TestRectColumnSection:
         assert isclose(M, m)
 
 
-from math import pi, sqrt, isclose, ceil
+# from rcdesign.is456.design import LSMBeam
 
-from rcdesign.is456.design import Beam
+def xumax_d(fy: float) -> float:
+    return 0.0035 / (fy / (1.15 * 2e5) + 0.0055)
 
-xumax_d = lambda fy: 0.0035 / (fy / (1.15 * 2e5) + 0.0055)
 
-mulim_const = (
-    lambda fy: (17 * 0.67) / (21 * 1.5) * xumax_d(fy) * (1 - 99 / 238 * xumax_d(fy))
-)
+def mulim_const(fy: float) -> float:
+    return (17 * 0.67) / (21 * 1.5) * xumax_d(fy) * (1 - 99 / 238 * xumax_d(fy))
 
-d_req = lambda fck, fy, b, Mu: sqrt(Mu / (fck * b * mulim_const(fy)))
+
+def d_req(fck: float, fy: float, b: float, Mu: float) -> float:
+    return sqrt(Mu / (fck * b * mulim_const(fy)))
 
 
 def reqd_xu_d(fck, b, d, Mu):

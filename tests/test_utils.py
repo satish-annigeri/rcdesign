@@ -1,6 +1,6 @@
-from math import isclose
+from math import isclose, pi, ceil
 
-from rcdesign.utils import func, rootsearch, ceiling, floor, underline, header
+from rcdesign.utils import func, rootsearch, ceiling, floor, underline, header, bar_area, num_bars
 
 
 def test_rootsearch01():
@@ -54,3 +54,11 @@ def test_uline():
     assert underline("Satish Annigeri", "=") == "==============="
     assert header("Satish Annigeri") == "Satish Annigeri\n---------------"
     assert header("Satish Annigeri", "=") == "Satish Annigeri\n==============="
+
+
+def test_bar_area():
+    dia = 16
+    assert bar_area(dia) == pi / 4 * dia**2
+    Ast = 620.0
+    n = int(ceil(Ast / bar_area(dia)))
+    assert num_bars(Ast, dia) == n

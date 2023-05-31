@@ -1,4 +1,5 @@
 # import numpy as np
+from math import pi, ceil
 from numpy import sign
 
 # from scipy.optimize import brentq
@@ -43,3 +44,11 @@ def ceiling(x: float, multipleof: float = 1.0):
 def floor(x: float, multipleof: float = 1.0):
     i = x // multipleof
     return i * multipleof
+
+
+def bar_area(dia: float) -> float:
+    return pi / 4 * dia ** 2
+
+
+def num_bars(ast: float, dia: float) -> int:
+    return int(ceil(ast / bar_area(dia)))

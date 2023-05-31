@@ -1,10 +1,10 @@
-from math import sqrt, pi, ceil
+from math import sqrt
 from typing import List
 from dataclasses import dataclass
 
 
 @dataclass
-class Beam:
+class LSMBeam:
     ecy = 0.002
     ecu = 0.0035
     gamma_mc = 1.5
@@ -35,14 +35,6 @@ class Beam:
         return Mu / ((fy / self.gamma_ms) * (d - (99 / 238 * xu)))
 
     @staticmethod
-    def bar_area(dia: float) -> float:
-        return pi / 4 * dia ** 2
-
-    @staticmethod
-    def num_bars(ast: float, dia: float) -> int:
-        return int(ceil(ast / Beam.bar_area(dia)))
-
-    @staticmethod
-    def spacing(b: float, cl_cov: float, bars: List[int]) -> float:
+    def hor_spacing(b: float, cl_cov: float, bars: List[int]) -> float:
         n = len(bars)
         return (b - (2 * cl_cov) - sum(bars)) / (n - 1)

@@ -19,7 +19,7 @@ from rcdesign.is456.rebar import (
     StressType,
     StressLabel,
 )
-from rcdesign.is456.design import Beam
+from rcdesign.is456.design import LSMBeam
 from rcdesign.utils import rootsearch, underline, header
 
 
@@ -235,7 +235,7 @@ class RectBeamSection:
         return xu, Mu
 
     def design_singly(self, bar_dia: float, Mu: float) -> Tuple[float, float]:
-        beam = Beam()
+        beam = LSMBeam()
         fck = self.conc.fck
         bottom_layer = self.long_steel.layers[-1]
         fy = bottom_layer.rebar.fy
