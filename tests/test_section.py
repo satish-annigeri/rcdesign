@@ -52,7 +52,7 @@ class TestRectBeamSection:
         b = 230
         D = 450
         main_st = RebarGroup([L1, L2])
-        shear_st = Stirrups(fe415, 2, 8, 150)
+        shear_st = ShearRebarGroup([Stirrups(fe415, 2, 8, 150)])
         rsec = RectBeamSection(b, D, csb, m20, main_st, shear_st, 25)
         rsec.calc_xc()
         assert rsec.long_steel.layers[0].xc == 35
@@ -74,7 +74,7 @@ class TestRectBeamSection:
         b = 230
         D = 450
         main_st = RebarGroup([L1, L2, L3])
-        shear_st = Stirrups(fe415, 2, 8, 150)
+        shear_st = ShearRebarGroup([Stirrups(fe415, 2, 8, 150)])
         rsec = RectBeamSection(b, D, csb, m20, main_st, shear_st, 25)
         rsec.calc_xc()
         assert rsec.long_steel.layers[0].xc == 35
@@ -106,7 +106,7 @@ class TestRectBeamSection:
         b = 230
         D = 450
         main_st = RebarGroup([L2])
-        shear_st = Stirrups(fe415, 2, 8, 150)
+        shear_st = ShearRebarGroup([Stirrups(fe415, 2, 8, 150)])
         rsec = RectBeamSection(b, D, csb, m20, main_st, shear_st, 25)
         rsec.calc_xc()
         xu = 75
@@ -133,7 +133,7 @@ class TestRectBeamSection:
         b = 230
         D = 450
         main_st = RebarGroup([L1, L2])
-        shear_st = Stirrups(fe415, 2, 8, 150)
+        shear_st = ShearRebarGroup([Stirrups(fe415, 2, 8, 150)])
         rsec = RectBeamSection(b, D, csb, m20, main_st, shear_st, 25)
         rsec.calc_xc()
         ast = 3 * pi / 4 * 20**2
@@ -161,7 +161,7 @@ class TestRectBeamSection:
         xu = 75
         ecmax = ecu
         Fc, Mc, Ft, Mt = rsec.F_M(xu, ecmax)
-        fcc = (17 / 21) * m20.fd * b * xu
+        # fcc = (17 / 21) * m20.fd * b * xu
         mcc = 139 / 294 * m20.fd * b * xu**2
         xc = xu - rsec.long_steel.layers[0].xc
         a = pi / 4 * 2 * 16**2
@@ -191,7 +191,7 @@ class TestRectBeamSection:
         assert isclose(calc_xu, 136.2101931)
 
         Mu = rsec.Mu(calc_xu, ecmax)
-        fcc = (17 / 21) * m20.fd * b * calc_xu
+        # fcc = (17 / 21) * m20.fd * b * calc_xu
         mcc = 139 / 294 * m20.fd * b * calc_xu**2
         xc = calc_xu - rsec.long_steel.layers[0].xc
         a = pi / 4 * 2 * 16**2
