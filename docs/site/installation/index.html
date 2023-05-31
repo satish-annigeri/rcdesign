@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://rcdesign.readthedocs.io/installation/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Installation - rcdesign</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+        <link href="../assets/_mkdocstrings.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Installation";
+        var mkdocs_page_input_path = "installation.md";
+        var mkdocs_page_url = "/installation/";
+      </script>
+    
+    <script src="../js/jquery-3.6.0.min.js" defer></script>
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/bash.min.js"></script>
+      <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> rcdesign
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="./">Installation</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#install-from-pypi-using-pip">Install from PyPI using pip</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#requirements">Requirements</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#install-from-pypi">Install from PyPI</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#install-from-source-on-github">Install from Source on github</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#clone-the-repository">Clone the repository</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#install-required-packages">Install required packages</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#run-tests">Run tests</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#testing">Testing</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#examples">Examples</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#built-in-example">Built-in Example</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#examples-from-tests-directory">Examples from tests Directory</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#your-own-example">Your Own Example</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../tutorial/">Tutorial</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Theory and Software Design</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../theory/">Introduction</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../theory/software_design/">Software Design</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../theory/materials/">Material Class</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../theory/section/">Section Classs</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../api/">API Reference</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">rcdesign</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a> &raquo;</li>
+      <li>Installation</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/satish-annigeri/rcdesign/edit/master/docs/installation.md" class="icon icon-github"> Edit on GitHub</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h1>
+<h2 id="install-from-pypi-using-pip">Install from PyPI using <code>pip</code><a class="headerlink" href="#install-from-pypi-using-pip" title="Permanent link">&para;</a></h2>
+<h3 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Python 3.7+</li>
+<li>numpy</li>
+<li>scipy</li>
+<li>sympy</li>
+</ul>
+<h3 id="install-from-pypi">Install from PyPI<a class="headerlink" href="#install-from-pypi" title="Permanent link">&para;</a></h3>
+<p>Create a separate directory and install a virtual environment. Activate the virtual environment and install required packages. On *nix systems, do the following:</p>
+<pre><code class="language-bash">$ mkdir rcd_tutorial
+$ cd rcd_tutorial
+$ python -m venv .venv
+$ .venv/bin/activate
+$ _
+</code></pre>
+<p>On Windows, do the following:</p>
+<pre><code class="language-bash">&gt; mkdir rcd_tutorial
+&gt; cd rcd_tutorial
+&gt; python -m venv .venv
+&gt; .venv\Scripts\activate
+&gt; (.venv) _
+</code></pre>
+<p>Install using <code>pip</code></p>
+<pre><code class="language-bash">$ (.venv) pip install -U rcdesign
+$ (.venv) python -c &quot;from rcdesign import __version__;print(__version____)
+$ 0.4.14
+</code></pre>
+<p>Run the two built-in examples problem and study the output.</p>
+<pre><code class="language-bash">$ (.venv) python -m rcdesign
+</code></pre>
+<h2 id="install-from-source-on-github">Install from Source on github<a class="headerlink" href="#install-from-source-on-github" title="Permanent link">&para;</a></h2>
+<h3 id="clone-the-repository">Clone the repository<a class="headerlink" href="#clone-the-repository" title="Permanent link">&para;</a></h3>
+<p>Choose a suitable directory where you wish to clone the source code from github.  Clone the repository using <code>git</code></p>
+<pre><code class="language-bash">$ git clone https://github.com/satish-annigeri/rcdesign.git
+</code></pre>
+<p>When you clone the <code>rcdesign</code> repository from github, a new directory named <code>rcdesign</code> will be created in the current working directory. Change over to the directory <code>rcdesign</code> that is created with the command</p>
+<pre><code class="language-bash">$ cd rcdesign
+</code></pre>
+<p>List the directory contents and verify the directory structure.</p>
+<h3 id="install-required-packages">Install required packages<a class="headerlink" href="#install-required-packages" title="Permanent link">&para;</a></h3>
+<p>Install required packages into the virtual environment with <code>pip</code></p>
+<pre><code class="language-bash">(.venv) $ pip install -U rcdesign[test]
+</code></pre>
+<p>This will install pytest and pytest-cov required to run the tests.</p>
+<h3 id="run-tests">Run tests<a class="headerlink" href="#run-tests" title="Permanent link">&para;</a></h3>
+<p>Run the tests with <code>pytest</code></p>
+<pre><code class="language-bash">(.venv) $ pytest tests
+</code></pre>
+<p>Check code coverage.</p>
+<pre><code class="language-bash">(.venv) $ pytest --cov=rcdesign tests
+</code></pre>
+<p>You can also use <code>nox</code> to run the tests. Install <code>nox</code> using <code>pip</code>, if necessary.</p>
+<pre><code class="language-bash">(.venv) $ pip install nox
+(.venv) $ nox
+</code></pre>
+<p>When you are done using the virtual environment, you can deactivate it with the command <code>deactivate</code> at the command prompt in all operating systems.</p>
+<h2 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">&para;</a></h2>
+<p>Testing  has been implemented using <code>pytest</code> and unit tests have been implemented for the following classes:</p>
+<ol>
+<li><strong>ConcreteLSMFlexure</strong> and <strong>Concrete</strong></li>
+<li><strong>RebarMS</strong> and <strong>RebarHYSD</strong></li>
+<li><strong>RebarLayer</strong> and <strong>RebarGroup</strong></li>
+<li><strong>ShearReinforcement</strong> and <strong>Stirrups</strong></li>
+<li><strong>RectBeamSection</strong> and <strong>FlangedBeamSection</strong></li>
+<li><strong>RectColumnSection</strong></li>
+</ol>
+<p>Code coverage through tests using <code>pytest-cov</code> at the current time is 100%, excepting the example script and the methods that implement <code>__repe__()</code> and <code>report()</code>.</p>
+<p>Analysis of rectangular and flanged beam sections with and without compression reinforcement, for flexure and shear, has been completed. Several examples have been solved and verified by hand to consider different cases.</p>
+<p>Analysis of rectangular column sections for combined axial compression and bending about one axis has been completed. An example has been solved and verified by hand.</p>
+<p>Automated testing can be done using. If required, install <code>nox</code> with the command:</p>
+<pre><code class="language-bash">(.venv) $pip install nox
+</code></pre>
+<p>Check to ensure that <code>nox</code> is installed and run the tests.</p>
+<pre><code class="language-bash">(.venv) $ nox --version
+2022.11.21
+(.venv) $ nox
+</code></pre>
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
+<h3 id="built-in-example">Built-in Example<a class="headerlink" href="#built-in-example" title="Permanent link">&para;</a></h3>
+<p>Run the built-in example with the following command.</p>
+<pre><code class="language-bash">(.venv) $ python -m rcdesign
+</code></pre>
+<h3 id="examples-from-tests-directory">Examples from <code>tests</code> Directory<a class="headerlink" href="#examples-from-tests-directory" title="Permanent link">&para;</a></h3>
+<p>Run the additional examples in the <code>tests</code> directory with the following command from the command prompt:</p>
+<pre><code class="language-bash">(.venv) $ python -m tests.example01
+(.venv) $ python -m tests.example02
+...
+(.venv) $ python -m tests.example09
+</code></pre>
+<h3 id="your-own-example">Your Own Example<a class="headerlink" href="#your-own-example" title="Permanent link">&para;</a></h3>
+<p>Alternately, you can create the following Python script <code>example.py</code>, which is in fact the first example in the <code>__main__.py</code> file of the <code>rcdesign</code> package (the built-in example), and run the script.</p>
+<pre><code class="language-python">from rcdesign.is456.stressblock import LSMStressBlock
+from rcdesign.is456.concrete import Concrete
+from rcdesign.is456.rebar import (
+    RebarHYSD,
+    RebarLayer,
+    RebarGroup,
+    ShearRebarGroup,
+    Stirrups,
+)
+from rcdesign.is456.section import RectBeamSection
+
+sb = LSMStressBlock(&quot;LSM Flexure&quot;)
+m20 = Concrete(&quot;M20&quot;, 20)
+fe415 = RebarHYSD(&quot;Fe 415&quot;, 415)
+
+t1 = RebarLayer(fe415, [20, 16, 20], -35)
+steel = RebarGroup([t1])
+sh_st = ShearRebarGroup([Stirrups(fe415, 2, 8, 150)])
+
+sec = RectBeamSection(230, 450, sb, m20, steel, sh_st, 25)
+xu = sec.xu(0.0035)RECTANGULAR BEAM SECTION: 230 x 450
+</code></pre>
+<p>Check the output.</p>
+<pre><code class="language-bash">Example 1
+
+RECTANGULAR BEAM SECTION: 230 x 450
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+FLEXURE
+=======
+Equilibrium NA = 179.94 (k = 0.40) (ec_max = 0.003500)
+
+   fck                             ec_max Type            f_cc   C (kN)  M (kNm)
+--------------------------------------------------------------------------------
+ 20.00                         0.00350000    C            8.93   299.30    31.45
+--------------------------------------------------------------------------------
+
+    fy         Bars       xc       Strain Type     f_sc   f_cc   C (kN)  M (kNm)
+--------------------------------------------------------------------------------
+   415    1-16;2-20   415.00  -0.00457204    T  -360.87         -299.30    70.35
+--------------------------------------------------------------------------------
+                                                                   0.00   101.81
+SHEAR
+=====
+          Type                 tau_c      Area (mm^2)                   V_uc (kN)
+---------------------------------------------------------------------------------
+      Concrete                  0.59         95450.00                      56.46
+---------------------------------------------------------------------------------
+          Type        Variant    f_y             Bars      s_v     A_sv V_us (kN)
+---------------------------------------------------------------------------------
+      Stirrups       Vertical    415             2-8#    150.0   100.53   100.37
+                                                                        ========
+                                                                          156.83
+CAPACITY
+========
+Mu = 101.81 kNm
+Vu = 156.83 kN
+
+================================================================================
+
+Example 2
+
+RECTANGULAR BEAM SECTION: 230 x 450
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+FLEXURE
+=======
+Equilibrium NA = 136.21 (k = 0.30) (ec_max = 0.003500)
+
+   fck                             ec_max Type            f_cc   C (kN)  M (kNm)
+--------------------------------------------------------------------------------
+ 20.00                         0.00350000    C            8.93   226.56    18.02
+--------------------------------------------------------------------------------
+
+    fy         Bars       xc       Strain Type     f_sc   f_cc   C (kN)  M (kNm)
+--------------------------------------------------------------------------------
+   415         2-16    35.00   0.00260065    C   347.70   8.93   136.23    13.79
+   415         2-16   380.00  -0.00626432    T  -360.87         -145.11    35.38
+   415         3-16   415.00  -0.00716367    T  -360.87         -217.67    60.68
+--------------------------------------------------------------------------------
+                                                                -226.56   109.85
+                                                               =================
+                                                                   0.00   127.87
+SHEAR
+=====
+          Type                 tau_c      Area (mm^2)                   V_uc (kN)
+---------------------------------------------------------------------------------
+      Concrete                  0.64         92230.00                      59.21
+---------------------------------------------------------------------------------
+          Type        Variant    f_y             Bars      s_v     A_sv V_us (kN)
+---------------------------------------------------------------------------------
+      Stirrups       Vertical    415             2-8#    150.0   100.53    96.98
+                                                                        ========
+                                                                          156.19
+CAPACITY
+========
+Mu = 127.87 kNm
+Vu = 156.19 kN
+</code></pre>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href=".." class="btn btn-neutral float-left" title="Home"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../tutorial/" class="btn btn-neutral float-right" title="Tutorial">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/satish-annigeri/rcdesign" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href=".." style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../tutorial/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme_extra.js" defer></script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

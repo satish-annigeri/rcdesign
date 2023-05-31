@@ -1,0 +1,6 @@
+-r base.in
+-r test.in
+-r docs.in
+
+flake8
+ruff

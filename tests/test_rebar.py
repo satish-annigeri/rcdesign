@@ -1,8 +1,7 @@
-from math import isclose, sqrt, pi, sin, cos
-import pytest
+from math import isclose, pi, sin, cos
 
 
-from rcdesign.is456.stressblock import LSMStressBlock, LSMStressBlock
+from rcdesign.is456.stressblock import LSMStressBlock
 from rcdesign.is456 import ecy, ecu
 from rcdesign.is456.concrete import Concrete
 from rcdesign.is456.rebar import (
@@ -79,7 +78,6 @@ class TestRebarLayer:
         assert L1.x(75) == xu - (D - 35)
 
     def test_03(self):
-        D = 450
         xu = 75
         ecmax = ecu
         fe415 = RebarHYSD("Fe 415", 415)
@@ -106,7 +104,6 @@ class TestRebarLayer:
         fe415 = RebarHYSD("Fe 415", 415)
         L1 = RebarLayer(fe415, [16, 16], dc)
         asc = pi * (2 * 16 ** 2) / 4
-        z = x / xu
         fsc = fe415.fs(ec)
         fcc = m20.fd * csb._fc_(ec)
         C = asc * (fsc - fcc)
@@ -230,9 +227,6 @@ class TestRebarGroup:
         assert (f1 == C) and (f2 == T) and (m1 == Mc) and (m2 == Mt)
 
     def test_04(self):
-        ecmax = ecu
-        csb = LSMStressBlock("LSM Flexure")
-        m20 = Concrete("M20", 20)
         fe415 = RebarHYSD("Fe 415", 415)
         L1 = RebarLayer(fe415, [16, 16], 35)
         L2 = RebarLayer(fe415, [16, 16], 70)
@@ -319,7 +313,6 @@ class TestStirrup:
         st = Stirrups(fe415, 2, 8, 150)
         d = 415  # Effective depth in mm
         Asv = pi / 4 * 2 * 8 ** 2
-        alpha = st._alpha_deg * pi / 180
         Vus = st.rebar.fd * Asv * d / st._sv
         assert st.Vus(d) == Vus
 

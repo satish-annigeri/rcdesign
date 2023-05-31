@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://rcdesign.readthedocs.io/theory/section/" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Section Classs - rcdesign</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+        <link href="../../assets/_mkdocstrings.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Section Classs";
+        var mkdocs_page_input_path = "theory\\section.md";
+        var mkdocs_page_url = "/theory/section/";
+      </script>
+    
+    <script src="../../js/jquery-3.6.0.min.js" defer></script>
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/bash.min.js"></script>
+      <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> rcdesign
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../installation/">Installation</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../tutorial/">Tutorial</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Theory and Software Design</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../">Introduction</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../software_design/">Software Design</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../materials/">Material Class</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="./">Section Classs</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#beam-sections">Beam Sections</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#rectangular-beam-sections">Rectangular Beam Sections</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#flanged-beam-sections">Flanged Beam Sections</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#column-sections">Column Sections</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#rectangular-beam-sections_1">Rectangular Beam Sections</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../api/">API Reference</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">rcdesign</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a> &raquo;</li>
+          <li>Theory and Software Design &raquo;</li>
+      <li>Section Classs</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/satish-annigeri/rcdesign/edit/master/docs/theory/section.md" class="icon icon-github"> Edit on GitHub</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="sections">Sections<a class="headerlink" href="#sections" title="Permanent link">&para;</a></h1>
+<p>Reinforced concrete structures are made of reinforced concrete structural members. They can be broadly classified into:</p>
+<ol>
+<li><strong>Beams</strong> which are predominantly subjected to bending, shear and torsion, and</li>
+<li><strong>Columns</strong> which are predominantly subjected to axial compression, possibly with an accompanying bending moment.</li>
+</ol>
+<p>Strctural members where both bending and axial compression forces are equally dominant are called beam-columns. Analysis and design of beams is simpler because bending and shear behaviours can be treated independently. Analysis and design of sections subjected only to axial compression is also simple.</p>
+<p>Analysis of sections subjected to axial compression and bending about one axis is a coupled problem. That is, for a given section, materials, reinforcement, and chosen location of neutral axis, there is a unique pair of axial compression $P_u$ and bending $M_u$ about one axis. But changing the location of the neutral axis results in a different combination of $P_u$ and $M_u$.</p>
+<p>Design of such sections is carried out as an inverse step of carrying out a large number of analyses and choosing the combination nearest to the given design forces. Usual practice is to construct interaction diagrams for different amounts of longitudinal reinforcement and plotting an interaction diagram for each value of area of longitudinal reinforcement.</p>
+<h2 id="beam-sections">Beam Sections<a class="headerlink" href="#beam-sections" title="Permanent link">&para;</a></h2>
+<p>A beam section can have any shape but from the point of view of ease of fabrication and aesthetics, rectangular beam section is the most common. The attributes, required to repesent a section irrespective of whether it belongs to a beam or a column, are listed below:</p>
+<ol>
+<li><code>csb</code>: Object of type concrete stress block repesenting strain distribution and stress stran relation for flexure.</li>
+<li><code>conc</code>: Object of type <code>Concrete</code>. There must only be one object of this type associated with a given section.</li>
+<li><code>long_steel</code>: Object of type <code>RebarGroup</code> representing the longitudinal reinforcement provided along the length of the structural member. There must only be one object of this type associated with a given section.</li>
+<li><code>shear_steel</code>: A list of objects of type <code>ShearRebarGroup</code>, consisting of zero or more of vertical or inclined stirrups, or bent-up bars.</li>
+<li><code>clear_cover</code>: Clear cover to reinforcement bars. </li>
+</ol>
+<p>Effective section of a beam can be rectangular or flanged. Since reinforced concrete slab is cast together with beams, the effective shape of the section is:
+1. A flanged section when the slab happens to be in the compression zone, or 
+2. Rectangular when the slab happens to be in the tension zone.</p>
+<p>A flanged section can be a T section with the flange extending on both sides of the web (as in the case of an intermediate beam) or an L section with the flange extending on only one side (as in the case of an end beam). Typically, mid-span section (with the beam subjected to gravity loads) is subjected to sagging bending moment and the slab is in the compression zone resulting in a flanged section. But under the same loading direction, end sections are subjected to hogging bending moment and the slab is in the tension zone resulting in a rectangular section. Based on the bending moment distribution and the location of the given section, a section can be categorized as rectangular or flanged.</p>
+<h3 id="rectangular-beam-sections">Rectangular Beam Sections<a class="headerlink" href="#rectangular-beam-sections" title="Permanent link">&para;</a></h3>
+<p>The <code>RectBeamSection</code> class represents a beam section, and it is expected to be subjected to bending, shear and torsion. Additional attributes of a <code>RectBeamSection</code> are:
+1. <code>b</code>: Breadth of the beam, in mm
+2. <code>D</code>: Overall depth of the beam, in mm
+3. <code>long_steel</code>: Object of type <code>RebarGroup</code>, representing longitudinal reinforcement bars. The group of reinforcement bars, in turn, may consist of one or more layers of reinforcement bars, placed parallel to the edge of size <code>b</code>.
+3. <code>shear_steel</code>: Object of type <code>ShearRebarGroup</code>, containing a list of one or more shear reinforcement types.</p>
+<h3 id="flanged-beam-sections">Flanged Beam Sections<a class="headerlink" href="#flanged-beam-sections" title="Permanent link">&para;</a></h3>
+<p>The <code>FlagnedBeamSection</code> is a child class of <code>RectBeamSection</code> and has all its atributes and many of its behaviours. Additional attributes of a <code>FlangedBeamSection</code>, in addition to those already defined in the parent class <code>RectBeamSection</code> are:</p>
+<ol>
+<li><code>bf</code>: Breadth of the flange, in mm</li>
+<li><code>Df</code>: Depth of the flange, in mm</li>
+</ol>
+<h2 id="column-sections">Column Sections<a class="headerlink" href="#column-sections" title="Permanent link">&para;</a></h2>
+<p>At present, only rectangular column sections have been implemented.</p>
+<h3 id="rectangular-beam-sections_1">Rectangular Beam Sections<a class="headerlink" href="#rectangular-beam-sections_1" title="Permanent link">&para;</a></h3>
+<p>The <code>RectColumnSection</code> is a class with the following attributes:
+1. <code>b</code>: Breadth of the column, in mm
+2. <code>D</code>: Depth of the column, in mm
+3. <code>long_steel</code>: Object of type <code>RebarGroup</code>, with one or more layers of reinforcement bars, placed parallel to the edge of size <code>b</code>.
+4. <code>LateralTie</code>: Object of type <code>LateralTie</code></p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../materials/" class="btn btn-neutral float-left" title="Material Class"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../../api/" class="btn btn-neutral float-right" title="API Reference">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/satish-annigeri/rcdesign" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../materials/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../../api/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script>var base_url = '../..';</script>
+    <script src="../../js/theme_extra.js" defer></script>
+    <script src="../../js/theme.js" defer></script>
+      <script src="../../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

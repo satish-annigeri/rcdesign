@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://rcdesign.readthedocs.io/tutorial/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Tutorial - rcdesign</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+        <link href="../assets/_mkdocstrings.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Tutorial";
+        var mkdocs_page_input_path = "tutorial.md";
+        var mkdocs_page_url = "/tutorial/";
+      </script>
+    
+    <script src="../js/jquery-3.6.0.min.js" defer></script>
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/bash.min.js"></script>
+      <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> rcdesign
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../installation/">Installation</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="./">Tutorial</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#install-rcdesign">Install rcdesign</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#singly-reinforced-rectangular-section">Singly reinforced rectangular section</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#doubly-reinforced-rectangular-section">Doubly reinforced rectangular section</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#flanged-beam">Flanged Beam</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#rectangular-column">Rectangular Column</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Theory and Software Design</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../theory/">Introduction</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../theory/software_design/">Software Design</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../theory/materials/">Material Class</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../theory/section/">Section Classs</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../api/">API Reference</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">rcdesign</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a> &raquo;</li>
+      <li>Tutorial</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/satish-annigeri/rcdesign/edit/master/docs/tutorial.md" class="icon icon-github"> Edit on GitHub</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="tutorial">Tutorial<a class="headerlink" href="#tutorial" title="Permanent link">&para;</a></h1>
+<h2 id="install-rcdesign">Install <code>rcdesign</code><a class="headerlink" href="#install-rcdesign" title="Permanent link">&para;</a></h2>
+<p>Create a folder for your tutorial files. Create a virtual environment if you prefer. Install <code>rcdesign</code> from PyPI using <code>pip</code> as explained in <a href="../installation/">Installation</a>. Verify that installation is successful, by running the example problem:</p>
+<pre><code class="language-bash">(env) $ python -m rcdesign
+</code></pre>
+<p>If things have gone well, the required packages will also be installed, and you are ready to go. Open your preferred IDE and try out the following examples. Create a Python script for each example and type the code given below. Then, run the scripts and compare your output with the one given here in the examples. Verify with your own manual calculations if necessary.</p>
+<h2 id="singly-reinforced-rectangular-section">Singly reinforced rectangular section<a class="headerlink" href="#singly-reinforced-rectangular-section" title="Permanent link">&para;</a></h2>
+<p>Consider a rectangular reinforced concrete section with the following details:</p>
+<ol>
+<li>Size: 230x450 mm overall with 25mm clear cover</li>
+<li>Concrete: M20</li>
+<li>Steel: Fe415</li>
+<li>Main reinforcement: Fe415 reinforcement bars 2-16# + 1-20# with centre of the bars at a distance of 35mm from tension edge of the section</li>
+<li>Shear reinforcement: 2-8# @ 150mm c/c (2 legged 8mm dia. vertical stirrups made of Fe415)</li>
+</ol>
+<p>Let us determine the Limit State capacity of the section in bending and shear.</p>
+<p>Create a Python script named <code>singly01.py</code> and type the following code in it.</p>
+<pre><code class="language-python"># File: example01.py
+
+from rcdesign.is456.concrete import Concrete
+from rcdesign.is456.stressblock import LSMStressBlock
+from rcdesign.is456.rebar import (
+    RebarHYSD,
+    RebarLayer,
+    RebarGroup,
+    Stirrups,
+    ShearRebarGroup,
+)
+from rcdesign.is456.section import RectBeamSection
+
+sb = LSMStressBlock(&quot;LSM Flexure&quot;)
+m20 = Concrete(&quot;M20&quot;, 20)
+fe415 = RebarHYSD(&quot;Fe 415&quot;, 415)
+
+t1 = RebarLayer(fe415, [20, 16, 20], -35)
+steel = RebarGroup([t1])
+sh_st = ShearRebarGroup([Stirrups(fe415, 2, 8, 150)])
+
+sec = RectBeamSection(230, 450, sb, m20, steel, sh_st, 25)
+xu = sec.xu(0.0035)
+print(f&quot;xu = {xu:.2f}&quot;)
+print(sec.report(xu, 0.0035))
+</code></pre>
+<p>Run the script from the command line:</p>
+<pre><code class="language-bash">$ python singly01.py
+</code></pre>
+<p>The output of the script must be</p>
+<pre><code class="language-bash">xu = 179.94
+RECTANGULAR BEAM SECTION: 230 x 450
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+FLEXURE
+=======
+Equilibrium NA = 179.94 (k = 0.40) (ec_max = 0.003500)
+
+   fck                             ec_max Type            f_cc   C (kN)  M (kNm)
+--------------------------------------------------------------------------------
+ 20.00                         0.00350000    C            8.93   299.30    31.45
+--------------------------------------------------------------------------------
+
+    fy         Bars       xc       Strain Type     f_sc   f_cc   C (kN)  M (kNm)
+--------------------------------------------------------------------------------
+   415    1-16;2-20   415.00  -0.00457204    T  -360.87         -299.30    70.35
+--------------------------------------------------------------------------------
+                                                                   0.00   101.81
+SHEAR
+=====
+          Type                 tau_c      Area (mm^2)                   V_uc (kN)
+---------------------------------------------------------------------------------
+      Concrete                  0.59         95450.00                      56.46
+---------------------------------------------------------------------------------
+          Type        Variant    f_y             Bars      s_v     A_sv V_us (kN)
+---------------------------------------------------------------------------------
+      Stirrups       Vertical    415             2-8#    150.0   100.53   100.37
+                                                                        ========
+                                                                          156.83
+CAPACITY
+========
+Mu = 101.81 kNm
+Vu = 156.83 kN
+</code></pre>
+<h2 id="doubly-reinforced-rectangular-section">Doubly reinforced rectangular section<a class="headerlink" href="#doubly-reinforced-rectangular-section" title="Permanent link">&para;</a></h2>
+<p>Consider a rectangular reinforced concrete beam section with the following details:</p>
+<ol>
+<li>Size: 230x450 mm overall with 25mm clear cover</li>
+<li>Concrete: M20</li>
+<li>Steel: Fe415</li>
+<li>Main reinforcement:<ol>
+<li>2-16# of Fe415 with centre of the bars at a distance of 35mm from compression edge of the section</li>
+<li>3-16# of Fe415 with centre of the bars at a distance of 35mm from tension edge of the section</li>
+</ol>
+</li>
+<li>Shear reinforcement: 2-8# @ 150mm c/c (2 legged 8mm dia. vertical stirrups made of Fe415)</li>
+</ol>
+<p>Let us determine the Limit State capacity of the section in bending and shear.</p>
+<p>Create a Python script named <code>example02.py</code> and type the following code in it.</p>
+<pre><code class="language-python"># File: example02.py
+
+from rcdesign.is456.stressblock import LSMStressBlock
+from rcdesign.is456.concrete import Concrete
+from rcdesign.is456.rebar import (
+    RebarHYSD,
+    RebarLayer,
+    RebarGroup,
+    Stirrups,
+    ShearRebarGroup,
+)
+from rcdesign.is456.section import RectBeamSection
+
+sb = LSMStressBlock(&quot;IS456 LSM&quot;)
+m20 = Concrete(&quot;M20&quot;, 20)
+fe415 = RebarHYSD(&quot;Fe 415&quot;, 415)
+
+t1 = RebarLayer(fe415, [16, 16], 35)
+t2 = RebarLayer(fe415, [16, 16, 16], -35)
+steel = RebarGroup([t1, t2])
+sh_st = ShearRebarGroup([Stirrups(fe415, 2, 8, 150)])
+
+sec = RectBeamSection(230, 450, sb, m20, steel, sh_st, 25)
+xu = sec.xu(0.0035)
+print(sec.report(xu, 0.0035))
+</code></pre>
+<p>Run the script from the command line:</p>
+<pre><code class="language-bash">(env) $ python example02.py
+RECTANGULAR BEAM SECTION: 230 x 450
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+FLEXURE
+=======
+Equilibrium NA = 61.57 (k = 0.14) (ec_max = 0.003500)
+
+   fck                             ec_max Type            f_cc   C (kN)  M (kNm)
+--------------------------------------------------------------------------------
+ 20.00                         0.00350000    C            8.93   102.41     3.68
+--------------------------------------------------------------------------------
+
+    fy         Bars       xc       Strain Type     f_sc   f_cc   C (kN)  M (kNm)
+--------------------------------------------------------------------------------
+   415         2-16    35.00   0.00151034    C   295.04   8.40   115.26     3.06
+   415         3-16   415.00  -0.02009170    T  -360.87         -217.67    76.93
+--------------------------------------------------------------------------------
+                                                                -102.41    79.99
+                                                               =================
+                                                                   0.00    83.68
+SHEAR
+=====
+          Type                 tau_c      Area (mm^2)                   V_uc (kN)
+---------------------------------------------------------------------------------
+      Concrete                  0.52         95450.00                      50.07
+---------------------------------------------------------------------------------
+          Type        Variant    f_y             Bars      s_v     A_sv V_us (kN)
+---------------------------------------------------------------------------------
+      Stirrups       Vertical    415             2-8#    150.0   100.53   100.37
+                                                                        ========
+                                                                          150.44
+CAPACITY
+========
+Mu = 83.68 kNm
+Vu = 150.44 kN
+</code></pre>
+<h2 id="flanged-beam">Flanged Beam<a class="headerlink" href="#flanged-beam" title="Permanent link">&para;</a></h2>
+<p>Consider a flanged reinforced concrete beam section with the following details:</p>
+<ol>
+<li>Web size: 300x475 mm overall with 25mm clear cover</li>
+<li>Flange size: Width=800 mm and depth = 150 mm</li>
+<li>Concrete: M25</li>
+<li>Steel: Fe415</li>
+<li>Main reinforcement: 2-18# of Fe415 with centre of the bars at a distance of 70&nbsp;mm from tension edge of the section and 3-20# of Fe415 with centre of the bars at a distance of 35&nbsp;mm from tension edge of the section</li>
+<li>Shear reinforcement: 2-8# @ 150mm c/c (2 legged 8mm dia. vertical stirrups made of Fe415)</li>
+</ol>
+<p>Let us determine the Limit State capacity of the section in bending and shear.</p>
+<p>Create a Python script named <code>example03.py</code> and type the following code in it.</p>
+<pre><code class="language-python"># File: example03.py
+
+from rcdesign.is456.stressblock import LSMStressBlock
+from rcdesign.is456.concrete import Concrete
+from rcdesign.is456.rebar import (
+    RebarHYSD,
+    RebarLayer,
+    RebarGroup,
+    Stirrups,
+    ShearRebarGroup,
+)
+from rcdesign.is456.section import FlangedBeamSection
+
+sb = LSMStressBlock(&quot;IS456 LSM&quot;)
+m25 = Concrete(&quot;M25&quot;, 25)
+fe415 = RebarHYSD(&quot;Fe 415&quot;, 415)
+t1 = RebarLayer(fe415, [20, 20, 20], -35)
+t2 = RebarLayer(fe415, [18, 18], -70)
+main_steel = RebarGroup([t1, t2])
+shear_steel = ShearRebarGroup([Stirrups(fe415, 2, 8, 150)])
+tsec = FlangedBeamSection(300, 475, 800, 150, sb, m25, main_steel, shear_steel, 25)
+xu = tsec.xu(0.0035)
+print(tsec.report(xu, 0.0035))
+</code></pre>
+<p>Run the example</p>
+<pre><code class="language-bash">(env) $ python example03.py
+FLANGED BEAM SECTION - Web: 300 x 475, Flange: 800 x 150
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+FLEXURE
+=======
+Equilibrium NA = 72.43 (ec_max = 0.003500)
+
+   fck    Breadth      Depth       ec_min        ec_max   Type   C (kN)  M (kNm)
+--------------------------------------------------------------------------------
+    25     300.00     475.00   0.00000000    0.00350000      C   196.41     8.31
+    25     800.00     150.00                 0.00350000      C   327.36    13.85
+--------------------------------------------------------------------------------
+                                                                 523.77    22.16
+
+    fy         Bars       xc       Strain Type     f_sc   f_cc   C (kN)  M (kNm)
+--------------------------------------------------------------------------------
+   415         2-18   405.00  -0.01607150    T  -360.87         -183.66    61.08
+   415         3-20   440.00  -0.01776287    T  -360.87         -340.11   125.02
+--------------------------------------------------------------------------------
+                                                                -523.77   186.10
+                                                               =================
+                                                                   0.00   208.25
+SHEAR
+=====
+          Type                 tau_c      Area (mm^2)                   V_uc (kN)
+---------------------------------------------------------------------------------
+      Concrete                  0.67        128318.18                      86.14
+---------------------------------------------------------------------------------
+          Type        Variant    f_y             Bars      s_v     A_sv V_us (kN)
+---------------------------------------------------------------------------------
+      Stirrups       Vertical    415             2-8#    150.0   100.53   103.45
+                                                                        ========
+                                                                          189.58
+CAPACITY
+========
+Mu = 208.25 kNm
+Vu = 189.58 kN
+</code></pre>
+<h2 id="rectangular-column">Rectangular Column<a class="headerlink" href="#rectangular-column" title="Permanent link">&para;</a></h2>
+<p>Consider a rectangular reinforced concrete column section with the following details:</p>
+<ol>
+<li>Rectangular column of size: 230x450&nbsp;mm</li>
+<li>Concrete: M20</li>
+<li>Steel: Fe415</li>
+<li>Longitudinal reinforcement: Fe415 in three layers:<ol>
+<li>3-16# at 50&nbsp;mm from highly compressed edge</li>
+<li>2-16# at 225&nbsp;mm from highly compressed edge</li>
+<li>3-16# at 400&nbsp;mm from highly compressed edge (or 50&nbsp;mm from the least compressed edge)</li>
+</ol>
+</li>
+<li>Location of neutral axis: At 900&nbsp;mm from highly compressed edge ($x_u=900$ and $k = \frac{x_u}{D}=2.0$).</li>
+</ol>
+<p>Create a Python script named <code>example04.py</code> and type the following code in it.</p>
+<pre><code class="language-python"># File: example04.py
+
+from rcdesign.is456.concrete import Concrete
+from rcdesign.is456.stressblock import LSMStressBlock
+from rcdesign.is456.rebar import RebarHYSD, LateralTie, RebarLayer, RebarGroup
+from rcdesign.is456.section import RectColumnSection
+
+b = 230
+D = 450
+csb = LSMStressBlock(&quot;LSM Compression&quot;)
+m20 = Concrete(&quot;M20&quot;, 20)
+fe415 = RebarHYSD(&quot;Fe 415&quot;, 415)
+L1 = RebarLayer(fe415, [16, 16, 16], 50)
+L2 = RebarLayer(fe415, [16, 16], D / 2)
+L3 = RebarLayer(fe415, [16, 16, 16], -50)
+long_st = RebarGroup([L1, L2, L3])
+lat_ties = LateralTie(fe415, 8, 150)
+colsec = RectColumnSection(b, D, csb, m20, long_st, lat_ties, 35)
+xu = 900
+k = xu / D  # k = 2 / 3
+print(colsec.report(xu))
+</code></pre>
+<p>Run the example.</p>
+<pre><code class="language-bash">(env) $ python example04.py
+RECTANGULAR COLUMN 230 x 450 xu = 900.00 (k = 2.00)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Concrete: fck = 20.00 N/mm^2, fd = 8.93 N/mm^2 Clear Cover: 35
+
+   fck                 ecmin        ecmax Type     fsc1   fsc2       Cc       Mc
+--------------------------------------------------------------------------------
+ 20.00            0.00127273   0.00254545    C     7.75   8.93   901.31   612.13
+--------------------------------------------------------------------------------
+
+    fy         Bars       xc       Strain Type      fsc    fcc   C (kN)  M (kNm)
+--------------------------------------------------------------------------------
+   415         3-16    50.00   0.00240404    C   342.45   8.93   201.18   171.00
+   415         2-16   225.00   0.00190909    C   323.86   8.91   126.65    85.49
+   415         3-16   400.00   0.00141414    C   282.83   8.17   165.67    82.84
+--------------------------------------------------------------------------------
+                                                                 493.49   339.32
+                                                               =================
+                                                                1394.81   951.45
+CAPACITY
+========
+Pu =    1394.81 kN
+Mu =     951.45 kNm
+ e =     682.14 mm
+</code></pre>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../installation/" class="btn btn-neutral float-left" title="Installation"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../theory/" class="btn btn-neutral float-right" title="Introduction">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/satish-annigeri/rcdesign" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../installation/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../theory/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme_extra.js" defer></script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

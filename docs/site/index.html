@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="description" content="None" /><link rel="canonical" href="https://rcdesign.readthedocs.io/" />
+      <link rel="shortcut icon" href="img/favicon.ico" />
+    <title>rcdesign</title>
+    <link rel="stylesheet" href="css/theme.css" />
+    <link rel="stylesheet" href="css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+        <link href="assets/_mkdocstrings.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Home";
+        var mkdocs_page_input_path = "index.md";
+        var mkdocs_page_url = "/";
+      </script>
+    
+    <script src="js/jquery-3.6.0.min.js" defer></script>
+    <!--[if lt IE 9]>
+      <script src="js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/bash.min.js"></script>
+      <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="." class="icon icon-home"> rcdesign
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="./search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href=".">Home</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#current-status">Current Status</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#what-rcdesign-can-and-cannot-do">What rcdesign can and cannot do</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#contribute">Contribute</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#links">Links</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#documentation">Documentation</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#future-plans">Future Plans</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#references">References</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="installation/">Installation</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="tutorial/">Tutorial</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Theory and Software Design</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="theory/">Introduction</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="theory/software_design/">Software Design</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="theory/materials/">Material Class</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="theory/section/">Section Classs</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="api/">API Reference</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href=".">rcdesign</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="." class="icon icon-home" aria-label="Docs"></a> &raquo;</li>
+      <li>Home</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/satish-annigeri/rcdesign/edit/master/docs/index.md" class="icon icon-github"> Edit on GitHub</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="documentation-for-rcdesign">Documentation for <code>rcdesign</code><a class="headerlink" href="#documentation-for-rcdesign" title="Permanent link">&para;</a></h1>
+<p><img alt="PyPI - License" src="https://img.shields.io/pypi/l/rcdesign"> <a href="https://pypi.python.org/pypi/rcdesign/"><img alt="PyPI version shields.io" src="https://img.shields.io/pypi/v/rcdesign.svg" /></a> <a href="http://rcdesign.readthedocs.io/?badge=latest"><img alt="Documentation Status" src="https://readthedocs.org/projects/rcdesign/badge/?version=latest" /></a> <a href="https://pypi.python.org/pypi/rcdesign/"><img alt="PyPI download month" src="https://img.shields.io/pypi/dm/rcdesign.svg" /></a> <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg" /></a></p>
+<p><code>rcdesign</code> is a Python package for analysis of reinforced concrete&nbsp;(RC) sections as per the limit state method&nbsp;(LSM) of IS&nbsp;456:2000 - the code of practice for plain and reinforced concrete in India.</p>
+<h2 id="current-status">Current Status<a class="headerlink" href="#current-status" title="Permanent link">&para;</a></h2>
+<p>The package is in early development and may undergo backward incompatible changes. It has undergone testing of the current code base. Limited examples have been solved and verified by hand. Test coverage is currently 100% (excepting the example script).</p>
+<h2 id="what-rcdesign-can-and-cannot-do">What <code>rcdesign</code> can and cannot do<a class="headerlink" href="#what-rcdesign-can-and-cannot-do" title="Permanent link">&para;</a></h2>
+<p>At present <code>rcdesign</code> <strong>can do</strong> the following:</p>
+<ol>
+<li>Represent stress strain relationship for: <ol>
+<li>concrete in flexure as per IS&nbsp;456:2000&nbsp;(38.1),</li>
+<li>concrete under axial compression and flexure as per IS&nbsp;456:2000&nbsp;(39.1),</li>
+<li>reinforcement bars:<ol>
+<li>mild steel bars with well defined yield point</li>
+<li>cold worked deformed bars</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>Represent layers of reinforcement bars placed parallel to the edge of the section at a given distance from the compression (or tension edge). Bars can be of different diameters but must be of the same type.</li>
+<li>Represent group of layers of reinforcement bars. All bars in a group must be of the same type, although their diameters may differ, and layers of reinforcement must be placed parallel to the short edge <em>b</em> of the section.</li>
+<li>Represent group of shear reinforcement in the form of vertical stirrups, inclined stirrups and bent-up bars.</li>
+<li>Analyse reinforced concrete rectangular and flanged sections subjected to bending and shear as per the Limit State Method according to IS&nbsp;456:2000, the Indian standard code of practice for plain and reinforced concrete. This calculates the ultimate strength of the section in bending and shear depending on the materials, section size and main (longitudinal) and shear reinforcement.</li>
+<li>Analyses reinforced concrete rectangular sections subjected to axial compression and bending about one axis parallel to the first (usually the short) edge, as per limit state method of IS&nbsp;456:2000.</li>
+</ol>
+<p>Rectangular and flanged sections must be of a given grade of concrete. Main (longitudinal) reinforcement to resist bending must be provided as a single group of reinforcement layers, arranged in one or more layers. Depending on their distance from the compression edge, the layers of rebars may lie in the tension and/or compression zone of the section.However, since the position of the neutral axis is dependent on the section size and the amount and location of main reinforcement, whether a layer of reinforcement lies in the tension zone or the compression zone will be known only after an analysis of the section.</p>
+<p>At present, <code>rcdesign</code> <strong>cannot do</strong> the following:</p>
+<ol>
+<li>Cannot design sections, either for bending, shear and torsion or for axial compression with or without bending about one or both axes.</li>
+<li>Cannot verify whether the section meets the detailing requirements of IS&nbsp;456:2000&nbsp;(26).</li>
+<li>Cannot analyse or design sections as per Working Stress Method of IS&nbsp;456:2000&nbsp;(Annexure&nbsp;N).</li>
+<li>Cannot design reinforced concrete elements such as beams and columns. At present, the scope of the package is restricted to analysis and design of sections of beams and columns. Design of sections is a distant goal, but no promises.</li>
+</ol>
+<p>Some or all of the above features will be gradually added. Contributions in accomplishing this are welcome.</p>
+<h2 id="contribute">Contribute<a class="headerlink" href="#contribute" title="Permanent link">&para;</a></h2>
+<p>Contributions are welcome. Contributions can be in a variety of forms:</p>
+<ol>
+<li>Bug reports</li>
+<li>Additional features</li>
+<li>Documentation</li>
+<li>Additional examples</li>
+</ol>
+<h2 id="links">Links<a class="headerlink" href="#links" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Documentation: <a href="https://rcdesign.readthedocs.io/en/latest/">Documentation</a></li>
+<li>PyPI release: <a href="https://pypi.org/project/rcdesign/">0.4.14</a></li>
+<li>Github repository: https://github.com/satish-annigeri/rcdesign</li>
+</ul>
+<h3 id="documentation">Documentation<a class="headerlink" href="#documentation" title="Permanent link">&para;</a></h3>
+<p><a href="https://rcdesign.readthedocs.io/en/latest/">Documentation is available here</a>. Any advise or help on documentation is welcome.</p>
+<h2 id="future-plans">Future Plans<a class="headerlink" href="#future-plans" title="Permanent link">&para;</a></h2>
+<p>Immediate plans include the design of <em>sections</em>:</p>
+<ol>
+<li>Design of rectangular and flanged sections subjected to bending, shear and torsion.</li>
+<li>Write user and API documentation using Sphinx.</li>
+<li>Design of rectangular column <em>sections</em>.</li>
+<li>Detailing of rectangular beam <em>sections</em> subjected to bending, shear and torsion.</li>
+<li>Design of rectangular column <em>sections</em> subjected to combined axial compression and bending.</li>
+<li>Implementing a stress block to represent <em>working stress method</em>.</li>
+</ol>
+<p>Long term plans include:</p>
+<ol>
+<li>Design and detailing of reinforced concrete elements such as beams, columns, slabs, footings, retaining walls etc.</li>
+<li>Calculation of deflections of elements.</li>
+<li>Design and detailing of reinforced concrete structures, including detailing of joints (very far into the future, if at all).</li>
+</ol>
+<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
+<ol>
+<li>IS 456:2000 Indian Standard Code of Practice for Plain and Reinforced Concrete (Fourth Revision), Bureau of Indian Standards, New Delhi, 2000.</li>
+<li>SP:24 (S&amp;T)-1983 Explanatory Handbook on Indian Standard Code of Practice for Plain and Reinforced Concrete (IS 456:1978), Bureau of Indian Standards, New Delhi, 1984.</li>
+<li>SP 16:1980 Design Aids for Reinforced Concrete to IS:456-1978, Bureau of Indian Standards, New Delhi, 1980.</li>
+</ol>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="installation/" class="btn btn-neutral float-right" title="Installation">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/satish-annigeri/rcdesign" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+    
+      <span><a href="installation/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script>var base_url = '.';</script>
+    <script src="js/theme_extra.js" defer></script>
+    <script src="js/theme.js" defer></script>
+      <script src="search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>
+
+<!--
+MkDocs version : 1.4.3
+Build Date UTC : 2023-05-29 15:33:32.482080+00:00
+-->

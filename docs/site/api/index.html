@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://rcdesign.readthedocs.io/api/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>API Reference - rcdesign</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+        <link href="../assets/_mkdocstrings.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "API Reference";
+        var mkdocs_page_input_path = "api.md";
+        var mkdocs_page_url = "/api/";
+      </script>
+    
+    <script src="../js/jquery-3.6.0.min.js" defer></script>
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/django.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/bash.min.js"></script>
+      <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> rcdesign
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../installation/">Installation</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../tutorial/">Tutorial</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Theory and Software Design</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../theory/">Introduction</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../theory/software_design/">Software Design</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../theory/materials/">Material Class</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../theory/section/">Section Classs</a>
+                  </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="./">API Reference</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#materials">Materials</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#concrete">Concrete</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#rcdesign.is456.concrete">rcdesign.is456.concrete</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#rcdesign.is456.concrete.Concrete">Concrete</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#rcdesign.is456.concrete.Concrete--returns">Returns</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#rebar">Rebar</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#rcdesign.is456.rebar">rcdesign.is456.rebar</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#rcdesign.is456.rebar.Rebar">Rebar</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#rcdesign.is456.rebar.Rebar--parameters">Parameters</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#rcdesign.is456.rebar.Rebar--returns">Returns</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#section">Section</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#rcdesign.is456.section">rcdesign.is456.section</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#rcdesign.is456.section.DesignForceType">DesignForceType</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#rcdesign.is456.section.RectBeamSection">RectBeamSection</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#rcdesign.is456.section.RectBeamSection--returns">Returns</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#stress-block">Stress Block</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#rcdesign.is456.stressblock">rcdesign.is456.stressblock</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#utilities">Utilities</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#rcdesign.utils">rcdesign.utils</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">rcdesign</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a> &raquo;</li>
+      <li>API Reference</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/satish-annigeri/rcdesign/edit/master/docs/api.md" class="icon icon-github"> Edit on GitHub</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="api-reference">API Reference<a class="headerlink" href="#api-reference" title="Permanent link">&para;</a></h1>
+<h2 id="materials">Materials<a class="headerlink" href="#materials" title="Permanent link">&para;</a></h2>
+<h3 id="concrete">Concrete<a class="headerlink" href="#concrete" title="Permanent link">&para;</a></h3>
+
+
+<div class="doc doc-object doc-module">
+
+
+<a id="rcdesign.is456.concrete"></a>
+  <div class="doc doc-contents first">
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="rcdesign.is456.concrete.Concrete" class="doc doc-heading">
+        <code>Concrete</code>
+
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
+  </span>
+
+<a href="#rcdesign.is456.concrete.Concrete" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+  <div class="doc doc-contents ">
+
+  
+      <p>Concrete</p>
+<h4 id="rcdesign.is456.concrete.Concrete--returns">Returns<a class="headerlink" href="#rcdesign.is456.concrete.Concrete--returns" title="Permanent link">&para;</a></h4>
+<p>Concrete
+    Concrete object</p>
+
+
+        <details class="quote">
+          <summary>Source code in <code>rcdesign\is456\concrete.py</code></summary>
+          <pre class="highlight"><code class="language-python">@dataclass
+class Concrete:
+    """Concrete
+
+    Returns
+    -------
+    Concrete
+        Concrete object
+    """
+
+    label: str
+    fck: float
+    gamma_m: float = 1.5
+    density: float = 25.0
+
+    def __repr__(self) -&gt; str:
+        s = f"fck = {self.fck:.2f} N/mm^2, fd = {self.fd:.2f} N/mm^2"
+        return s
+
+    @property
+    def Ec(self) -&gt; float:
+        return 5000 * sqrt(self.fck)
+
+    @property
+    def fd(self) -&gt; float:
+        return 0.67 * self.fck / self.gamma_m
+
+    def tauc(self, pt: float) -&gt; float:
+        if pt &lt; 0.15:
+            pt = 0.15
+        if pt &gt; 3:
+            pt = 3.0
+        beta = max(1.0, (0.8 * self.fck) / (6.89 * pt))
+        num = 0.85 * sqrt(0.8 * self.fck) * (sqrt(1 + 5 * beta) - 1)
+        den = 6 * beta
+        return num / den
+
+    def tauc_max(self):
+        tauc = np.array([[15, 20, 25, 30, 35, 40], [2.5, 2.8, 3.1, 3.5, 3.7, 4.0]])
+        if self.fck &lt; 15:
+            return 0.0
+        elif self.fck &gt;= tauc[0, -1]:
+            return tauc[1, -1]
+        else:
+            for i in range(1, tauc.shape[1]):
+                if self.fck &lt;= tauc[0, i]:
+                    if self.fck == tauc[0, i]:
+                        return tauc[1, i]
+                    else:
+                        x1 = tauc[0, i - 1]
+                        y1 = tauc[1, i - 1]
+                        x2 = tauc[0, i]
+                        y2 = tauc[1, i]
+                        print(x1, x2, y1, y2)
+                        return y1 + (y2 - y1) / (x2 - x1) * (self.fck - x1)</code></pre>
+        </details>
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+
+
+
+  </div>
+
+  </div>
+
+</div><h3 id="rebar">Rebar<a class="headerlink" href="#rebar" title="Permanent link">&para;</a></h3>
+
+
+<div class="doc doc-object doc-module">
+
+
+<a id="rcdesign.is456.rebar"></a>
+  <div class="doc doc-contents first">
+  
+      <p>Classes to represent reinforcement bars, layers of reinforcement bars
+and groups of reinforcement layers</p>
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="rcdesign.is456.rebar.Rebar" class="doc doc-heading">
+        <code>Rebar</code>
+
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
+  </span>
+
+<a href="#rcdesign.is456.rebar.Rebar" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+  <div class="doc doc-contents ">
+      <p class="doc doc-class-bases">
+        Bases: <code><span title="abc.ABC">ABC</span></code></p>
+
+  
+      <p>Rebar object represents a reinforcment bar.</p>
+<h4 id="rcdesign.is456.rebar.Rebar--parameters">Parameters<a class="headerlink" href="#rcdesign.is456.rebar.Rebar--parameters" title="Permanent link">&para;</a></h4>
+
+<details class="abc-" open>
+  <summary><em>type</em></summary>
+  <p><em>description</em></p>
+</details>      <h4 id="rcdesign.is456.rebar.Rebar--returns">Returns<a class="headerlink" href="#rcdesign.is456.rebar.Rebar--returns" title="Permanent link">&para;</a></h4>
+<p>Rebar
+    <em>description</em></p>
+
+
+        <details class="quote">
+          <summary>Source code in <code>rcdesign\is456\rebar.py</code></summary>
+          <pre class="highlight"><code class="language-python">@dataclass
+class Rebar(ABC):  # pragma: no cover
+    """Rebar object represents a reinforcment bar.
+
+    Parameters
+    ----------
+    ABC : _type_
+        _description_
+
+    Returns
+    -------
+    Rebar
+        _description_
+    """
+    label: str
+    fy: float
+    gamma_m: float = 1.15
+    density: float = 78.5
+    Es: float = 2e5
+    rebar_type: RebarType = RebarType.REBAR_HYSD
+
+    @property
+    def fd(self) -&gt; float:
+        return self.fy / self.gamma_m
+
+    def es_min(self) -&gt; float:
+        return self.fd / self.Es + 0.002
+
+    @abstractmethod
+    def fs(self, es: float) -&gt; float:
+        pass</code></pre>
+        </details>
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+
+
+
+  </div>
+
+  </div>
+
+</div><h2 id="section">Section<a class="headerlink" href="#section" title="Permanent link">&para;</a></h2>
+
+
+<div class="doc doc-object doc-module">
+
+
+<a id="rcdesign.is456.section"></a>
+  <div class="doc doc-contents first">
+  
+      <p>Class to represent reinforced concrete cross sections</p>
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="rcdesign.is456.section.DesignForceType" class="doc doc-heading">
+        <code>DesignForceType</code>
+
+
+<a href="#rcdesign.is456.section.DesignForceType" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+  <div class="doc doc-contents ">
+      <p class="doc doc-class-bases">
+        Bases: <code><span title="enum.Enum">Enum</span></code></p>
+
+  
+      <p>DesignForceType object is an enumeration</p>
+
+
+        <details class="quote">
+          <summary>Source code in <code>rcdesign\is456\section.py</code></summary>
+          <pre class="highlight"><code class="language-python">class DesignForceType(Enum):
+    """DesignForceType object is an enumeration
+    """
+    BEAM = 1
+    COLUMN = 2
+    SLAB = 3
+    SHEARWALL = 4</code></pre>
+        </details>
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="rcdesign.is456.section.RectBeamSection" class="doc doc-heading">
+        <code>RectBeamSection</code>
+
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
+  </span>
+
+<a href="#rcdesign.is456.section.RectBeamSection" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+  <div class="doc doc-contents ">
+
+  
+      <p>RectBeamSection object represnts a rectangular beam section subjected to bending and shear.</p>
+<h4 id="rcdesign.is456.section.RectBeamSection--returns">Returns<a class="headerlink" href="#rcdesign.is456.section.RectBeamSection--returns" title="Permanent link">&para;</a></h4>
+<p>RectBeamSection
+    <em>description</em></p>
+
+
+        <details class="quote">
+          <summary>Source code in <code>rcdesign\is456\section.py</code></summary>
+          <pre class="highlight"><code class="language-python">@dataclass
+class RectBeamSection:
+    """RectBeamSection object represnts a rectangular beam section subjected to bending and shear.
+
+    Returns
+    -------
+    RectBeamSection
+        _description_
+    """
+
+    b: float
+    D: float
+    csb: LSMStressBlock
+    conc: Concrete
+    long_steel: RebarGroup
+    shear_steel: ShearRebarGroup
+    clear_cover: float
+
+    def __post_init__(self):
+        self.design_force_type = DesignForceType.BEAM
+        self.calc_xc()
+
+    def calc_xc(self) -&gt; None:
+        self.long_steel.calc_xc(self.D)
+        return None
+
+    def calc_stress_type(self, xu: float) -&gt; None:
+        self.calc_xc()
+        self.long_steel.calc_stress_type(xu)
+
+    def C(self, xu: float, ecmax: float = ecu) -&gt; Tuple[float, float]:
+        Fc, Mc, _, _ = self.F_M(xu, ecmax)
+        return Fc, Mc
+
+    def T(self, xu: float, ecmax: float) -&gt; Tuple[float, float]:
+        _, _, Ft, Mt = self.F_M(xu, ecmax)
+        return Ft, Mt
+
+    def C_T(self, xu: float, ecmax: float = ecu) -&gt; float:
+        self.calc_stress_type(xu)
+        C, _, T, _ = self.F_M(xu, ecmax)
+        return C - T
+
+    def F_M(self, xu: float, ecmax: float = ecu) -&gt; Tuple[float, float, float, float]:
+        # sb = LSMStressBlock("LSM Flexure")
+        self.calc_stress_type(xu)
+        Fc = Mc = Ft = Mt = 0.0
+        # Compression force - concrete
+        k = xu / self.D
+        Fcc = self.csb.C(0, k, k, ecmax) * self.conc.fd * self.b * self.D
+        Mcc = self.csb.M(0, k, k, ecmax) * self.conc.fd * self.b * self.D**2
+        # Compression force - compression steel
+        Fsc, Msc, Fst, Mst = self.long_steel.force_moment(
+            xu, self.csb, self.conc, ecmax
+        )
+        # Tension force in tension steel
+        Ft, Mt = self.long_steel.force_tension(xu, ecmax)
+        Fc = Fcc + Fsc
+        Mc = Mcc + Msc
+        return Fc, Mc, Ft, Mt
+
+    def xu(self, ecmax: float = ecu) -&gt; Union[float, Any]:
+        dc_max = 10
+
+        x1, x2 = rootsearch(self.C_T, dc_max, self.D, 10, ecmax)
+        x = brentq(self.C_T, x1, x2, args=(ecmax,))
+        return x
+
+    def Mu(self, xu: float, ecmax: float = ecu) -&gt; float:
+        # Assuming area of tension steel to be such as to produce a tension force equal to C
+        _, Mc = self.C(xu, ecmax)
+        _, Mt = self.T(xu, ecmax)
+        M = Mc + Mt
+        return M
+
+    def tauc(self, xu: float) -&gt; float:
+        return self.conc.tauc(self.pt(xu))
+
+    def __repr__(self) -&gt; str:
+        ecmax = self.csb.ecu
+        xu = self.xu(ecmax)
+        return self.report(xu, ecmax)
+
+    def has_compr_steel(self, xu: float) -&gt; bool:
+        for L in self.long_steel.layers:
+            if L._xc &lt; xu:
+                return True
+        return False
+
+    def report(self, xu: float, ecmax: float = ecu) -&gt; str:  # pragma: no cover
+        self.calc_xc()
+        self.calc_stress_type(xu)
+        k = xu / self.D
+        ecy = self.csb.ecy
+        hdr0 = f"RECTANGULAR BEAM SECTION: {self.b} x {self.D}"
+        s = f"{header(hdr0, '~')}\n"
+        s += f"{header('FLEXURE', '=')}\nEquilibrium NA = {xu:.2f} (k = {k:.2f}) (ec_max = {ecmax:.6f})\n\n"
+        fcc = self.csb._fc_(ecmax) * self.conc.fd
+        Fc = self.b * self.csb.C(0, k, k, ecmax) * self.conc.fd * self.D
+        Mc = self.csb.M(0, k, k) * self.conc.fd * self.b * self.D**2
+        hdr1 = f"{'fck':&gt;6} {' ':&gt;8} {' ':&gt;12} {'ec_max':&gt;12} {'Type':&gt;4} "
+        hdr1 += f"{' ':&gt;8} {'f_c':&gt;6} {'F (kN)':&gt;8} {'M (kNm)':&gt;8}"
+        s += hdr1 + "\n" + underline(hdr1) + "\n"
+        s += f"{self.conc.fck:6.2f} {' ':&gt;8} {' ':&gt;12} {ecmax:12.8f} {'C':&gt;4} {' ':&gt;8} {fcc:6.2f} "
+        s += f"{Fc / 1e3:8.2f} {Mc/ 1e6:8.2f}\n{underline(hdr1)}\n\n"
+        Ft = 0.0
+        Mt = 0.0
+        hdr2 = f"{'fy':&gt;6} {'Bars':&gt;12} {'xc':&gt;8} {'Strain':&gt;12} {'Type':&gt;4} {'f_s':&gt;8} {'f_c':&gt;6}"
+        hdr2 += f" {'F (kN)':&gt;8} {'M (kNm)':&gt;8}"
+        s += f"{hdr2}\n{underline(hdr2)}\n"
+        for L in sorted(self.long_steel.layers):
+            z = k - (L._xc / self.D)
+            esc = self.csb.ec(z, k) * ecy
+            stress_type = L.stress_type(xu)
+            fsc = L.rebar.fs(esc)
+            s += f"{L.rebar.fy:6.0f} {L.bar_list():&gt;12} {L._xc:8.2f} {esc:12.8f} "
+            s += f"{StressLabel[stress_type][0]:&gt;4} {fsc:8.2f} "
+            if stress_type == StressType.STRESS_COMPRESSION:
+                fcc = self.csb.fc(z, k, ecmax) * self.conc.fd
+                c = L.area * (fsc - fcc)
+                s += f"{fcc:6.2f} "
+            elif L._stress_type == StressType.STRESS_TENSION:
+                c = L.area * fsc
+                s += f"{' ':&gt;6} "
+            else:
+                c = 0.0
+
+            m = c * (k * self.D - L._xc)
+            s += f"{c/1e3:8.2f} {m/1e6:8.2f}\n"
+            Ft += c
+            Mt += m
+        s += f"{underline(hdr2)}\n"
+        if len(self.long_steel.layers) &gt; 1:
+            C_M = f"{Ft/1e3:8.2f} {Mt/1e6:8.2f}"
+            s += f"{' '*62} {C_M}\n{' '*62} {underline(C_M, '=')}\n"
+        F = 0.0 if isclose(Fc + Ft, 0, abs_tol=1e-10) else Fc + Ft
+        C_M = f"{F/1e3:8.2f} {(Mc + Mt)/1e6:8.2f}"
+        s += f"{' ':&gt;62} {C_M}\n"
+        s += f"{header('SHEAR', '=')}\n"
+        tauc = self.conc.tauc(self.pt(xu))
+        area = self.b * self.eff_d(xu)
+        vuc = area * tauc
+        hdr3 = f"{'Type':&gt;14} {' ':&gt;14} {'tau_c':&gt;6} {'Area (mm^2)':&gt;16} {' ':&gt;8} {' ':&gt;8} {'V_uc (kN)':&gt;8}"
+        s += f"{header(hdr3)}\n"
+        s += f"{'Concrete':&gt;14} {' ':&gt;14} {tauc:6.2f} {area:16.2f} {' ':&gt;8} {' ':&gt;8} {vuc/1e3:8.2f}\n"
+        s += f"{underline(hdr3)}\n"
+        hdr4 = f"{'Type':&gt;14} {'Variant':&gt;14} {'f_y':&gt;6} {'Bars':&gt;16} {'s_v':&gt;8} {'A_sv':&gt;8} {'V_us (kN)':&gt;8}"
+        s += f"{header(hdr4)}\n"
+        vus = 0.0
+        for sh_rein in self.shear_steel.shear_reinforcement:
+            data = sh_rein.report(self.eff_d(xu))
+            s += f"{data['label']:&gt;14} {data['type']:&gt;14} {data['fy']:6} "
+            if data["sh_type"] in [
+                ShearRebarType.SHEAR_REBAR_VERTICAL_STIRRUP,
+                ShearRebarType.SHEAR_REBAR_INCLINED_STIRRUP,
+            ]:
+                bar_info = f"{data['legs']}-{data['bar_dia']}#"
+            else:
+                bar_info = f"{data['bars']}"
+            s += f"{bar_info:&gt;16} {data['sv']:8.1f} {data['Asv']:8.2f} {data['Vus']/1e3:8.2f}\n"
+            vus += data["Vus"]
+        vu = f"{(vuc + vus)/1e3:8.2f}"
+        s += f"{' ':&gt;71} {underline(vu, '=')}\n{' ':&gt;71} {vu}\n"
+        s += (
+            f"{header('CAPACITY', '=')}\n{'Mu = ':&gt;5}{self.Mu(xu, ecmax)/1e6:.2f} kNm\n"
+        )
+        Vuc, Vus = self.Vu(xu)
+        Vu = Vuc + sum(Vus)
+        s += f"{'Vu = ':&gt;5}{Vu/1e3:.2f} kN\n"
+        return s
+
+    def eff_d(self, xu: float) -&gt; float:
+        _, ct = self.long_steel.centroid(xu)
+        return ct
+
+    def pt(self, xu: float) -&gt; float:
+        ast = 0.0
+        for L in sorted(self.long_steel.layers):
+            if L._xc &gt; xu:
+                ast += L.area
+        d = self.eff_d(xu)
+        pt = ast / (self.b * d) * 100
+        return pt
+
+    def Vu(self, xu: float) -&gt; Tuple[float, List[float]]:
+        # print("\nstart::RectBeamSection.Vu(xu)", xu)
+        pt = self.pt(xu)
+        # print("stop::RectBeamSection.Vu(xu)\n")
+        tauc = self.conc.tauc(pt)
+        d = self.eff_d(xu)
+        vuc = tauc * self.b * d
+        vus = self.shear_steel.Vus(d)
+        return vuc, vus
+
+    def analyse(self, ecmax: float = ecu) -&gt; Tuple[float, float]:
+        xu = self.xu(ecmax)
+        Mu = self.Mu(xu, ecmax)
+        return xu, Mu
+
+    def design_singly(self, bar_dia: float, Mu: float) -&gt; Tuple[float, float]:
+        beam = Beam()
+        fck = self.conc.fck
+        bottom_layer = self.long_steel.layers[-1]
+        fy = bottom_layer.rebar.fy
+        fd = bottom_layer.rebar.fd
+        d = self.D - self.clear_cover - bar_dia / 2
+        dc = self.clear_cover + bar_dia / 2
+        Mulim = beam.Mulim_const(fy) * fck * self.b * d**2
+        if Mu &lt; Mulim:
+            ast = beam.reqd_Ast(fck, fy, self.b, d, Mu)
+            asc = 0.0
+        else:
+            ast1 = beam.reqd_Ast(fck, fy, self.b, d, Mulim)
+            Mu2 = Mu - Mulim
+            ast2 = Mu2 / (fd * (d - dc))
+            ast = ast1 + ast2
+            xu = beam.xumax_d(fy) * d
+            esc = self.csb.ecu / xu * (xu - dc)
+            fsc = bottom_layer.rebar.fs(esc)
+            fcc = self.csb._fc_(esc) * self.conc.fd
+            asc = ast2 * fd / (fsc - fcc)
+            print("---", xu, d, esc, fsc, fcc, ast1, ast2, ast, asc)
+        return ast, asc</code></pre>
+        </details>
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+
+
+
+  </div>
+
+  </div>
+
+</div><h2 id="stress-block">Stress Block<a class="headerlink" href="#stress-block" title="Permanent link">&para;</a></h2>
+
+
+<div class="doc doc-object doc-module">
+
+
+<a id="rcdesign.is456.stressblock"></a>
+  <div class="doc doc-contents first">
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+  </div>
+
+</div><h2 id="utilities">Utilities<a class="headerlink" href="#utilities" title="Permanent link">&para;</a></h2>
+
+
+<div class="doc doc-object doc-module">
+
+
+<a id="rcdesign.utils"></a>
+  <div class="doc doc-contents first">
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+  </div>
+
+</div>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../theory/section/" class="btn btn-neutral float-left" title="Section Classs"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/satish-annigeri/rcdesign" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../theory/section/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+  </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme_extra.js" defer></script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

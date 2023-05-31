@@ -1,0 +1,5 @@
+-r base.in
+
+mkdocs
+mkdocstrings
+mkdocstrings-python

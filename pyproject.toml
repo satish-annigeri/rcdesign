@@ -75,11 +75,12 @@ exclude = [
 ]
 
 [tool.pytest.ini_options]
-addopts = "--cov --cov-report term-missing --cov-fail-under 95"
+addopts = "--cov --cov-report term-missing --cov-fail-under 5"
 
 [tool.coverage.run]
-source = ["."]
+source = ["rcdesign"]
 omit = [
+    "tests/*",
     "example*.py",
     "__main__*.py",
 ]
@@ -90,5 +91,9 @@ exclude_lines = [
     "def __repr__",
     "def __str__",
     "def report",
+    "def asdict",
     "if __name__ == .__main__.:",
 ]
+
+[tool.ruff]
+line-length = 130

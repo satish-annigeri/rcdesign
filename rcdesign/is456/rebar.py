@@ -64,6 +64,18 @@ ShearRebarLabel = {
 
 @dataclass
 class Rebar(ABC):  # pragma: no cover
+    """Rebar object represents a reinforcment bar.
+
+    Parameters
+    ----------
+    ABC : _type_
+        _description_
+
+    Returns
+    -------
+    Rebar
+        _description_
+    """
     label: str
     fy: float
     gamma_m: float = 1.15
@@ -128,25 +140,18 @@ class RebarHYSD(Rebar):
         return f"{self.label:>6}: Type={RebarLabel[self.rebar_type]} fy={self.fy} fd={self.fd:.2f}"
 
     def fs(self, es: float) -> float:
-        _es = abs(es)
-        i = 0
-        fd1 = self.es[i, 0]
-        es1 = self.es[i, 1]
-        if _es <= es1:
+        x = abs(es)
+        if x < self.es[0, 1]:
             return es * self.Es
-        else:
-            for i in range(1, 6):
-                fd2 = self.es[i, 0]
-                es2 = self.es[i, 1]
-                if _es <= es2:
-                    break
-                else:
-                    fd1, es1 = fd2, es2
-            if _es < es2:
-                fs = fd1 + (fd2 - fd1) / (es2 - es1) * (_es - es1)
-            else:
-                fs = fd2
-            return copysign(fs, es)
+        if x > self.es[-1, 1]:
+            return self.es[-1, 0]
+        i1 = np.searchsorted(self.es[:, 1], x) - 1
+        i2 = i1 + 1
+        y1, x1 = self.es[i1]
+        y2, x2 = self.es[i2]
+        m = (y2 - y1) / (x2 - x1)
+        y = y1 + m * (x - x1)
+        return copysign(y, es)
 
 
 """Layer of reinforcement bars"""
@@ -328,7 +333,7 @@ class RebarLayer:
 
     def asdict(
         self, xu: float, sb: LSMStressBlock, conc: Concrete, ecmax: float = ecu
-    ) -> dict:
+    ) -> dict:  # pragma: no cover
         x = self.x(xu)
         es = ecmax / xu * x
         fsc = self.rebar.fs(es)
@@ -704,7 +709,5 @@ class LateralTie:
     spacing: float
 
     def __repr__(self):
-        s = f"Lateral Ties: {self.rebar} - {self.bar_dia}"
-        if self.n > 1:
-            s += " {self.n}"
+        s = f"Lateral Ties: {self.rebar} - {self.bar_dia} @ {self.spacing:.0f}"
         return s

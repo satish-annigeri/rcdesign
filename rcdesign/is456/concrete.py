@@ -8,6 +8,14 @@ import numpy as np
 
 @dataclass
 class Concrete:
+    """Concrete
+
+    Returns
+    -------
+    Concrete
+        Concrete object
+    """
+
     label: str
     fck: float
     gamma_m: float = 1.5

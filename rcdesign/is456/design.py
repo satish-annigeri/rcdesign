@@ -1,7 +1,9 @@
 from math import sqrt, pi, ceil
 from typing import List
+from dataclasses import dataclass
 
 
+@dataclass
 class Beam:
     ecy = 0.002
     ecu = 0.0035

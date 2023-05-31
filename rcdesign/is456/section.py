@@ -27,17 +27,24 @@ from rcdesign.utils import rootsearch, underline, header
 
 
 class DesignForceType(Enum):
+    """DesignForceType object is an enumeration
+    """
     BEAM = 1
     COLUMN = 2
     SLAB = 3
     SHEARWALL = 4
 
 
-"""Class to repersent a rectangular beam section"""
-
-
 @dataclass
 class RectBeamSection:
+    """RectBeamSection object represnts a rectangular beam section subjected to bending and shear.
+
+    Returns
+    -------
+    RectBeamSection
+        _description_
+    """
+
     b: float
     D: float
     csb: LSMStressBlock

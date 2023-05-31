@@ -1,4 +1,4 @@
-from math import isclose
+from math import isclose, pi, sqrt
 import pytest
 
 # from sympy import symbols, nsimplify, integrate
@@ -91,6 +91,9 @@ class TestLSMStressBlock:
         ec = z / k * ecu / ecy
         assert isclose(sb.fc(0.5 * k, k), 2 * ec - ec**2)
 
+        k = 0
+        assert sb.fc(z, k) == 0
+
     def test_05(self):
         sb = LSMStressBlock("LSM Compression")
         k = 1.5
@@ -111,6 +114,8 @@ class TestLSMStressBlock:
         assert isclose(sb.C(4 / 7 * k, k, k), 3 / 7)
         with pytest.raises(ValueError):
             assert sb.C(k - 1 - 0.001, k, k)
+        k = 0
+        assert sb.C(z1, z2, k) == 0
 
     def test_06(self):
         sb = LSMStressBlock("LSM Compression")
@@ -132,6 +137,9 @@ class TestLSMStressBlock:
         assert isclose(sb.M(k - 1, k, k), m1 + m2)
         with pytest.raises(ValueError):
             assert sb.M(k - 1 - 0.001, k, k)
+
+        k = 0
+        assert sb.M(0, 1, k) == 0
 
 
 class TestWSMStressBlock:
@@ -182,3 +190,40 @@ class TestWSMStressBlock:
         sb = WSMStressBlock(fcbc, fst)
         xb = sb.m * fcbc * d / (fst + sb.m * fcbc)
         assert isclose(sb.xb(d), xb)
+
+    def test_06(self):
+        fcbc = 5.0
+        fst = 190.0
+        sb = WSMStressBlock(fcbc, fst)
+        b = 230.0
+        d = 415.0
+        Ast = 3 * pi / 4 * 16**2
+        # Expected value
+        ca = b / 2.0
+        cb = sb.m * Ast
+        cc = -sb.m * Ast * d
+        expected = (-cb + sqrt(cb**2 - 4 * ca * cc)) / (2 * ca)
+
+        assert isclose(sb.x(b, d, Ast), expected)
+
+    def test_07(self):
+        fcbc = 5.0
+        fst = 190.0
+        sb = WSMStressBlock(fcbc, fst)
+        b = 230.0
+        d = 415.0
+        Mb = sb.Qb(b, d)
+        # Expected value
+        M = 0.8 * Mb
+        x = (1.5 - sqrt(1.5**2 - (6 * M / (sb.fcbc * b * d**2)))) * d
+        Ast_exp = b * x * sb.fcbc / (2 * sb.fst)
+        Asc_exp = 0.0
+        Asc, Ast = sb.reqd_Asc_Ast(b, d, 40, M)
+        assert isclose(Asc, Asc_exp)
+        assert isclose(Ast, Ast_exp)
+
+        # Expected value
+        M = 1.4 * Mb
+        Asc, Ast = sb.reqd_Asc_Ast(b, d, 40, M)
+        assert Asc > 0
+        assert Ast > 0

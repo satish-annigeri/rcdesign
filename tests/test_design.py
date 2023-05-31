@@ -2,13 +2,17 @@ from math import pi, sqrt, isclose, ceil
 
 from rcdesign.is456.design import Beam
 
-xumax_d = lambda fy: 0.0035 / (fy / (1.15 * 2e5) + 0.0055)
 
-mulim_const = (
-    lambda fy: (17 * 0.67) / (21 * 1.5) * xumax_d(fy) * (1 - 99 / 238 * xumax_d(fy))
-)
+def xumax_d(fy: float) -> float:
+    return 0.0035 / (fy / (1.15 * 2e5) + 0.0055)
 
-d_req = lambda fck, fy, b, Mu: sqrt(Mu / (fck * b * mulim_const(fy)))
+
+def mulim_const(fy: float) -> float:
+    return (17 * 0.67) / (21 * 1.5) * xumax_d(fy) * (1 - 99 / 238 * xumax_d(fy))
+
+
+def d_req(fck: float, fy: float, b: float, Mu: float) -> float:
+    return sqrt(Mu / (fck * b * mulim_const(fy)))
 
 
 def reqd_xu_d(fck, b, d, Mu):
@@ -43,7 +47,6 @@ class TestIS456Design:
         fck = 20
         fy = 415
         b = 230
-        d = 450 - 25 - 16 / 2
         Mu = 100e6
         beam = Beam()
         assert isclose(beam.reqd_d(fck, fy, b, Mu), d_req(fck, fy, b, Mu))
