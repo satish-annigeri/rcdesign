@@ -1,4 +1,5 @@
 from math import isclose, pi, sin, cos
+import pytest
 
 
 from rcdesign.is456.stressblock import LSMStressBlock
@@ -268,8 +269,8 @@ class TestStirrup:
 
     def test_shearrebar04(self):
         fe415 = RebarHYSD("Fe 415", 415)
-        st = Stirrups(fe415, 2, 8, 150, 40)
-        assert st.calc_sv(80e3, 400) is None
+        with pytest.raises(ValueError):
+            Stirrups(fe415, 2, 8, 150, 40)
 
     def test_shearrebar05(self):
         fe415 = RebarHYSD("Fe 415", 415)

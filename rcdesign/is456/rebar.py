@@ -554,8 +554,6 @@ class Stirrups(ShearReinforcement):
         return self._sv
 
     def calc_sv(self, Vus: float, d: float) -> Optional[float]:
-        if (self._alpha_deg < 45) or (self._alpha_deg > 90):
-            return None
         alpha_rad = self._alpha_deg * pi / 180
         self._sv = self.rebar.fd * self.Asv * d * sin(alpha_rad) / Vus
         return self._sv
