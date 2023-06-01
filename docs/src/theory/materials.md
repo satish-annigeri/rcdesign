@@ -71,7 +71,7 @@ However, there is an upper limit to the shear that can be resisted by a section 
 The `ShearReinforcement` is an abstarct class. The attributes of shear reinforcement are:
 
 1. `rebar`: The type of reinforcement bars used as shear reinforcement.
-2. `__Asv`: Area of shear reinforcement. This is _not_ an input data. It will be computed based on the type of reinforcement.
+2. `_Asv`: Area of shear reinforcement. This is _not_ an input data. It will be computed based on the type of reinforcement.
 3. `_sv`: Spacing of shear reinforcement. This is an input data and is common for all types of shear reinforcement.
 
 ### Vertical and Inclined Stirrups

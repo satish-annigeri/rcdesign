@@ -60,7 +60,7 @@ class TestIS456Design:
         beam = LSMBeam()
         assert isclose(beam.reqd_xu_d(fck, b, d, Mu), reqd_xu_d(fck, b, d, Mu))
 
-    def test_06(self):
+    def test_05(self):
         beam = LSMBeam()
         fck = 20
         fy = 415

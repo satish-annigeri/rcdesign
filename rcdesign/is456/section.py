@@ -61,9 +61,9 @@ class RectBeamSection:
         self.long_steel.calc_xc(self.D)
         return None
 
-    def calc_stress_type(self, xu: float) -> None:
+    def get_stress_type(self, xu: float) -> None:
         self.calc_xc()
-        self.long_steel.calc_stress_type(xu)
+        self.long_steel.get_stress_type(xu)
 
     def C(self, xu: float, ecmax: float = ecu) -> Tuple[float, float]:
         Fc, Mc, _, _ = self.F_M(xu, ecmax)
@@ -74,13 +74,13 @@ class RectBeamSection:
         return Ft, Mt
 
     def C_T(self, xu: float, ecmax: float = ecu) -> float:
-        self.calc_stress_type(xu)
+        self.get_stress_type(xu)
         C, _, T, _ = self.F_M(xu, ecmax)
         return C - T
 
     def F_M(self, xu: float, ecmax: float = ecu) -> Tuple[float, float, float, float]:
         # sb = LSMStressBlock("LSM Flexure")
-        self.calc_stress_type(xu)
+        self.get_stress_type(xu)
         Fc = Mc = Ft = Mt = 0.0
         # Compression force - concrete
         k = xu / self.D
@@ -126,7 +126,7 @@ class RectBeamSection:
 
     def report(self, xu: float, ecmax: float = ecu) -> str:  # pragma: no cover
         self.calc_xc()
-        self.calc_stress_type(xu)
+        self.get_stress_type(xu)
         k = xu / self.D
         ecy = self.csb.ecy
         hdr0 = f"RECTANGULAR BEAM SECTION: {self.b} x {self.D}"
@@ -347,7 +347,7 @@ class FlangedBeamSection(RectBeamSection):
 
     def report(self, xu: float, ecmax: float = ecu) -> str:  # pragma: no cover
         self.calc_xc()
-        self.calc_stress_type(xu)
+        self.get_stress_type(xu)
         k = xu / self.D
         ecy = self.csb.ecy
         hdr0 = f"FLANGED BEAM SECTION - Web: {self.b} x {self.D}, Flange: {self.bf} x {self.Df}"
@@ -519,7 +519,7 @@ class RectColumnSection:
         s += f"{Cc/1e3:8.2f} {Mc/1e6:8.2f}\n{'-'*len(hdr1)}\n"
         # Longitudinal steel
         self.long_steel.calc_xc(self.D)
-        self.long_steel.calc_stress_type(xu)
+        self.long_steel.get_stress_type(xu)
         hdr2 = f"{'fy':>6} {'Bars':>12} {'xc':>8} {'Strain':>12} {'Type':>4} {'fsc':>8} {'fcc':>6} "
         hdr2 += f"{'C (kN)':>8} {'M (kNm)':>8}"
         s += f"\n{header(hdr2)}\n"

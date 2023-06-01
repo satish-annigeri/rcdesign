@@ -169,8 +169,8 @@ class TestRebarGroup:
         assert main_st.layers[1].xc == D - 35
         assert main_st.has_comp_steel(xu)
         assert not main_st.has_comp_steel(25)
-        assert main_st.area_comp(xu) == pi / 4 * (2 * 16 ** 2)
-        assert main_st.area_tension(xu) == pi / 4 * (3 * 16 ** 2)
+        assert main_st.Asc(xu) == pi / 4 * (2 * 16 ** 2)
+        assert main_st.Ast(xu) == pi / 4 * (3 * 16 ** 2)
 
     def test_02(self):
         fe415 = RebarHYSD("Fe 415", 415)
@@ -180,7 +180,7 @@ class TestRebarGroup:
         D = 450
         xu = 75
         main_st.calc_xc(D)
-        main_st.calc_stress_type(xu)
+        main_st.get_stress_type(xu)
         assert main_st.layers[0]._stress_type == StressType.STRESS_COMPRESSION
         assert main_st.layers[1]._stress_type == StressType.STRESS_TENSION
 
@@ -196,7 +196,7 @@ class TestRebarGroup:
         D = 450
         xu = 75
         main_st.calc_xc(D)
-        main_st.calc_stress_type(xu)
+        main_st.get_stress_type(xu)
         # Manual calculation -- tension force
         x2 = D - 70 - xu
         x3 = D - 35 - xu
@@ -236,7 +236,7 @@ class TestRebarGroup:
         D = 450
         xu = 75
         main_st.calc_xc(D)
-        main_st.calc_stress_type(xu)
+        main_st.get_stress_type(xu)
         # Manual calculation
         a1 = (2 * pi / 4 * 16 ** 2) + (2 * pi / 4 * 16 ** 2)
         m1 = (2 * pi / 4 * 16 ** 2) * 35 + (2 * pi / 4 * 16 ** 2) * 70

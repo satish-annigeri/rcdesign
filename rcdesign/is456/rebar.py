@@ -6,6 +6,7 @@ from enum import IntEnum
 from math import pi, sin, cos, isclose, copysign
 
 from typing import Tuple, List, Union, Dict, Optional, Any
+import numpy.typing as npt
 
 from abc import ABC, abstractmethod
 import numpy as np
@@ -122,7 +123,7 @@ linear stress-strain relation between 0.8 to 1.0 times design strength"""
 
 
 class RebarHYSD(Rebar):
-    inel = np.array(
+    inel: npt.NDArray[np.float64] = np.array(
         [
             [0.8, 0.85, 0.9, 0.95, 0.975, 1.0],
             [0.0, 0.0001, 0.0003, 0.0007, 0.001, 0.002],
@@ -360,7 +361,7 @@ class RebarLayer:
 class RebarGroup:
     layers: List[RebarLayer] = field(
         default_factory=list
-    )  # List of layers of bars, in any order from edge
+    )  # List of layers of bars, in no particular order, of distance from compression edge
 
     @property
     def area(self) -> float:
@@ -394,21 +395,21 @@ class RebarGroup:
                 return True
         return False
 
-    def area_comp(self, xu: float) -> float:
+    def Asc(self, xu: float) -> float:
         a = 0.0
         for L in self.layers:
             if L._xc < xu:
                 a += L.area
         return a
 
-    def area_tension(self, xu: float) -> float:
+    def Ast(self, xu: float) -> float:
         a = 0.0
         for L in self.layers:
             if L._xc > xu:
                 a += L.area
         return a
 
-    def calc_stress_type(self, xu: float) -> None:
+    def get_stress_type(self, xu: float) -> None:
         for L in self.layers:
             L.stress_type(xu)
 
@@ -513,6 +514,8 @@ class Stirrups(ShearReinforcement):
         self._nlegs = _nlegs
         self._bar_dia = _bar_dia
         self._alpha_deg = _alpha_deg
+        if self._alpha_deg not in [45, 90]:
+            raise ValueError
 
     def _Asv(self) -> float:
         self._Asv_ = self.nlegs * pi * self.bar_dia**2 / 4

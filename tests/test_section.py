@@ -58,7 +58,7 @@ class TestRectBeamSection:
         assert rsec.long_steel.layers[0].xc == 35
         assert rsec.long_steel.layers[1].xc == D - 35
         xu = 75
-        rsec.calc_stress_type(xu)
+        rsec.get_stress_type(xu)
         assert (
             rsec.long_steel.layers[0].stress_type(xu) == StressType.STRESS_COMPRESSION
         )
@@ -81,7 +81,7 @@ class TestRectBeamSection:
         assert rsec.long_steel.layers[1].xc == D - 70
         assert rsec.long_steel.layers[2].xc == D - 35
         xu = 75
-        rsec.calc_stress_type(xu)
+        rsec.get_stress_type(xu)
         assert (
             rsec.long_steel.layers[0].stress_type(xu) == StressType.STRESS_COMPRESSION
         )

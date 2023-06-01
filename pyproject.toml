@@ -73,6 +73,7 @@ exclude = [
     "conf.py",
     "noxfile.py",
 ]
+plugins = numpy.typing.mypy_plugin
 
 [tool.pytest.ini_options]
 addopts = "--cov --cov-report term-missing --cov-fail-under 5"
