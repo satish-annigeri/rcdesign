@@ -285,14 +285,7 @@ class TestStirrup:
         st = Stirrups(fe415, 2, 8, 150, 45)
         Vus = 80e3
         d = 400
-        sv = (
-            st.rebar.fd
-            * (2 * pi * 8 ** 2 / 4)
-            * d
-            * sin(pi / 2)
-            * sin(45 * pi / 180)
-            / Vus
-        )
+        sv = st.rebar.fd * (2 * pi * 8 ** 2 / 4) * d / Vus * (sin(45 * pi / 180) + cos(45 * pi / 180))
         assert st.calc_sv(Vus, d) == sv
 
     def test_shearrebar07(self):
@@ -369,7 +362,7 @@ class TestShearRebarGroup:
         asv4 = asv2
         vus4 = fe415.fd * asv4 * d / bupseries._sv * (sin(alpha) + cos(alpha))
         shear_gr = ShearRebarGroup([vst, bup, ist, bupseries])
-        assert shear_gr.Asv() == [asv1, asv2, asv3, asv4]
+        assert shear_gr.Asv == [asv1, asv2, asv3, asv4]
         assert shear_gr.Vus(d) == [vus1, vus2, vus3, vus4]
         assert shear_gr.get_type() == {
             ShearRebarType.SHEAR_REBAR_VERTICAL_STIRRUP: 1,
@@ -377,6 +370,7 @@ class TestShearRebarGroup:
             ShearRebarType.SHEAR_REBAR_BENTUP_SINGLE: 1,
             ShearRebarType.SHEAR_REBAR_BENTUP_SERIES: 1,
         }
+        assert shear_gr.check()
 
 
 class TestLateralTies:

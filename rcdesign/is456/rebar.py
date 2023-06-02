@@ -14,6 +14,8 @@ import numpy as np
 from rcdesign.is456 import ecu
 from rcdesign.is456.concrete import Concrete
 from rcdesign.is456.stressblock import LSMStressBlock
+from rcdesign.utils import deg2rad
+
 
 # Rebar Enumerations
 
@@ -161,7 +163,7 @@ class RebarHYSD(Rebar):
 @dataclass
 class RebarLayer:
     rebar: Rebar
-    dia: List[int] = field(default_factory=list)
+    dia: List[float] = field(default_factory=list)
     _dc: float = 0.0
 
     def __post_init__(self):
@@ -169,7 +171,7 @@ class RebarLayer:
         self._stress_type: StressType = StressType.STRESS_NEUTRAL
 
     @property
-    def max_dia(self) -> int:
+    def max_dia(self) -> float:
         return max(self.dia)
 
     @property
@@ -214,7 +216,7 @@ class RebarLayer:
         s = "Dia: "
         b = ""
         for bardia in self.dia:
-            b += f"{bardia}, "
+            b += f"{bardia:.0f}, "
         b = "[" + b[:-2] + "]"
         s += f"{b} at {self.dc}. Area: {self.area:.2f} (xc = {self._xc:.2f})"
         return s
@@ -307,7 +309,7 @@ class RebarLayer:
         d = Counter(self.dia)
         s = ""
         for k in sorted(d):
-            s += f"{d[k]}-{k} "
+            s += f"{d[k]}-{k:.0f} "
         s = s.rstrip().replace(" ", sep)
         return s
 
@@ -478,11 +480,13 @@ class RebarGroup:
 @dataclass
 class ShearReinforcement(ABC):  # pragma: no cover
     rebar: Rebar
-    _Asv_: float = 0.0
-    _sv: float = 0.0
+
+    def __post_init__(self):
+        self._Asv_: float = 0.0
+        self._sv: float = 0.0
 
     @abstractmethod
-    def _Asv(self):
+    def _Asv(self) -> float:
         pass
 
     @abstractmethod
@@ -506,24 +510,25 @@ class Stirrups(ShearReinforcement):
         self,
         rebar: Rebar,
         _nlegs: int,
-        _bar_dia: int,
+        _bar_dia: float,
         _sv: float = 0.0,
         _alpha_deg: float = 90,
     ):
-        super().__init__(rebar, _nlegs * pi * _bar_dia**2 / 4, _sv)
+        super().__init__(rebar)
         self._nlegs = _nlegs
         self._bar_dia = _bar_dia
         self._alpha_deg = _alpha_deg
         if self._alpha_deg not in [45, 90]:
             raise ValueError
+        self._Asv_ = self._nlegs * pi * self._bar_dia**2 / 4
+        self._sv = _sv
 
     def _Asv(self) -> float:
-        self._Asv_ = self.nlegs * pi * self.bar_dia**2 / 4
-        return self._Asv_
+        return self.nlegs * pi * self.bar_dia**2 / 4
 
     @property
     def Asv(self):
-        return self._Asv()
+        return self.nlegs * pi * self.bar_dia**2 / 4
 
     @property
     def nlegs(self) -> int:
@@ -532,17 +537,16 @@ class Stirrups(ShearReinforcement):
     @nlegs.setter
     def nlegs(self, n) -> float:
         self._nlegs = n
-        self.__Asv = self.nlegs * pi * self.bar_dia**2 / 4
-        return self.__Asv
+        return self._nlegs
 
     @property
-    def bar_dia(self) -> int:
+    def bar_dia(self) -> float:
         return self._bar_dia
 
     @bar_dia.setter
-    def bar_dia(self, dia) -> None:
+    def bar_dia(self, dia) -> float:
         self._bar_dia = dia
-        self.__Asv = self.nlegs * pi * self.bar_dia**2 / 4
+        return self._bar_dia
 
     @property
     def sv(self) -> float:
@@ -554,8 +558,9 @@ class Stirrups(ShearReinforcement):
         return self._sv
 
     def calc_sv(self, Vus: float, d: float) -> Optional[float]:
-        alpha_rad = self._alpha_deg * pi / 180
-        self._sv = self.rebar.fd * self.Asv * d * sin(alpha_rad) / Vus
+        sind = sin(deg2rad(self._alpha_deg))
+        cosd = cos(deg2rad(self._alpha_deg))
+        self._sv = self.rebar.fd * self.Asv * d / Vus * (sind + cosd)
         return self._sv
 
     def __repr__(self) -> str:
@@ -568,10 +573,10 @@ class Stirrups(ShearReinforcement):
         return s
 
     def Vus(self, d: float) -> float:
-        V_us = self.rebar.fd * self.Asv * d / self._sv
-        if self._alpha_deg != 90:
-            alpha_rad = self._alpha_deg * pi / 180
-            V_us *= sin(alpha_rad) + cos(alpha_rad)
+        alpha_rad = deg2rad(self._alpha_deg)
+        sind = sin(alpha_rad)
+        cosd = cos(alpha_rad)
+        V_us = self.rebar.fd * self.Asv * d / self._sv * (sind + cosd)
         return V_us
 
     def get_type(self) -> int:
@@ -603,9 +608,11 @@ class BentupBars(ShearReinforcement):
     def __init__(
         self, rebar: Rebar, bars: List[int], _alpha_deg: float = 45, _sv: float = 0.0
     ):
-        super().__init__(rebar, pi / 4 * sum([x**2 for x in bars]), _sv)
+        super().__init__(rebar)
         self.bars = bars
         self._alpha_deg = _alpha_deg
+        self._Asv_ = pi / 4 * sum([x**2 for x in bars])
+        self._sv = _sv
 
     def _Asv(self) -> float:
         area = 0.0
@@ -664,13 +671,17 @@ class BentupBars(ShearReinforcement):
 
 class ShearRebarGroup:
     def __init__(self, shear_reinforcement: List[ShearReinforcement]):
-        self.shear_reinforcement = shear_reinforcement
+        self.shear_reinforcement = shear_reinforcement.copy()
 
-    def Asv(self) -> List[float]:
+    def _Asv(self) -> List[float]:
         asv = []
         for reinf in self.shear_reinforcement:
             asv.append(reinf._Asv())
         return asv
+
+    @property
+    def Asv(self) -> List[float]:
+        return self._Asv()
 
     def Vus(self, d: float) -> List[float]:
         vus = []
@@ -695,6 +706,12 @@ class ShearRebarGroup:
             elif reinf.get_type() == ShearRebarType.SHEAR_REBAR_BENTUP_SERIES:
                 d[ShearRebarType.SHEAR_REBAR_BENTUP_SERIES] += 1
         return d
+
+    def check(self) -> bool:
+        d = self.get_type()
+        if d[ShearRebarType.SHEAR_REBAR_VERTICAL_STIRRUP] > 1:
+            return False
+        return True
 
     def __repr__(self):
         s = ""

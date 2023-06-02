@@ -52,3 +52,7 @@ def bar_area(dia: float) -> float:
 
 def num_bars(ast: float, dia: float) -> int:
     return int(ceil(ast / bar_area(dia)))
+
+
+def deg2rad(deg: float) -> float:
+    return deg * pi / 180
