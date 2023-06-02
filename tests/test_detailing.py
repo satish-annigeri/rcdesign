@@ -29,8 +29,6 @@ class TestBeam:
         assert beam.nominal_cover_durability(Exposure.VERY_SEVERE, 16, 20) == 50
         assert beam.nominal_cover_durability(Exposure.VERY_SEVERE, 16, 35) == 45
         assert beam.nominal_cover_durability(Exposure.EXTREME, 16, 20) == 75
-        with pytest.raises(AttributeError):
-            assert beam.nominal_cover_durability(Exposure.SEVEREX, 16, 20)
         with pytest.raises(NotImplementedError):
             assert beam.nominal_cover_fire()
         assert beam.sv_max(d, 90) == min(300, 0.75 * d)
@@ -40,6 +38,11 @@ class TestBeam:
         Asv = 2 * pi / 4 * 8**2
         fds = Fraction(100, 115)
         assert beam.sv_min(b, fy, Asv) == Asv * fds * min(415, fy) / (0.4 * b)
+
+    def test_02(self):
+        beam = Beam()
+        with pytest.raises(AttributeError):
+            assert beam.nominal_cover_durability(Exposure.SEVEREX, 16, 20)
 
 
 class TestSlab:
