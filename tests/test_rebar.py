@@ -371,6 +371,8 @@ class TestShearRebarGroup:
             ShearRebarType.SHEAR_REBAR_BENTUP_SERIES: 1,
         }
         assert shear_gr.check()
+        shear_gr = ShearRebarGroup([vst, bup, ist, bupseries, vst])
+        assert not shear_gr.check()
 
 
 class TestLateralTies:
