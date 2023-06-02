@@ -627,7 +627,7 @@ class BentupBars(ShearReinforcement):
 
     def Vus(self, d: float = 0.0) -> float:
         V_us = self.rebar.fd * self.Asv
-        alpha_rad = self._alpha_deg * pi / 180
+        alpha_rad = deg2rad(self._alpha_deg)
         if self._sv == 0:  # Single group of parallel bars
             V_us *= sin(alpha_rad)
         else:  # Series of bars bent-up at different sections
@@ -709,9 +709,14 @@ class ShearRebarGroup:
 
     def check(self) -> bool:
         d = self.get_type()
-        if d[ShearRebarType.SHEAR_REBAR_VERTICAL_STIRRUP] > 1:
+        print('***', d)
+        if (d[ShearRebarType.SHEAR_REBAR_VERTICAL_STIRRUP] < 2) and  \
+           (d[ShearRebarType.SHEAR_REBAR_INCLINED_STIRRUP] < 2) and \
+           (d[ShearRebarType.SHEAR_REBAR_BENTUP_SINGLE] < 2) and \
+           (d[ShearRebarType.SHEAR_REBAR_BENTUP_SERIES] < 2):
+            return True
+        else:
             return False
-        return True
 
     def __repr__(self):
         s = ""
