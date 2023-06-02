@@ -1,5 +1,7 @@
 # API Reference
 
+NOTE: The API reference is incomplete as I am beginning to learn how to do this correctly. Any suggestionss or help are greatly appreciated.
+
 ## Materials
 
 ### Concrete

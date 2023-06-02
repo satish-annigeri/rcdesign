@@ -24,12 +24,15 @@ theme:
     - bash
 
 markdown_extensions:
-  toc:
-    permalink: true
-    title: "Contents"
-  pymdownx.highlight:
-    use_pygments: true
-  admonition:
+    - toc:
+        permalink: true
+        title: "Contents"
+    - pymdownx.highlight:
+        use_pygments: true
+    - pymdownx.snippets
+    - pymdownx.superfences
+    - callouts
+    - mkdocs-click
 
 plugins:
 - search:

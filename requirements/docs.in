@@ -3,3 +3,6 @@
 mkdocs
 mkdocstrings
 mkdocstrings-python
+markdown-callouts
+pymdown-extensions
+mkdocs-click
