@@ -2,6 +2,7 @@ from math import pi, sqrt, isclose, ceil
 
 from rcdesign.is456.design import LSMBeam
 from rcdesign.utils import num_bars
+import pytest
 
 
 def xumax_d(fy: float) -> float:
@@ -30,38 +31,37 @@ def reqd_ast(fck, fy, b, d, Mu):
     return ast
 
 
-class TestIS456Design:
-    def test_01(self):
-        beam = LSMBeam()
+@pytest.fixture
+def beam():
+    return LSMBeam()
 
+
+class TestIS456Design:
+    def test_01(self, beam):
         assert isclose(beam.xumax_d(250), xumax_d(250))
         assert isclose(beam.xumax_d(415), xumax_d(415))
         assert isclose(beam.xumax_d(500), xumax_d(500))
 
-    def test_02(self):
-        beam = LSMBeam()
+    def test_02(self, beam):
         assert isclose(beam.Mulim_const(250), mulim_const(250))
         assert isclose(beam.Mulim_const(415), mulim_const(415))
         assert isclose(beam.Mulim_const(500), mulim_const(500))
 
-    def test_03(self):
+    def test_03(self, beam):
         fck = 20
         fy = 415
         b = 230
         Mu = 100e6
-        beam = LSMBeam()
         assert isclose(beam.reqd_d(fck, fy, b, Mu), d_req(fck, fy, b, Mu))
 
-    def test_04(self):
+    def test_04(self, beam):
         fck = 20
         b = 230
         d = 450 - 25 - 16 / 2
         Mu = 100e6
-        beam = LSMBeam()
         assert isclose(beam.reqd_xu_d(fck, b, d, Mu), reqd_xu_d(fck, b, d, Mu))
 
-    def test_05(self):
-        beam = LSMBeam()
+    def test_05(self, beam):
         fck = 20
         fy = 415
         b = 230

@@ -4,13 +4,17 @@ from fractions import Fraction
 from rcdesign.is456.detailing import Beam, Slab, Column, Exposure
 
 
+@pytest.fixture
+def beam():
+    return Beam()
+
+
 class TestBeam:
-    def test_01(self):
+    def test_01(self, beam):
         b = 230
         D = 450
         d = D - 25 - 8
         fy = 500
-        beam = Beam()
         assert beam.Asc_max(b, D) == 0.04 * b * D
         assert beam.Ast_max(b, D) == 0.04 * b * D
         assert beam.Ast_min(b, d, fy) == 0.85 / fy * b * d
@@ -39,15 +43,18 @@ class TestBeam:
         fds = Fraction(100, 115)
         assert beam.sv_min(b, fy, Asv) == Asv * fds * min(415, fy) / (0.4 * b)
 
-    def test_02(self):
-        beam = Beam()
+    def test_02(self, beam):
         with pytest.raises(AttributeError):
             assert beam.nominal_cover_durability(Exposure.SEVEREX, 16, 20)
 
 
+@pytest.fixture
+def slab():
+    return Slab()
+
+
 class TestSlab:
-    def test_01(self):
-        slab = Slab()
+    def test_01(self, slab):
         assert slab.bardia_max(150) == 150 / 8.0
         assert slab.nominal_cover_durability(Exposure.MILD, 16, 20) == 20
         assert slab.Ast_min(150, 250) == 0.15 / 100 * 1000 * 150
@@ -59,11 +66,15 @@ class TestSlab:
             assert slab.nominal_cover_fire()
 
 
+@pytest.fixture
+def col():
+    return Column()
+
+
 class TestColumn:
-    def test_01(self):
+    def test_01(self, col):
         b = 230
         D = 450
-        col = Column()
         assert col.Asc_max(b, D) == 6 / 100 * b * D
         assert col.Asc_min(b, D) == 0.8 / 100 * b * D
         assert col.bardia_min() == 12

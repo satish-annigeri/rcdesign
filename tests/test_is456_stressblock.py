@@ -22,11 +22,18 @@ def m_r(z1: float, z2: float) -> float:
     return (z2**2 - z1**2) / 2
 
 
-class TestLSMStressBlock:
-    def test_01(self):
-        sb = LSMStressBlock()
-        # k = 1.5
+@pytest.fixture
+def sb():
+    return LSMStressBlock()
 
+
+@pytest.fixture
+def sb_comp():
+    return LSMStressBlock("LSM Compression")
+
+
+class TestLSMStressBlock:
+    def test_01(self, sb):
         assert sb._fc_(-0.0001) == 0
         assert sb._fc_(0.0036) == 0
         with pytest.raises(ValueError):
@@ -38,8 +45,7 @@ class TestLSMStressBlock:
         with pytest.raises(ValueError):
             assert sb.isvalid_k(-0.1)
 
-    def test_02(self):
-        sb = LSMStressBlock("LSM Compression")
+    def test_02(self, sb):
         k = 1.5
         assert sb.ec(k - 3 / 7, k) == 1
         assert sb.ec(k - 3 / 7, k) == 1
@@ -47,9 +53,7 @@ class TestLSMStressBlock:
         assert isclose(sb.ec(k, k), k / (k - 3 / 7))
         assert sb._ec(0) == 0.0
 
-    def test_03(self):
-        sb = LSMStressBlock("LSM Compression")
-
+    def test_03(self, sb):
         k = 1.0
         assert sb.ec(0, k) == 0
         assert sb.ec(1, k) == ecu / ecy
@@ -58,10 +62,9 @@ class TestLSMStressBlock:
         assert isclose(sb.ec(k, k), 0.0035 / 0.002)
         assert isclose(sb.ec(0.5, k), 0.5 / k * 0.0035 / 0.002)
 
-    def test_04(self):
+    def test_04(self, sb):
         ecy = 0.002
         ecu = 0.0035
-        sb = LSMStressBlock("LSM Compression")
         k = 1.5  # NA outside the section
         z = k - 1
         ec = z / (k - 3 / 7)
@@ -94,8 +97,7 @@ class TestLSMStressBlock:
         k = 0
         assert sb.fc(z, k) == 0
 
-    def test_05(self):
-        sb = LSMStressBlock("LSM Compression")
+    def test_05(self, sb):
         k = 1.5
         z1 = k - 1
         z2 = k - 3 / 7
@@ -117,8 +119,7 @@ class TestLSMStressBlock:
         k = 0
         assert sb.C(z1, z2, k) == 0
 
-    def test_06(self):
-        sb = LSMStressBlock("LSM Compression")
+    def test_06(self, sb):
         k = 1.5
         m1 = m_p(k - 1, k - 3 / 7, k)
         m2 = m_r(k - 3 / 7, k)
@@ -142,88 +143,88 @@ class TestLSMStressBlock:
         assert sb.M(0, 1, k) == 0
 
 
+@pytest.fixture
+def wsm_5_190():
+    return WSMStressBlock(5.0, 190.0)
+
+
+@pytest.fixture
+def wsm_10_240():
+    return WSMStressBlock(10.0, 240.0)
+
+
 class TestWSMStressBlock:
-    def test_01(self):
+    def test_01(self, wsm_5_190, wsm_10_240):
         fcbc = 5.0
         fst = 190.0
-        sb = WSMStressBlock(fcbc, fst)
-        assert sb.fcbc == fcbc
-        assert sb.fst == fst
-        assert isclose(sb.m, 280.0 / (3 * fcbc))
-        sb.fcbc = 10.0
-        assert sb.fcbc == 10.0
-        sb.fst = 240.0
-        assert sb.fst == 240.0
+        assert wsm_5_190.fcbc == fcbc
+        assert wsm_5_190.fst == fst
+        assert isclose(wsm_5_190.m, 280.0 / (3 * fcbc))
+        fcbc = 10.0
+        fst = 240.0
+        wsm_10_240.fcbc = 10.0
+        assert wsm_10_240.fcbc == 10.0
+        wsm_10_240.fst = 240.0
+        assert wsm_10_240.fst == 240.0
 
-    def test_02(self):
+    def test_02(self, wsm_5_190):
         fcbc = 5.0
         fst = 190.0
-        sb = WSMStressBlock(fcbc, fst)
-        m = sb.m
+        m = wsm_5_190.m
         kb = (m * fcbc) / (m * fcbc + fst)
-        assert isclose(sb.kb(), kb)
+        assert isclose(wsm_5_190.kb(), kb)
 
-    def test_03(self):
+    def test_03(self, wsm_5_190):
         fcbc = 5.0
         fst = 190.0
         d = 1.0
-        sb = WSMStressBlock(fcbc, fst)
-        m = sb.m
+        m = wsm_5_190.m
         kb = (m * fcbc) / (m * fcbc + fst)
         jb = 1 - kb / 3.0
-        assert isclose(sb.jb(d), jb)
+        assert isclose(wsm_5_190.jb(d), jb)
 
-    def test_04(self):
+    def test_04(self, wsm_5_190):
         fcbc = 5.0
-        fst = 190.0
         b = 1.0
         d = 1.0
-        sb = WSMStressBlock(fcbc, fst)
-        xb = sb.kb(d)
+        xb = wsm_5_190.kb(d)
         Qb = b * xb * fcbc / 2.0 * (d - xb / 3.0)
-        assert isclose(sb.Qb(b, d), Qb)
+        assert isclose(wsm_5_190.Qb(b, d), Qb)
 
-    def test_05(self):
+    def test_05(self, wsm_5_190):
         fcbc = 5.0
         fst = 190.0
         d = 1.0
-        sb = WSMStressBlock(fcbc, fst)
-        xb = sb.m * fcbc * d / (fst + sb.m * fcbc)
-        assert isclose(sb.xb(d), xb)
+        xb = wsm_5_190.m * fcbc * d / (fst + wsm_5_190.m * fcbc)
+        assert isclose(wsm_5_190.xb(d), xb)
 
-    def test_06(self):
-        fcbc = 5.0
-        fst = 190.0
-        sb = WSMStressBlock(fcbc, fst)
+    def test_06(self, wsm_5_190):
         b = 230.0
         d = 415.0
         Ast = 3 * pi / 4 * 16**2
         # Expected value
         ca = b / 2.0
-        cb = sb.m * Ast
-        cc = -sb.m * Ast * d
+        cb = wsm_5_190.m * Ast
+        cc = -wsm_5_190.m * Ast * d
         expected = (-cb + sqrt(cb**2 - 4 * ca * cc)) / (2 * ca)
 
-        assert isclose(sb.x(b, d, Ast), expected)
+        assert isclose(wsm_5_190.x(b, d, Ast), expected)
 
-    def test_07(self):
-        fcbc = 5.0
-        fst = 190.0
-        sb = WSMStressBlock(fcbc, fst)
+    def test_07(self, wsm_5_190):
         b = 230.0
         d = 415.0
-        Mb = sb.Qb(b, d)
+        Mb = wsm_5_190.Qb(b, d)
         # Expected value
         M = 0.8 * Mb
-        x = (1.5 - sqrt(1.5**2 - (6 * M / (sb.fcbc * b * d**2)))) * d
-        Ast_exp = b * x * sb.fcbc / (2 * sb.fst)
+        x = (1.5 - sqrt(1.5**2 - (6 * M / (wsm_5_190.fcbc * b * d**2)))) * d
+        Ast_exp = b * x * wsm_5_190.fcbc / (2 * wsm_5_190.fst)
         Asc_exp = 0.0
-        Asc, Ast = sb.reqd_Asc_Ast(b, d, 40, M)
+        Asc, Ast = wsm_5_190.reqd_Asc_Ast(b, d, 40, M)
         assert isclose(Asc, Asc_exp)
         assert isclose(Ast, Ast_exp)
 
         # Expected value
         M = 1.4 * Mb
-        Asc, Ast = sb.reqd_Asc_Ast(b, d, 40, M)
+        Asc, Ast = wsm_5_190.reqd_Asc_Ast(b, d, 40, M)
         assert Asc > 0
         assert Ast > 0

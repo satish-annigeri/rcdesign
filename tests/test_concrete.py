@@ -1,26 +1,33 @@
-from math import isclose, sqrt
+from math import sqrt
 import pytest
 
 
-from rcdesign.is456.stressblock import LSMStressBlock
-from rcdesign.is456 import ecy, ecu
+# from rcdesign.is456.stressblock import LSMStressBlock
+# from rcdesign.is456 import ecy, ecu
 from rcdesign.is456.concrete import Concrete
 
 
+@pytest.fixture
+def m20():
+    return Concrete("M20", 20)
+
+
+@pytest.fixture
+def m30():
+    return Concrete("M30", 30)
+
+
 class TestConcrete:
-    def test_01(self):
-        m20 = Concrete("M20", 20)
+    def test_01(self, m20):
         assert m20.Ec == 5000 * sqrt(m20.fck)
         assert m20.fd == m20.fck * 0.67 / m20.gamma_m
 
-    def test_02(self):
+    def test_02(self, m20, m30):
         def tauc(pt, fck):
             beta = max(1, 0.8 * fck / (6.89 * pt))
             tc = ((0.85 * sqrt(0.8 * fck)) * (sqrt(1 + 5 * beta) - 1)) / (6 * beta)
             return tc
 
-        m20 = Concrete("M20", 20)
-        m30 = Concrete("M30", 30)
         assert m20.tauc(0.2) == tauc(0.2, m20.fck)
         assert m30.tauc(0.3) == tauc(0.3, m30.fck)
         assert m20.tauc(0.5) == tauc(0.5, m20.fck)
