@@ -158,7 +158,7 @@ class TestRectBeamSection:
         vstirrups = Stirrups(fe415, 2, 8, 150)
         shear_st = ShearRebarGroup([vstirrups])
         rsec = RectBeamSection(b, D, csb, m20, main_st, shear_st, 25)
-        xu = 75
+        xu = 75.0
         ecmax = ecu
         Fc, Mc, Ft, Mt = rsec.F_M(xu, ecmax)
         # fcc = (17 / 21) * m20.fd * b * xu

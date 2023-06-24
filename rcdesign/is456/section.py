@@ -6,7 +6,7 @@ from typing import Tuple, List, Any, Union
 from dataclasses import dataclass
 
 # from abc import ABC, abstractmethod
-from scipy.optimize import brentq
+from scipy.optimize import brentq  # type: ignore
 
 from rcdesign.is456 import ecu
 from rcdesign.is456.stressblock import LSMStressBlock
