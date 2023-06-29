@@ -37,15 +37,20 @@ dependencies = [
 test = [
     "pytest >=2.7.3",
     "pytest-cov",
-    "pytest-env",
 ]
 dev = [
     "flake8",
+    "ruff",
     "black",
-    "sphinx",
-    "myst-parser",
-    "sphinx-rtd-theme",
-    "linkify-it-py",
+    "mypy",
+]
+docs = [
+    "mkdocs",
+    "mkdocstrings",
+    "mkdocstrings-python",
+    "markdown-callouts",
+    "pymdown-extensions",
+    "mkdocs-click",
 ]
 
 [project.urls]
@@ -97,4 +102,7 @@ exclude_lines = [
 ]
 
 [tool.ruff]
+line-length = 130
+
+[tool.black]
 line-length = 130
