@@ -1,6 +1,8 @@
 [build-system]
-requires = ["flit_core >=3.2,<4"]
-build-backend = "flit_core.buildapi"
+# requires = ["flit_core >=3.2,<4"]
+# build-backend = "flit_core.buildapi"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [project]
 name = "rcdesign"
@@ -106,3 +108,24 @@ line-length = 130
 
 [tool.black]
 line-length = 130
+
+[tool.hatch.version]
+path = "rcdesign/__about__.py"
+
+[tool.hatch.build.targets.sdist]
+exclude = [
+    "/docs",
+    "/.github",
+    "/tests",
+    ".coveragerc",
+    ".gitignore",
+    ".editorconfig",
+    ".flake8",
+    ".readthedocs.yml",
+    "mkdocs.yml",
+    "mypy.ini",
+    "noxfile.py",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["rcdesign"]
