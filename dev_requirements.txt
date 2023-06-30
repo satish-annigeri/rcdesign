@@ -75,7 +75,7 @@ pyyaml==6.0
     #   pyyaml-env-tag
 pyyaml-env-tag==0.1
     # via mkdocs
-scipy==1.11.1
+scipy>=1.11.0
     # via rcdesign (pyproject.toml)
 six==1.16.0
     # via python-dateutil
