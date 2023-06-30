@@ -12,7 +12,7 @@ The package is in early development and may undergo backward incompatible change
 
 At present `rcdesign` **can do** the following:
 
-1. Represent stress strain relationship for: 
+1. Represent stress strain relationship for:
     1. concrete in flexure as per IS&nbsp;456:2000&nbsp;(38.1),
     2. concrete under axial compression and flexure as per IS&nbsp;456:2000&nbsp;(39.1),
     2. reinforcement bars:
@@ -45,7 +45,7 @@ Contributions are welcome. Contributions can be in a variety of forms:
 
 ## Links
 - Documentation: [Documentation](https://rcdesign.readthedocs.io/en/latest/)
-- PyPI release: [0.4.14](https://pypi.org/project/rcdesign/)
+- PyPI release: [0.4.13](https://pypi.org/project/rcdesign/)
 - Github repository: https://github.com/satish-annigeri/rcdesign
 
 ### Documentation
