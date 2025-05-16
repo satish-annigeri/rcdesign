@@ -10,12 +10,9 @@ build:
   tools:
     python: "3.13"
 
-
 python:
   install:
     - requirements: docs_requirements.txt
-    - method: pip
-    - path: .
 
 # Build documentation with MkDocs
 mkdocs:
