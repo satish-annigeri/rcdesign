@@ -14,7 +14,7 @@ build:
 python:
   install:
     - method: uv
-      dependency-group: docs
+      dependency-groups: "docs"
 
 # Build documentation with MkDocs
 mkdocs:
@@ -24,10 +24,4 @@ mkdocs:
 formats:
     - htmlzip
 
-# Optionally set the version of Python and requirements required to build your docs
-# python:
-#   version: 3.8
-#   install:
-#     - requirements: dev_requirements.txt
-#     - method: pip
-#       path: .
+
