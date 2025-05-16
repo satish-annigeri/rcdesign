@@ -6,7 +6,7 @@ This is when you only wish to use `rcdesign` without attempting to look at its s
 The traditional way is to install `rcdesign` from PyPI using `pip` into a previously created virtual environment and write your scripts to use the package. The other way is to use `uv` to create the virtual environment and install `rcdesign` from PyPI using `uv`. The former approcah is good enough if you merely wish to use the package, and that is described below. If you wish to explore the source code, generate the documentation and run tests on your local machine, it is better to take the latter approach, and that is described in the next section.
 
 ### Requirements
-* Python 3.10+
+* Python 3.12+
 * numpy
 * scipy
 * sympy
