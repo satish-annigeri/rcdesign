@@ -42,7 +42,3 @@ def main():
     xu = sec.xu(0.0035)
     print("Example 2\n")
     print(sec.report(xu, 0.0035))
-
-
-if __name__ == "__main__":
-    main()
