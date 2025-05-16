@@ -1,14 +1,9 @@
-[build-system]
-# requires = ["flit_core >=3.2,<4"]
-# build-backend = "flit_core.buildapi"
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
 [project]
 name = "rcdesign"
-description = 'A Python package for reinforced concrete analysis and design as per IS 456:2000'
+description = "A Python package for reinforced concrete analysis and design as per IS 456:2000"
 readme = "README.md"
-requires-python = ">=3.8"
+version = "0.4.13"
+requires-python = ">=3.13"
 authors = [{name = "Satish Annigeri", email = "satish.annigeri@gmail.com"}]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -27,32 +22,33 @@ classifiers = [
     "Intended Audience :: Developers",
     "Operating System :: OS Independent",
 ]
-dynamic = ["version"]
 license = {file = "LICENSE.md"}
 dependencies = [
-  "numpy",
-  "scipy",
-  "sympy",
+    "numpy>=2.2.5",
+    "scipy>=1.15.3",
+    "sympy>=1.14.0",
 ]
 
-[project.optional-dependencies]
-test = [
-    "pytest >=2.7.3",
-    "pytest-cov",
-]
+[project.scripts]
+rcdesign = "rcdesign.main:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
 dev = [
-    "flake8",
-    "ruff",
-    "black",
-    "mypy",
+    "pytest>=8.3.5",
+    "pytest-cov>=6.1.1",
+    "ruff>=0.11.9",
 ]
 docs = [
-    "mkdocs",
-    "mkdocstrings",
-    "mkdocstrings-python",
-    "markdown-callouts",
-    "pymdown-extensions",
-    "mkdocs-click",
+    "markdown-callouts>=0.4.0",
+    "mkdocs>=1.6.1",
+    "mkdocs-click>=0.9.0",
+    "mkdocstrings>=0.29.1",
+    "mkdocstrings-python>=1.16.10",
+    "pymdown-extensions>=10.15",
 ]
 
 [project.urls]
@@ -60,38 +56,6 @@ Documentation = "https://github.com/satish-annigeri/rcdesign#readme"
 Issues = "https://github.com/satish-annigeri/rcdesign/issues"
 Source = "https://github.com/satish-annigeri/rcdesign"
 Home = "https://github.com/satish-annigeri/rcdesign"
-
-[tool.flit.sdist]
-exclude = [
-    ".github/",
-    "docs/",
-    "tests/",
-    "CODE_OF_CONDUCT.md",
-    "CONTRIBUTING.md",
-    "noxfile.py",
-    ".gitignore",
-    ".coveragerc",
-]
-
-[tool.mypy]
-warn_return_any = true
-warn_unused_configs = true
-exclude = [
-    "conf.py",
-    "noxfile.py",
-]
-plugins = "numpy.typing.mypy_plugin"
-
-[tool.pytest.ini_options]
-addopts = "--cov --cov-report term-missing --cov-fail-under 5"
-
-[tool.coverage.run]
-source = ["rcdesign"]
-omit = [
-    "tests/*",
-    "example*.py",
-    "__main__*.py",
-]
 
 [tool.coverage.report]
 exclude_lines = [
@@ -105,27 +69,3 @@ exclude_lines = [
 
 [tool.ruff]
 line-length = 130
-
-[tool.black]
-line-length = 130
-
-[tool.hatch.version]
-path = "rcdesign/__about__.py"
-
-[tool.hatch.build.targets.sdist]
-exclude = [
-    "/docs",
-    "/.github",
-    "/tests",
-    ".coveragerc",
-    ".gitignore",
-    ".editorconfig",
-    ".flake8",
-    ".readthedocs.yml",
-    "mkdocs.yml",
-    "mypy.ini",
-    "noxfile.py",
-]
-
-[tool.hatch.build.targets.wheel]
-packages = ["rcdesign"]

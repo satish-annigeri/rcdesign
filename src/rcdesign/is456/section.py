@@ -6,7 +6,8 @@ from typing import Tuple, List, Any, Union
 from dataclasses import dataclass
 
 # from abc import ABC, abstractmethod
-from scipy.optimize import brentq  # type: ignore
+# from scipy.optimize import brentq  # type: ignore
+from rcdesign.brent import brent
 
 from rcdesign.is456 import ecu
 from rcdesign.is456.stressblock import LSMStressBlock
@@ -27,8 +28,8 @@ from rcdesign.utils import rootsearch, underline, header
 
 
 class DesignForceType(Enum):
-    """DesignForceType object is an enumeration
-    """
+    """DesignForceType object is an enumeration"""
+
     BEAM = 1
     COLUMN = 2
     SLAB = 3
@@ -87,9 +88,7 @@ class RectBeamSection:
         Fcc = self.csb.C(0, k, k, ecmax) * self.conc.fd * self.b * self.D
         Mcc = self.csb.M(0, k, k, ecmax) * self.conc.fd * self.b * self.D**2
         # Compression force - compression steel
-        Fsc, Msc, Fst, Mst = self.long_steel.force_moment(
-            xu, self.csb, self.conc, ecmax
-        )
+        Fsc, Msc, Fst, Mst = self.long_steel.force_moment(xu, self.csb, self.conc, ecmax)
         # Tension force in tension steel
         Ft, Mt = self.long_steel.force_tension(xu, ecmax)
         Fc = Fcc + Fsc
@@ -100,7 +99,8 @@ class RectBeamSection:
         dc_max = 10
 
         x1, x2 = rootsearch(self.C_T, dc_max, self.D, 10, ecmax)
-        x = brentq(self.C_T, x1, x2, args=(ecmax,))
+        x = brent(self.C_T, x1, x2, ecmax)
+        # x = brentq(self.C_T, x1, x2, args=(ecmax,))
         return x
 
     def Mu(self, xu: float, ecmax: float = ecu) -> float:
@@ -139,7 +139,7 @@ class RectBeamSection:
         hdr1 += f"{' ':>8} {'f_c':>6} {'F (kN)':>8} {'M (kNm)':>8}"
         s += hdr1 + "\n" + underline(hdr1) + "\n"
         s += f"{self.conc.fck:6.2f} {' ':>8} {' ':>12} {ecmax:12.8f} {'C':>4} {' ':>8} {fcc:6.2f} "
-        s += f"{Fc / 1e3:8.2f} {Mc/ 1e6:8.2f}\n{underline(hdr1)}\n\n"
+        s += f"{Fc / 1e3:8.2f} {Mc / 1e6:8.2f}\n{underline(hdr1)}\n\n"
         Ft = 0.0
         Mt = 0.0
         hdr2 = f"{'fy':>6} {'Bars':>12} {'xc':>8} {'Strain':>12} {'Type':>4} {'f_s':>8} {'f_c':>6}"
@@ -163,15 +163,15 @@ class RectBeamSection:
                 c = 0.0
 
             m = c * (k * self.D - L._xc)
-            s += f"{c/1e3:8.2f} {m/1e6:8.2f}\n"
+            s += f"{c / 1e3:8.2f} {m / 1e6:8.2f}\n"
             Ft += c
             Mt += m
         s += f"{underline(hdr2)}\n"
         if len(self.long_steel.layers) > 1:
-            C_M = f"{Ft/1e3:8.2f} {Mt/1e6:8.2f}"
-            s += f"{' '*62} {C_M}\n{' '*62} {underline(C_M, '=')}\n"
+            C_M = f"{Ft / 1e3:8.2f} {Mt / 1e6:8.2f}"
+            s += f"{' ' * 62} {C_M}\n{' ' * 62} {underline(C_M, '=')}\n"
         F = 0.0 if isclose(Fc + Ft, 0, abs_tol=1e-10) else Fc + Ft
-        C_M = f"{F/1e3:8.2f} {(Mc + Mt)/1e6:8.2f}"
+        C_M = f"{F / 1e3:8.2f} {(Mc + Mt) / 1e6:8.2f}"
         s += f"{' ':>62} {C_M}\n"
         s += f"{header('SHEAR', '=')}\n"
         tauc = self.conc.tauc(self.pt(xu))
@@ -179,7 +179,7 @@ class RectBeamSection:
         vuc = area * tauc
         hdr3 = f"{'Type':>14} {' ':>14} {'tau_c':>6} {'Area (mm^2)':>16} {' ':>8} {' ':>8} {'V_uc (kN)':>8}"
         s += f"{header(hdr3)}\n"
-        s += f"{'Concrete':>14} {' ':>14} {tauc:6.2f} {area:16.2f} {' ':>8} {' ':>8} {vuc/1e3:8.2f}\n"
+        s += f"{'Concrete':>14} {' ':>14} {tauc:6.2f} {area:16.2f} {' ':>8} {' ':>8} {vuc / 1e3:8.2f}\n"
         s += f"{underline(hdr3)}\n"
         hdr4 = f"{'Type':>14} {'Variant':>14} {'f_y':>6} {'Bars':>16} {'s_v':>8} {'A_sv':>8} {'V_us (kN)':>8}"
         s += f"{header(hdr4)}\n"
@@ -194,16 +194,14 @@ class RectBeamSection:
                 bar_info = f"{data['legs']}-{data['bar_dia']}#"
             else:
                 bar_info = f"{data['bars']}"
-            s += f"{bar_info:>16} {data['sv']:8.1f} {data['Asv']:8.2f} {data['Vus']/1e3:8.2f}\n"
+            s += f"{bar_info:>16} {data['sv']:8.1f} {data['Asv']:8.2f} {data['Vus'] / 1e3:8.2f}\n"
             vus += data["Vus"]
-        vu = f"{(vuc + vus)/1e3:8.2f}"
+        vu = f"{(vuc + vus) / 1e3:8.2f}"
         s += f"{' ':>71} {underline(vu, '=')}\n{' ':>71} {vu}\n"
-        s += (
-            f"{header('CAPACITY', '=')}\n{'Mu = ':>5}{self.Mu(xu, ecmax)/1e6:.2f} kNm\n"
-        )
+        s += f"{header('CAPACITY', '=')}\n{'Mu = ':>5}{self.Mu(xu, ecmax) / 1e6:.2f} kNm\n"
         Vuc, Vus = self.Vu(xu)
         Vu = Vuc + sum(Vus)
-        s += f"{'Vu = ':>5}{Vu/1e3:.2f} kN\n"
+        s += f"{'Vu = ':>5}{Vu / 1e3:.2f} kN\n"
         return s
 
     def eff_d(self, xu: float) -> float:
@@ -342,7 +340,8 @@ class FlangedBeamSection(RectBeamSection):
 
     def xu(self, ecmax: float = ecu) -> Union[float, Any]:
         x1, x2 = rootsearch(self.C_T, 10, self.D, 10, ecmax)
-        x = brentq(self.C_T, x1, x2, args=(ecmax,))
+        x = brent(self.C_T, x1, x2, ecmax)
+        # x = brentq(self.C_T, x1, x2, args=(ecmax,))
         return x
 
     def report(self, xu: float, ecmax: float = ecu) -> str:  # pragma: no cover
@@ -361,12 +360,12 @@ class FlangedBeamSection(RectBeamSection):
         # Web
         s += hdr1 + "\n" + underline(hdr1) + "\n"
         s += f"{self.conc.fck:6.0f} {self.bw:10.2f} {self.D:10.2f} {0:12.8f}  {ecmax:12.8f} {'C':>6} "
-        s += f"{Fcw/1e3:8.2f} {Mcw/1e6:8.2f}\n"
+        s += f"{Fcw / 1e3:8.2f} {Mcw / 1e6:8.2f}\n"
         # Flange
         s += f"{self.conc.fck:6.0f} {self.bf:10.2f} {self.Df:10.2f} {' ':>12}  {ecmax:12.8f} {'C':>6} "
-        s += f"{Fcf/1e3:8.2f} {Mcf/1e6:8.2f}\n"
+        s += f"{Fcf / 1e3:8.2f} {Mcf / 1e6:8.2f}\n"
         s += f"{underline(hdr1)}\n"
-        s += f"{' ':>62} {(Fcw+Fcf)/1e3:8.2f} {(Mcw+Mcf)/1e6:8.2f}\n"
+        s += f"{' ':>62} {(Fcw + Fcf) / 1e3:8.2f} {(Mcw + Mcf) / 1e6:8.2f}\n"
         hdr2 = f"{'fy':>6} {'Bars':>12} {'xc':>8} {'Strain':>12} {'Type':>4} {'f_s':>8} {'f_c':>6}"
         hdr2 += f" {'C (kN)':>8} {'M (kNm)':>8}"
         s += f"\n{hdr2}\n{underline(hdr2)}\n"
@@ -387,15 +386,15 @@ class FlangedBeamSection(RectBeamSection):
                 c = L.area * fsc
                 s += f"{' ':>6} "
             m = c * (k * self.D - L._xc)
-            s += f"{c/1e3:8.2f} {m/1e6:8.2f}\n"
+            s += f"{c / 1e3:8.2f} {m / 1e6:8.2f}\n"
             Ft += c
             Mt += m
         s += f"{underline(hdr2)}\n"
         if len(self.long_steel.layers) > 1:
-            C_M = f"{Ft/1e3:8.2f} {Mt/1e6:8.2f}"
+            C_M = f"{Ft / 1e3:8.2f} {Mt / 1e6:8.2f}"
             s += f"{' ':>62} {C_M}\n{' ':>62} {underline(C_M, '=')}\n"
         F = 0.0 if isclose(Fcw + Fcf + Ft, 0, abs_tol=1e-10) else Fcw + Fcf + Ft
-        s += f"{' ':>62} {F/1e3:8.2f} {(Mc + Mt)/1e6:8.2f}\n"
+        s += f"{' ':>62} {F / 1e3:8.2f} {(Mc + Mt) / 1e6:8.2f}\n"
 
         s += f"{header('SHEAR', '=')}\n"
         tauc = self.conc.tauc(self.pt(xu))
@@ -403,7 +402,7 @@ class FlangedBeamSection(RectBeamSection):
         vuc = area * tauc
         hdr3 = f"{'Type':>14} {' ':>14} {'tau_c':>6} {'Area (mm^2)':>16} {' ':>8} {' ':>8} {'V_uc (kN)':>8}"
         s += f"{header(hdr3)}\n"
-        s += f"{'Concrete':>14} {' ':>14} {tauc:6.2f} {area:16.2f} {' ':>8} {' ':>8} {vuc/1e3:8.2f}\n"
+        s += f"{'Concrete':>14} {' ':>14} {tauc:6.2f} {area:16.2f} {' ':>8} {' ':>8} {vuc / 1e3:8.2f}\n"
         s += f"{underline(hdr3)}\n"
         hdr4 = f"{'Type':>14} {'Variant':>14} {'f_y':>6} {'Bars':>16} {'s_v':>8} {'A_sv':>8} {'V_us (kN)':>8}"
         s += f"{header(hdr4)}\n"
@@ -418,16 +417,14 @@ class FlangedBeamSection(RectBeamSection):
                 bar_info = f"{data['legs']}-{data['bar_dia']}#"
             else:
                 bar_info = f"{data['bars']}"
-            s += f"{bar_info:>16} {data['sv']:8.1f} {data['Asv']:8.2f} {data['Vus']/1e3:8.2f}\n"
+            s += f"{bar_info:>16} {data['sv']:8.1f} {data['Asv']:8.2f} {data['Vus'] / 1e3:8.2f}\n"
             vus += data["Vus"]
-        vu = f"{(vuc + vus)/1e3:8.2f}"
+        vu = f"{(vuc + vus) / 1e3:8.2f}"
         s += f"{' ':>71} {underline(vu, '=')}\n{' ':>71} {vu}\n"
-        s += (
-            f"{header('CAPACITY', '=')}\n{'Mu = ':>5}{self.Mu(xu, ecmax)/1e6:.2f} kNm\n"
-        )
+        s += f"{header('CAPACITY', '=')}\n{'Mu = ':>5}{self.Mu(xu, ecmax) / 1e6:.2f} kNm\n"
         Vuc, Vus = self.Vu(xu)
         Vu = Vuc + sum(Vus)
-        s += f"{'Vu = ':>5}{Vu/1e3:.2f} kN\n"
+        s += f"{'Vu = ':>5}{Vu / 1e3:.2f} kN\n"
         return s
 
 
@@ -516,7 +513,7 @@ class RectColumnSection:
         s += f"\n{header(hdr1)}\n"
         # s += header(hdr1) + "\n"
         s += f"{self.conc.fck:6.2f} {' ':>8} {ecmin:12.8f} {ecmax:12.8f} {'C':>4} {fsc1:8.2f} {fsc2:6.2f} "
-        s += f"{Cc/1e3:8.2f} {Mc/1e6:8.2f}\n{'-'*len(hdr1)}\n"
+        s += f"{Cc / 1e3:8.2f} {Mc / 1e6:8.2f}\n{'-' * len(hdr1)}\n"
         # Longitudinal steel
         self.long_steel.calc_xc(self.D)
         self.long_steel.get_stress_type(xu)
@@ -540,14 +537,14 @@ class RectColumnSection:
             m = c * z * self.D
             s += f"{L.rebar.fy:6.0f} {L.bar_list():>12} {L._xc:8.2f} {esc:12.8f} {StressLabel[str_type][0]:>4} "
             s += f"{fsc:8.2f} {fcc:6.2f}"
-            s += f" {c/1e3:8.2f} {m/1e6:8.2f}\n"
+            s += f" {c / 1e3:8.2f} {m / 1e6:8.2f}\n"
             Cs += c
             Ms += m
         s += "-" * len(hdr2) + "\n"
-        s += f"{' '*62} {Cs/1e3:8.2f} {Ms/1e6:8.2f}\n"
+        s += f"{' ' * 62} {Cs / 1e3:8.2f} {Ms / 1e6:8.2f}\n"
         C, M = self.C_M(xu)
-        hdr3 = f"{(Cc+Cs)/1e3:8.2f} {(Mc+Ms)/1e6:8.2f}"
+        hdr3 = f"{(Cc + Cs) / 1e3:8.2f} {(Mc + Ms) / 1e6:8.2f}"
         s += f"{' ':>62} {underline(hdr3, '=')}\n{' ':>62} {hdr3}\n"
         s += f"{header('CAPACITY', '=')}\n"
-        s += f"Pu = {C/1e3:10.2f} kN\nMu = {M/1e6:10.2f} kNm (about centroidal axis)\n e = {M/C:10.2f} mm\n"
+        s += f"Pu = {C / 1e3:10.2f} kN\nMu = {M / 1e6:10.2f} kNm (about centroidal axis)\n e = {M / C:10.2f} mm\n"
         return s
