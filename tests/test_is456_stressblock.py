@@ -51,7 +51,7 @@ class TestLSMStressBlock:
         assert sb.ec(k - 3 / 7, k) == 1
         assert sb.ec(k - 1, k) == (k - 1) / (k - 3 / 7)
         assert isclose(sb.ec(k, k), k / (k - 3 / 7))
-        assert sb._ec(0) == 0.0
+        assert float(sb._ec(0)) == 0.0
 
     def test_03(self, sb):
         k = 1.0
