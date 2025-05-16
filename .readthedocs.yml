@@ -13,8 +13,9 @@ build:
 
 python:
   install:
-    - method: uv
-      dependency-groups: "docs"
+    - requirements: docs_requirements.txt
+    - method: pip
+    - path: .
 
 # Build documentation with MkDocs
 mkdocs:
