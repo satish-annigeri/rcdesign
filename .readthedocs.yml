@@ -17,11 +17,10 @@ build:
       - asdf global uv latest
       - uv venv
     install:
-      - echo "Installing dependencies"
       - uv pip install -r docs_requirements.txt
     build:
-      - echo "Building documentation"
-      - uv run mkdocs build
+      html:
+        - uv run mkdocs build
 
 # Build documentation with MkDocs
 mkdocs:
