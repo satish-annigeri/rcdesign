@@ -1,12 +1,13 @@
 # Documentation for `rcdesign`
 
-<img alt="PyPI - License" src="https://img.shields.io/pypi/l/rcdesign"> [![PyPI version shields.io](https://img.shields.io/pypi/v/rcdesign.svg)](https://pypi.python.org/pypi/rcdesign/) [![Documentation Status](https://readthedocs.org/projects/rcdesign/badge/?version=latest)](http://rcdesign.readthedocs.io/?badge=latest) [![PyPI download month](https://img.shields.io/pypi/dm/rcdesign.svg)](https://pypi.python.org/pypi/rcdesign/) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+<img alt="PyPI - License" src="https://img.shields.io/pypi/l/rcdesign"> [![PyPI version shields.io](https://img.shields.io/pypi/v/rcdesign)](https://pypi.python.org/pypi/rcdesign/) [![Documentation Status](https://readthedocs.org/projects/rcdesign/badge/?version=latest)](http://rcdesign.readthedocs.io/?badge=latest) [![PyPI - Downloads](https://img.shields.io/pypi/dm/rcdesign)](https://pypi.python.org/pypi/rcdesign/) [![Code style: Ruff](https://img.shields.io/badge/code%20style-Ruff-blue)](https://astral.sh/ruff) [![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/satish-annigeri/rcdesign/total)
+](https://github.com/satish-annigeri/rcdesign)
 
 `rcdesign` is a Python package for analysis of reinforced concrete&nbsp;(RC) sections as per the limit state method&nbsp;(LSM) of IS&nbsp;456:2000 - the code of practice for plain and reinforced concrete in India.
 
 ## Current Status
 
-The package is in early development and may undergo backward incompatible changes. It has undergone testing of the current code base. Limited examples have been solved and verified by hand. Test coverage is currently 100% (excepting the example script).
+The package is in early development and may undergo backward incompatible changes. It has undergone testing of the current code base. Limited examples have been solved and verified by hand. Test coverage is currently 100% (exccluding the example script).
 
 ## What `rcdesign` can and cannot do
 
@@ -44,12 +45,12 @@ Contributions are welcome. Contributions can be in a variety of forms:
 4. Additional examples
 
 ## Links
-- Documentation: [Documentation](https://rcdesign.readthedocs.io/en/latest/)
-- PyPI release: [0.4.13](https://pypi.org/project/rcdesign/)
+- Documentation: [`rcdesign` on Read the Docs](https://rcdesign.readthedocs.io/en/latest/)
+- PyPI release: [![PyPI version shields.io](https://img.shields.io/pypi/v/rcdesign)](https://pypi.python.org/pypi/rcdesign/)
 - Github repository: https://github.com/satish-annigeri/rcdesign
 
 ### Documentation
-[Documentation is available here](https://rcdesign.readthedocs.io/en/latest/). Any advise or help on documentation is welcome.
+[Documentation is available here](https://rcdesign.readthedocs.io/en/latest/). Any advise or help on improving the documentation is welcome.
 
 ## Future Plans
 

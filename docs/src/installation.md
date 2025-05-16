@@ -1,13 +1,18 @@
 # Installation
 ## Install from PyPI using `pip`
+
+This is when you only wish to use `rcdesign` without attempting to look at its source code, documentation on your local machine or wishing to run tests.
+
+The traditional way is to install `rcdesign` from PyPI using `pip` into a previously created virtual environment and write your scripts to use the package. The other way is to use `uv` to create the virtual environment and install `rcdesign` from PyPI using `uv`. The former approcah is good enough if you merely wish to use the package, and that is described below. If you wish to explore the source code, generate the documentation and run tests on your local machine, it is better to take the latter approach, and that is described in the next section.
+
 ### Requirements
-* Python 3.7+
+* Python 3.10+
 * numpy
 * scipy
 * sympy
 
 ### Install from PyPI
-Create a separate directory and install a virtual environment. Activate the virtual environment and install required packages. On *nix systems, do the following:
+Create a separate directory and create a virtual environment. Activate the virtual environment and install required packages. First, choose the directory where you wish to create your project and change into that directory. On *nix systems, do the following:
 ```bash
 $ mkdir rcd_tutorial
 $ cd rcd_tutorial
@@ -32,28 +37,32 @@ $ (.venv) python -c "from rcdesign import __version__;print(__version____)
 $ 0.4.13
 ```
 
-Run the two built-in examples problem and study the output.
+Run the two built-in example problems and study the output.
 ```bash
 $ (.venv) python -m rcdesign
 ```
 
-## Install from Source on github
+## Install from Source on GitHub
+
+Installing source code from GitHub is mainly for those interested in exploring the source code to understand how the code works and possibly remove bugs and/or make improvements.
 
 ### Clone the repository
 Choose a suitable directory where you wish to clone the source code from github.  Clone the repository using `git`
 ```bash
 $ git clone https://github.com/satish-annigeri/rcdesign.git
 ```
-When you clone the `rcdesign` repository from github, a new directory named `rcdesign` will be created in the current working directory. Change over to the directory `rcdesign` that is created with the command
+This creates a new directory named `rcdesign` in the current working directory. Change over to the directory `rcdesign` that is created with the command
 ```bash
 $ cd rcdesign
 ```
 List the directory contents and verify the directory structure.
 
 ### Install required packages
-Install required packages into the virtual environment with `pip`
+Using `uv` for project management simplifies the process a great deal. Therefore install `uv` before starting with the steps below. Note however, that using `uv` is not essential but the required steps are not described here. Since the project uses `pyproject.toml`, installing required packages using `pip` is straight forward.
+
+Install required packages into the virtual environment with `uv`
 ```bash
-(.venv) $ pip install -U rcdesign[test]
+$uv sync --group test
 ```
 This will install pytest and pytest-cov required to run the tests.
 
@@ -61,18 +70,13 @@ This will install pytest and pytest-cov required to run the tests.
 
 Run the tests with `pytest`
 ```bash
-(.venv) $ pytest tests
+$ uv run pytest tests
 ```
 Check code coverage.
 ```bash
-(.venv) $ pytest --cov=rcdesign tests
+$ uv run pytest --cov=src --cov-report=html tests
 ```
-You can also use `nox` to run the tests. Install `nox` using `pip`, if necessary.
-```bash
-(.venv) $ pip install nox
-(.venv) $ nox
-```
-When you are done using the virtual environment, you can deactivate it with the command `deactivate` at the command prompt in all operating systems.
+With `uv`, there is no need to activate and deactivate the virtual environment, but it is there if you want to use it. The virtual environment is named `.venv` and can be activated in the usual way (`.venv\Scripts\activate` on Windows and `source .venv/bin/activate` on GNU/Linux). Remember to deactivate the virtual environment When you are done, with the command `deactivate` at the command prompt in all operating systems.
 
 
 ## Testing
@@ -91,31 +95,20 @@ Analysis of rectangular and flanged beam sections with and without compression r
 
 Analysis of rectangular column sections for combined axial compression and bending about one axis has been completed. An example has been solved and verified by hand.
 
-Automated testing can be done using. If required, install `nox` with the command:
-```bash
-(.venv) $pip install nox
-```
-Check to ensure that `nox` is installed and run the tests.
-```bash
-(.venv) $ nox --version
-2022.11.21
-(.venv) $ nox
-```
-
 ## Examples
 ### Built-in Example
 Run the built-in example with the following command.
 ```bash
-(.venv) $ python -m rcdesign
+$ uv run python -m rcdesign
 ```
 
 ### Examples from `tests` Directory
 Run the additional examples in the `tests` directory with the following command from the command prompt:
 ```bash
-(.venv) $ python -m tests.example01
-(.venv) $ python -m tests.example02
+$ uv run python -m tests.example01
+$ uv run python -m tests.example02
 ...
-(.venv) $ python -m tests.example09
+$ uv run python -m tests.example09
 ```
 
 ### Your Own Example
@@ -145,7 +138,7 @@ sec = RectBeamSection(230, 450, sb, m20, steel, sh_st, 25)
 xu = sec.xu(0.0035)RECTANGULAR BEAM SECTION: 230 x 450
 ```
 
-Check the output.
+Run the script and check the output.
 
 ```bash
 Example 1
