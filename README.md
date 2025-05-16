@@ -1,5 +1,5 @@
 # `rcdesign`
-<img alt="PyPI - License" src="https://img.shields.io/pypi/l/rcdesign"> [![PyPI version shields.io](https://img.shields.io/pypi/v/rcdesign.svg)](https://pypi.python.org/pypi/rcdesign/) [![Documentation Status](https://readthedocs.org/projects/rcdesign/badge/?version=latest)](http://rcdesign.readthedocs.io/?badge=latest) [![PyPI download month](https://img.shields.io/pypi/dm/rcdesign.svg)](https://pypi.python.org/pypi/rcdesign/)  [![Code style: Ruff](https://img.shields.io/badge/code%20style-Ruff-blue)](https://astral.sh/ruff)
+<img alt="PyPI - License" src="https://img.shields.io/pypi/l/rcdesign"> [![PyPI version shields.io](https://img.shields.io/pypi/v/rcdesign)](https://pypi.python.org/pypi/rcdesign/) [![Documentation Status](https://readthedocs.org/projects/rcdesign/badge/?version=latest)](http://rcdesign.readthedocs.io/?badge=latest) [![PyPI download month](https://img.shields.io/pypi/dm/rcdesign.svg)](https://pypi.python.org/pypi/rcdesign/)  [![Code style: Ruff](https://img.shields.io/badge/code%20style-Ruff-blue)](https://astral.sh/ruff)
 
 `rcdesign` is a Python package for analysis and design of reinforced concrete sections as per IS&nbsp;456:2000, the Indian Standard code of practice for plain and reinforced concrete.
 
@@ -27,8 +27,8 @@ Contributions are welcome. Contributions can be in a variety of forms:
 4. Additional examples
 
 ## Links
-- Documentation: [Documentation](https://rcdesign.readthedocs.io/en/latest/)
-- PyPI release: [0.4.13](https://pypi.org/project/rcdesign/)
+- Documentation: [Documentation on Read the Docs](https://rcdesign.readthedocs.io/en/latest/)
+- PyPI release: [![PyPI version shields.io](https://img.shields.io/pypi/v/rcdesign)](https://pypi.org/project/rcdesign/)
 - Github repository: https://github.com/satish-annigeri/rcdesign
 
 ## References
