@@ -34,8 +34,8 @@ Install using `pip`
 ```bash
 $ (.venv) pip install -U rcdesign
 $ (.venv) python -c "from rcdesign import __version__;print(__version____)
-$ 0.4.13
 ```
+This prints the release version and it must match the version displayed by the `pip list` or `uv pip list` (if you are using `uv`) command.
 
 Run the two built-in example problems and study the output.
 ```bash
