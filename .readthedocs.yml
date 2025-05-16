@@ -13,6 +13,8 @@ build:
 python:
   install:
     - requirements: docs_requirements.txt
+    - method: pip
+      path: src/
 
 # Build documentation with MkDocs
 mkdocs:
