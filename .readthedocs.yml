@@ -17,10 +17,10 @@ build:
       - asdf global uv latest
       - uv venv
     install:
-      - uv pip install -r pyproject.toml --group docs
+      - uv pip install -r pyproject.toml --group docs --link-mode=copy
     build:
       html:
-        - uv run mkdocs build
+        - uv run mkdocs build --strict --site-dir $READTHEDOCS_OUTPUT/html
 
 # Build documentation with MkDocs
 mkdocs:
