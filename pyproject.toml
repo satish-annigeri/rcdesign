@@ -25,7 +25,6 @@ classifiers = [
 license = {file = "LICENSE.md"}
 dependencies = [
     "numpy>=2.2.5",
-    "scipy>=1.15.3",
     "sympy>=1.14.0",
 ]
 
