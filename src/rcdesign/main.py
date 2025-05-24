@@ -1,3 +1,6 @@
+import sys
+
+
 from rcdesign import __version__
 from rcdesign.is456.stressblock import LSMStressBlock
 from rcdesign.is456.concrete import Concrete
@@ -12,7 +15,10 @@ from rcdesign.is456.section import RectBeamSection
 
 
 def main():
-    print(f"rcdesign for RC Design as per IS456:2000 v{__version__}\n")
+    print(f"\nrcdesign for RC Design as per IS456:2000 v{__version__}\n")
+    if len(sys.argv) > 1:
+        if sys.argv[1] in ["-V", "--version"]:
+            sys.exit(0)
     sb = LSMStressBlock("LSM Flexure")
     m20 = Concrete("M20", 20)
     fe415 = RebarHYSD("Fe 415", 415)
