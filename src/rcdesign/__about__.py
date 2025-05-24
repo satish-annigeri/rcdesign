@@ -1,10 +1,3 @@
-import tomllib
+# Version set automatically by set_version()
 
-
-def get_version():
-    with open("pyproject.toml", "rb") as f:
-        data = tomllib.load(f)
-    return data["project"]["version"]
-
-
-__version__ = get_version()
+__version__ = "0.4.18"
