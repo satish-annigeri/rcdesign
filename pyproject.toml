@@ -30,7 +30,7 @@ dependencies = [
 
 [project.scripts]
 rcdesign = "rcdesign.main:main"
-ver = "rcdesign.set_version:get_ver"
+version = "rcdesign.set_version:set_ver"
 
 [build-system]
 requires = ["hatchling"]

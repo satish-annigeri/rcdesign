@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 import re
 from datetime import datetime
@@ -14,16 +15,6 @@ def get_ver(src_ver: str = "pyproject.toml"):
         data = tomllib.load(f)
     ver = data["project"]["version"]
     return ver
-
-
-def set_ver():
-    version = get_ver()
-    fpath = ROOT_DIR / "src" / "rcdesign" / "__about__.py"
-    with open(fpath, "w") as f:
-        time_now = datetime.now(ZoneInfo("Asia/Kolkata")).isoformat()
-        s = f"#  Version set by src/rcdesign/set_version.py {time_now}\n\n"
-        s += f'__version__ = "{version}"\n'
-        f.write(s)
 
 
 def bump(next_ver: str) -> str:
@@ -51,3 +42,28 @@ def bump(next_ver: str) -> str:
             return f"{next_ver}"
         else:
             return "0.0.0"
+
+
+def set_ver():
+    if len(sys.argv) == 1:
+        return f"rcdesign v{get_ver()}"
+
+    fpath = ROOT_DIR / "src" / "rcdesign" / "__about__.py"
+    current_ver = get_ver()
+    if len(sys.argv) > 2:
+        if (sys.argv[1] == "--bump") and (sys.argv[2] in ["patch", "minor", "major"]):
+            new_ver = bump(sys.argv[2])
+        else:
+            print("Invalid command options")
+            sys.exit(1)
+    dry_run = (len(sys.argv) > 3) and (sys.argv[3] == "--dry-run")
+
+    time_now = datetime.now(ZoneInfo("Asia/Kolkata")).isoformat()
+    s = f'\nChanging release version from "{current_ver}" to "{new_ver}"\n'
+    if not dry_run:
+        s = f"# Version set by src/rcdesign/set_version.py {time_now}\n"
+        s += f'# Changing release version from "{current_ver}" to "{new_ver}"\n'
+        s += f'\n__version__ = "{new_ver}"\n'
+        with open(fpath, "w") as f:
+            f.write(s)
+    return s
