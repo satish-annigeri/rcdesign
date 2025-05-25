@@ -1,4 +1,6 @@
-# Sections
+Sections
+==================
+
 Reinforced concrete structures are made of reinforced concrete structural members. They can be broadly classified into:
 
 1. **Beams** which are predominantly subjected to bending, shear and torsion, and
@@ -10,14 +12,16 @@ Analysis of sections subjected to axial compression and bending about one axis i
 
 Design of such sections is carried out as an inverse step of carrying out a large number of analyses and choosing the combination nearest to the given design forces. Usual practice is to construct interaction diagrams for different amounts of longitudinal reinforcement and plotting an interaction diagram for each value of area of longitudinal reinforcement.
 
-## Beam Sections
+Beam Sections
+----------------------
+
 A beam section can have any shape but from the point of view of ease of fabrication and aesthetics, rectangular beam section is the most common. The attributes, required to repesent a section irrespective of whether it belongs to a beam or a column, are listed below:
 
-1. `csb`: Object of type concrete stress block repesenting strain distribution and stress stran relation for flexure.
-2. `conc`: Object of type `Concrete`. There must only be one object of this type associated with a given section.
-3. `long_steel`: Object of type `RebarGroup` representing the longitudinal reinforcement provided along the length of the structural member. There must only be one object of this type associated with a given section.
-4. `shear_steel`: A list of objects of type `ShearRebarGroup`, consisting of zero or more of vertical or inclined stirrups, or bent-up bars.
-5. `clear_cover`: Clear cover to reinforcement bars. 
+1. ``csb``: Object of type concrete stress block repesenting strain distribution and stress stran relation for flexure.
+2. ``conc``: Object of type ``Concrete``. There must only be one object of this type associated with a given section.
+3. ``long_steel``: Object of type ``RebarGroup`` representing the longitudinal reinforcement provided along the length of the structural member. There must only be one object of this type associated with a given section.
+4. ``shear_steel``: A list of objects of type ``ShearRebarGroup``, consisting of zero or more of vertical or inclined stirrups, or bent-up bars.
+5. ``clear_cover``: Clear cover to reinforcement bars. 
 
 Effective section of a beam can be rectangular or flanged. Since reinforced concrete slab is cast together with beams, the effective shape of the section is:
 1. A flanged section when the slab happens to be in the compression zone, or 
@@ -25,26 +29,34 @@ Effective section of a beam can be rectangular or flanged. Since reinforced conc
 
 A flanged section can be a T section with the flange extending on both sides of the web (as in the case of an intermediate beam) or an L section with the flange extending on only one side (as in the case of an end beam). Typically, mid-span section (with the beam subjected to gravity loads) is subjected to sagging bending moment and the slab is in the compression zone resulting in a flanged section. But under the same loading direction, end sections are subjected to hogging bending moment and the slab is in the tension zone resulting in a rectangular section. Based on the bending moment distribution and the location of the given section, a section can be categorized as rectangular or flanged.
 
-### Rectangular Beam Sections
-The `RectBeamSection` class represents a beam section, and it is expected to be subjected to bending, shear and torsion. Additional attributes of a `RectBeamSection` are:
-1. `b`: Breadth of the beam, in mm
-2. `D`: Overall depth of the beam, in mm
-3. `long_steel`: Object of type `RebarGroup`, representing longitudinal reinforcement bars. The group of reinforcement bars, in turn, may consist of one or more layers of reinforcement bars, placed parallel to the edge of size `b`.
-3. `shear_steel`: Object of type `ShearRebarGroup`, containing a list of one or more shear reinforcement types.
+Rectangular Beam Sections
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-### Flanged Beam Sections
-The `FlagnedBeamSection` is a child class of `RectBeamSection` and has all its atributes and many of its behaviours. Additional attributes of a `FlangedBeamSection`, in addition to those already defined in the parent class `RectBeamSection` are:
+The ``RectBeamSection`` class represents a beam section, and it is expected to be subjected to bending, shear and torsion. Additional attributes of a ``RectBeamSection`` are:
+1. ``b``: Breadth of the beam, in mm
+2. ``D``: Overall depth of the beam, in mm
+3. ``long_steel``: Object of type ``RebarGroup``, representing longitudinal reinforcement bars. The group of reinforcement bars, in turn, may consist of one or more layers of reinforcement bars, placed parallel to the edge of size ``b``.
+4. ``shear_steel``: Object of type ``ShearRebarGroup``, containing a list of one or more shear reinforcement types.
 
-1. `bf`: Breadth of the flange, in mm
-2. `Df`: Depth of the flange, in mm
+Flanged Beam Sections
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The ``FlagnedBeamSection`` is a child class of ``RectBeamSection`` and has all its atributes and many of its behaviours. Additional attributes of a ``FlangedBeamSection``, in addition to those already defined in the parent class ``RectBeamSection`` are:
+
+1. ``bf``: Breadth of the flange, in mm
+2. ``Df``: Depth of the flange, in mm
 
 
-## Column Sections
+Column Sections
+---------------------
+
 At present, only rectangular column sections have been implemented.
 
-### Rectangular Beam Sections
-The `RectColumnSection` is a class with the following attributes:
-1. `b`: Breadth of the column, in mm
-2. `D`: Depth of the column, in mm
-3. `long_steel`: Object of type `RebarGroup`, with one or more layers of reinforcement bars, placed parallel to the edge of size `b`.
-4. `LateralTie`: Object of type `LateralTie`
+Rectangular Column Sections
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The ``RectColumnSection`` is a class with the following attributes:
+1. ``b``: Breadth of the column, in mm
+2. ``D``: Depth of the column, in mm
+3. ``long_steel``: Object of type ``RebarGroup``, with one or more layers of reinforcement bars, placed parallel to the edge of size ``b``.
+4. ``LateralTie``: Object of type ``LateralTie``

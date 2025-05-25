@@ -1,6 +1,13 @@
-# Theory
+IS 456:2000 Theory
+====================
 
-## Introduction
+.. toctree::
+   :maxdepth: 1
+   :caption: IS 456:2000
+
+   software_design
+   materials
+   section
 
 Reinforced concrete is, along with steel, a widely used structural material in the construction of buildings, bridges and other such structures. The primary tasks for a structural engineer working with reinforced concrete are design and analysis.
 
@@ -15,8 +22,3 @@ Design and analysis complement each other. When we design, the intention is that
 In this work, the task of analysis of a section is taken up first even though the more common task is that of design. That is because, analysis is more precise compared to design, which requires adjusting quantities upwards, such as the depth of the section (because it is preferred to provide dimensions that are practical for fabrication) or the number of reinforcement bars to be provided (because it is not possible to provide fraction of a bar). Moreover, analysis does not involve the task of detailing, such as ensuring the horizontal distance between bars is greater than the prescribed minimum, checking if the required number of reinforcement bars will fit within the breadth of the beam and adjusting them in multiple layers if they do not all fit in a single layer etc. This makes analysis simpler than design.
 
 The task of design can be broken down into determining the required section dimensions, reinforcement bars, satisfying detailing requirements and finally calculating the capacity of the section and computing the strength ratio. Thus, completing the task of analysis first aids the task of design.
-
-
-- [Software Design](software_design.md)
-- [Materials](materials.md)
-- [Sections](section.md)

@@ -44,12 +44,9 @@ dev = [
     "ruff>=0.11.9",
 ]
 docs = [
-    "markdown-callouts>=0.4.0",
-    "mkdocs>=1.6.1",
-    "mkdocs-click>=0.9.0",
-    "mkdocstrings>=0.29.1",
-    "mkdocstrings-python>=1.16.10",
-    "pymdown-extensions>=10.15",
+    "sphinx>=8.2.3",
+    "sphinx-rtd-theme>=3.0.2",
+    "sphinx-tabs>=3.4.7",
 ]
 
 [project.urls]
