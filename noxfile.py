@@ -19,7 +19,8 @@ def docs(session: nox.Session) -> None:
 
     session.install(*requirements)
     session.install("-e", ".")
-    session.run("mkdocs", "build")
+    # session.run("mkdocs", "build")
+    session.run("make", "-C", "docs", "html")
 
 
 @nox.session(python="3.12")
