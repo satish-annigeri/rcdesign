@@ -151,7 +151,7 @@ bak/
 # Sphinx
 build/
 _build/
-_static/
+# _static/
 _templates/
 
 # Virtual environment management files

@@ -37,3 +37,4 @@ html_theme_options = {
     "collapse_navigation": True,
 }
 html_static_path = ["_static"]
+html_favicon = "_static/rcbeam.ico"
