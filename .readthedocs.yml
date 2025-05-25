@@ -20,4 +20,5 @@ build:
       - uv pip install -r pyproject.toml --group docs --link-mode=copy
     build:
       html:
+        - mkdir -p docs/_static
         - uv run --group docs --link-mode=copy sphinx-build -W -b html docs $READTHEDOCS_OUTPUT/html
