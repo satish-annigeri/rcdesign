@@ -25,7 +25,7 @@ These packages will not be installed automatically. They are required only when 
     * ruff
 * Documentation dependencies
     * sphinx
-    * sphinx_rtd_theme
+    * sphinx-rtd-theme
     * sphinx-tabs
 
 This project uses ``uv`` to manage the project. This documentation therefore uses ``uv`` command line instructions, See here for `instructions to install <https://docs.astral.sh/uv/>`_ ``uv``.
