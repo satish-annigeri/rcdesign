@@ -22,6 +22,7 @@ release = "0.4.18"
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx_tabs.tabs",
+    "sphinx.ext.napoleon",
 ]
 autodoc_member_order = "bysource"
 
@@ -34,7 +35,18 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 html_theme = "sphinx_rtd_theme"
 html_theme_options = {
-    "collapse_navigation": True,
+    "collapse_navigation": False,
+    "navigation_depth": 3,
+    "sticky_navigation": True,
 }
 html_static_path = ["_static"]
 html_favicon = "_static/rcbeam.ico"
+
+autodoc_default_options = {
+    "members": True,
+    "undoc-members": True,  # Include undocumented members
+}
+
+napoleon_google_docstring = True
+napoleon_numpy_docstring = False
+autoapi_root = "docs/source/api"
