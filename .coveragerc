@@ -3,6 +3,7 @@ omit =
     tests/*
     example*.py
     __main__*.py
+    main.py
 
 [report]
 exclude_lines =

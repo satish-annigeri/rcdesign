@@ -1,6 +1,12 @@
 from math import isclose, pi, ceil
 
-from rcdesign.utils import func, rootsearch, ceiling, floor, underline, header, bar_area, num_bars
+from rcdesign.utils import rootsearch, ceiling, floor, underline, header, bar_area, num_bars
+
+
+def func(x: float, *args: float) -> float:
+    # return a*x**2 + c*x - 4
+    # return x**3 - 10*x**2 + 5
+    return args[0] ** 3 + args[1] * x**2 + args[2] * x + args[3]
 
 
 def test_rootsearch01():
