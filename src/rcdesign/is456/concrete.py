@@ -8,12 +8,13 @@ import numpy as np
 
 @dataclass
 class Concrete:
-    """Concrete
+    """Represents Concrete material
 
-    Returns
-    -------
-    Concrete
-        Concrete object
+    Attributes:
+        label (str): A label for the object
+        fck (float): Characteristic strength of concrete
+        gamma_m (float): Partial safety factor for material for concrete (default: 1.5)
+        density (float): Density of concrete in kN per cubic metre (default: 25.0)
     """
 
     label: str
@@ -22,18 +23,40 @@ class Concrete:
     density: float = 25.0
 
     def __repr__(self) -> str:
+        """String representation of the Concrete object
+
+        Returns:
+            string: Representation of the object that will be used by print()
+        """
         s = f"fck = {self.fck:.2f} N/mm^2, fd = {self.fd:.2f} N/mm^2"
         return s
 
     @property
     def Ec(self) -> float:
+        """Returns the Modulus of elasticity of concrete as per IS 456:2000
+
+        Returns:
+            float: Modulus of elasticity of concrete
+        """
         return 5000 * sqrt(self.fck)
 
     @property
     def fd(self) -> float:
+        """Returns design strength of concrete as per IS 456:2000
+
+        Returns:
+            float: Design strength of concrete
+        """
         return 0.67 * self.fck / self.gamma_m
 
     def tauc(self, pt: float) -> float:
+        """Returns permissible design shear stress in concrete as per IS 456:2000
+
+        Args:
+            pt (float): Percentage of tension reinforcement
+        Returns:
+            float: Permissible design shear stress for concrete
+        """
         if pt < 0.15:
             pt = 0.15
         if pt > 3:
@@ -44,6 +67,7 @@ class Concrete:
         return num / den
 
     def tauc_max(self):
+        """Returns maximum permissible shear stress concrete"""
         tauc = np.array([[15, 20, 25, 30, 35, 40], [2.5, 2.8, 3.1, 3.5, 3.7, 4.0]])
         if self.fck < 15:
             return 0.0
