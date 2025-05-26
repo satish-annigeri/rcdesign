@@ -2,11 +2,19 @@ from typing import Callable
 from math import isclose
 
 
-def bracket(
-    f: Callable, xa: float, xb: float, *args, intervals: int = 10, **kwargs
-) -> tuple[float | None, float | None]:
+def bracket(f: Callable, xa: float, xb: float, *args, intervals: int = 10, **kwargs) -> tuple[float | None, float | None]:
     """
-    Bracket the root of the function f in the interval [xa, xb].
+    Bracket the root of the function ``f`` in the range ``[xa, xb]`` at ``interval`` equal intervals.
+
+    Args:
+        f (Callable): Function whose root is to be determined
+        xa (float): Start value of range to test for root
+        xb (float): End value of range to test for root
+        *args (tuple): Positional arguments to be passed to Callable ``f``
+        intervals (int): Number of equal intervals at which to test for root (default = 10)
+        **kwargs (dict): Keyword arguments to be passed to Callable ``f``
+    Returns:
+        tuple (float, float): ``(x1, x2)`` bracketing a root of ``f``, if found. Else returns ``(None, None)``.
     """
     fa = f(xa, *args, **kwargs)
     if isclose(fa, 0, abs_tol=1e-9):
@@ -37,6 +45,21 @@ def search(
     max_intervals: int = 100,
     **kwargs,
 ) -> tuple[float | None, float | None]:
+    """
+    Recursively search for values bracketing the roots of ``f``, doubling the number of equal intervals until the number of intervals exceeds ``max_intervals``.
+
+    Args:
+        f (Callable): Function whose root is to be determined
+        xa (float): Initial start value of range to test for root
+        xb (float): Initial end value of range to test for root
+        *args (tuple): Positional arguments to be passed to Callable ``f``
+        intervals (int): Initial number of equal intervals at which to test for root (default = 10)
+        max_intervals (int): Maximum number of equal intervals until which to attempt to bracket the root
+        **kwargs (dict): Keyword arguments to be passed to Callable ``f``
+    Returns:
+        tuple: (float, float) bracketing a root of ``f``, if found, else (None, None).
+            - float | None: Start bracket of root, else None
+            - float | None: End value of bracket, else None"""
     while intervals < max_intervals:
         x1, x2 = bracket(f, xa, xb, *args, intervals=intervals, **kwargs)
         if x1 and x2:
@@ -55,6 +78,22 @@ def bisection(
     maxiter: int = 30,
     **kwargs,
 ) -> float:
+    """Determine the roots of the function ``f``, given ``xa`` and ``xb`` bracketing the root by the bisection method, to an absolute tolerance ``abs_tol``, attempting a maximum of ``maxiter`` iterations.
+
+    Args:
+        f (Callable): Function whose root is to be determined
+        xa (float): Start value of value to test for root
+        xb (float): End value of value to test for root
+        *args (tuple): Positional arguments to be passed to Callable ``f``
+        abs_tol (float): Absolute value for tolerance for difference from zero (default = 1e-6)
+        maxiter (int): Maximum number of iterations to attempt to determine a root
+        **kwargs (dict): Keyword arguments to be passed to Callable ``f``
+    Returns:
+        float: Root of the function ``f``, if it can be determined. Else raises an exception.
+    Raises:
+        ValueError: If the values of the function ``f`` at ``xa`` and ``xb`` have the same sign
+        RuntimeError: If the root cannot be determined after ``maxiter`` iterations.
+    """
     fa = f(xa, *args, **kwargs)
     if isclose(fa, 0, abs_tol=abs_tol):
         return xa
@@ -93,6 +132,23 @@ def brent(
     maxiter: int = 30,
     **kwargs,
 ) -> float:
+    """Determine the roots of the function ``f``, given ``xa`` and ``xb`` bracketing the root by Brent's method, to an absolute tolerance ``abs_tol``, attempting a maximum of ``maxiter`` iterations.
+    Ref: Jaan Kiusalaas, *Numerical Methods in Engineering with Python*, Cambridge University Press, 2005. pp. 150.
+
+    Args:
+        f (Callable): Function whose root is to be determined
+        xa (float): Start value of value to test for root
+        xb (float): End value of value to test for root
+        *args (tuple): Positional arguments to be passed to Callable ``f``
+        abs_tol (float): Absolute value for tolerance for difference from zero (default = 1e-6)
+        maxiter (int): Maximum number of iterations to attempt to determine a root
+        **kwargs (dict): Keyword arguments to be passed to Callable ``f``
+    Returns:
+        float: Root of the function ``f``, if it can be determined. Else raises an exception.
+    Raises:
+        ValueError: If the values of the function ``f`` at ``xa`` and ``xb`` have the same sign
+        RuntimeError: If the root cannot be determined after ``maxiter`` iterations.
+    """
     x1 = xa
     f1 = f(x1, *args, **kwargs)
     if isclose(f1, 0, abs_tol=abs_tol):
@@ -122,9 +178,7 @@ def brent(
 
         # Try quadratic interpolation
         denom = (f2 - f1) * (f3 - f1) * (f2 - f3)
-        numer = (
-            x3 * (f1 - f2) * (f2 - f3 + f1) + f2 * x1 * (f2 - f3) + f1 * x2 * (f3 - f1)
-        )
+        numer = x3 * (f1 - f2) * (f2 - f3 + f1) + f2 * x1 * (f2 - f3) + f1 * x2 * (f3 - f1)
         # If division by zero, push x out of bounds
         try:
             dx = f3 * numer / denom
