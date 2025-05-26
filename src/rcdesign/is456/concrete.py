@@ -8,7 +8,7 @@ import numpy as np
 
 @dataclass
 class Concrete:
-    """Represents Concrete material
+    """Represents Concrete material as per IS 456:2000
 
     Attributes:
         label (str): A label for the object
@@ -33,20 +33,12 @@ class Concrete:
 
     @property
     def Ec(self) -> float:
-        """Returns the Modulus of elasticity of concrete as per IS 456:2000
-
-        Returns:
-            float: Modulus of elasticity of concrete
-        """
+        """float: Modulus of elasticity of concrete as per IS 456:2000"""
         return 5000 * sqrt(self.fck)
 
     @property
     def fd(self) -> float:
-        """Returns design strength of concrete as per IS 456:2000
-
-        Returns:
-            float: Design strength of concrete
-        """
+        """float: Design strength of concrete as per IS 456:2000"""
         return 0.67 * self.fck / self.gamma_m
 
     def tauc(self, pt: float) -> float:
@@ -67,9 +59,13 @@ class Concrete:
         return num / den
 
     def tauc_max(self):
-        """Returns maximum permissible shear stress concrete"""
+        """Returns maximum permissible shear stress concrete with shear reinforcement
+
+        Returns:
+            float: Maximum permissible design shear stress for concrete with shear reinforcement
+        """
         tauc = np.array([[15, 20, 25, 30, 35, 40], [2.5, 2.8, 3.1, 3.5, 3.7, 4.0]])
-        if self.fck < 15:
+        if self.fck < tauc[0, 0]:
             return 0.0
         elif self.fck >= tauc[0, -1]:
             return tauc[1, -1]
