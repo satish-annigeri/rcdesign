@@ -10,6 +10,12 @@ ROOT_DIR = Path(__file__).resolve().parents[2]
 
 
 def get_ver(src_ver: str = "pyproject.toml"):
+    """Get the current version of the project from the specified source file.
+    Args:
+        src_ver (str): The source file from which to read the version. Default is "pyproject.toml".
+    Returns:
+        str: The current version of the project.
+    """
     fpath = ROOT_DIR / src_ver
     with open(fpath, "rb") as f:
         data = tomllib.load(f)
@@ -18,6 +24,12 @@ def get_ver(src_ver: str = "pyproject.toml"):
 
 
 def bump(next_ver: str) -> str:
+    """Bump the version number based on the specified type (major, minor, patch) or return the specified version.
+    Args:
+        next_ver (str): The type of version bump ("major", "minor", "patch") or a specific version string.
+    Returns:
+        str: The new version number based on the specified type or the specified version string.
+    """
     pattern = r"(\d+).(\d+).(\d+)"
 
     if next_ver.lower() in ["major", "minor", "patch"]:
@@ -45,6 +57,15 @@ def bump(next_ver: str) -> str:
 
 
 def set_ver():
+    """Get or set the version of the project based on command line arguments.
+
+    If no arguments are provided, it returns the current version.
+    If the first argument is "--bump" followed by "patch", "minor", or "major",
+    it bumps the version accordingly and writes it to the `__about__.py` file.
+    If the third argument is "--dry-run", it simulates the version change without writing to the file.
+    Returns:
+        str: A message indicating the current or new version, or the change made.
+    """
     if len(sys.argv) == 1:
         return f"rcdesign v{get_ver()}"
 
