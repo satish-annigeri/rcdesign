@@ -1,5 +1,6 @@
 """Classes to represent reinforcement bars, layers of reinforcement bars
-and groups of reinforcement layers"""
+and groups of reinforcement layers
+"""
 
 from dataclasses import dataclass, field
 from enum import IntEnum
@@ -21,6 +22,14 @@ from rcdesign.utils import deg2rad
 
 
 class RebarType(IntEnum):
+    """Enumeration for different types of reinforcement bars.
+
+    - REBAR_UNDEFINED: Undefined type of rebar
+    - REBAR_MS: Mild Steel reinforcement
+    - REBAR_HYSD: High Yield Strength Deformed bars
+    - REBAR_CUSTOM: Custom type of rebar defined by user
+    """
+
     REBAR_UNDEFINED = 0
     REBAR_MS = 1
     REBAR_HYSD = 2
@@ -36,6 +45,13 @@ RebarLabel = {
 
 
 class StressType(IntEnum):
+    """Enumeration for different types of stress in reinforcement bars.
+
+    - STRESS_NEUTRAL: Neutral stress
+    - STRESS_COMPRESSION: Compression stress
+    - STRESS_TENSION: Tension stress
+    """
+
     STRESS_NEUTRAL = 0
     STRESS_COMPRESSION = 1
     STRESS_TENSION = 2
@@ -49,6 +65,14 @@ StressLabel = {
 
 
 class ShearRebarType(IntEnum):
+    """Enumeration for different types of shear reinforcement bars.
+
+    - SHEAR_REBAR_VERTICAL_STIRRUP: Vertical stirrup
+    - SHEAR_REBAR_INCLINED_STIRRUP: Inclined stirrup
+    - SHEAR_REBAR_BENTUP_SINGLE: Bent-up bars in single group
+    - SHEAR_REBAR_BENTUP_SERIES: Bent-up bars in series
+    """
+
     SHEAR_REBAR_VERTICAL_STIRRUP = 1
     SHEAR_REBAR_INCLINED_STIRRUP = 2
     SHEAR_REBAR_BENTUP_SINGLE = 3
@@ -67,18 +91,17 @@ ShearRebarLabel = {
 
 @dataclass
 class Rebar(ABC):  # pragma: no cover
-    """Rebar object represents a reinforcment bar.
+    """Base class for reinforcement bars.
 
-    Parameters
-    ----------
-    ABC : _type_
-        _description_
-
-    Returns
-    -------
-    Rebar
-        _description_
+    Attributes:
+        label (str): Label for the reinforcement bar
+        fy (float): Characteristic yield strength of the reinforcement bar
+        gamma_m (float): Partial safety factor for reinforcement (default: 1.15)
+        density (float): Density of the reinforcement bar (default: 78.5 kg/m^3)
+        Es (float): Modulus of elasticity of the reinforcement bar (default: 2e5 MPa)
+        rebar_type (RebarType): Type of reinforcement bar (default: RebarType.REBAR_HYSD)
     """
+
     label: str
     fy: float
     gamma_m: float = 1.15
@@ -98,12 +121,16 @@ class Rebar(ABC):  # pragma: no cover
         pass
 
 
-"""Mild steel reinforcement bars as defined in IS456:2000 with a
-well defined yield point"""
-
-
 class RebarMS(Rebar):
+    """Mild steel reinforcement bars as defined in IS456:2000 with linear stress-strain relation"""
+
     def __init__(self, label: str, fy: float):
+        """Initialize a Mild Steel reinforcement bar with given label and yield strength.
+
+        Args:
+            label (str): Label for the reinforcement bar
+            fy (float): Characteristic yield strength of the reinforcement bar
+        """
         super().__init__(label, fy)
         self.rebar_type = RebarType.REBAR_MS
 
@@ -111,6 +138,13 @@ class RebarMS(Rebar):
         return f"{self.label:>6}: Type={RebarLabel[self.rebar_type]} fy={self.fy} fd={self.fd:.2f}"
 
     def fs(self, es: float) -> float:
+        """Calculate the stress in the reinforcement bar based on the strain.
+
+        Args:
+            es (float): Strain in the reinforcement bar
+        Returns:
+            float: Stress in the reinforcement bar
+        """
         _es = abs(es)
         _esy = self.fd / self.Es
 
@@ -120,11 +154,17 @@ class RebarMS(Rebar):
             return copysign(self.fd, es)
 
 
-"""High yield strength deformed bars as defined in IS456:2000 with piece-wise
-linear stress-strain relation between 0.8 to 1.0 times design strength"""
-
-
 class RebarHYSD(Rebar):
+    """High Yield Strength Deformed (HYSD) reinforcement bars as defined in IS456:2000 with non-linear stress-strain relation
+
+    Attributes:
+        label (str): Label for the reinforcement bar
+        fy (float): Characteristic yield strength of the reinforcement bar
+        gamma_m (float): Partial safety factor for reinforcement (default: 1.15)
+        density (float): Density of the reinforcement bar (default: 78.5 kN/m^3)
+        Es (float): Modulus of elasticity of the reinforcement bar (default: 2e5 N/mm^2)
+    """
+
     inel: npt.NDArray[np.float64] = np.array(
         [
             [0.8, 0.85, 0.9, 0.95, 0.975, 1.0],
@@ -143,6 +183,13 @@ class RebarHYSD(Rebar):
         return f"{self.label:>6}: Type={RebarLabel[self.rebar_type]} fy={self.fy} fd={self.fd:.2f}"
 
     def fs(self, es: float) -> float:
+        """Calculate the stress in the reinforcement bar based on the strain.
+
+        Args:
+            es (float): Strain in the reinforcement bar
+        Returns:
+            float: Stress in the reinforcement bar
+        """
         x = abs(es)
         if x < self.es[0, 1]:
             return es * self.Es
@@ -157,11 +204,16 @@ class RebarHYSD(Rebar):
         return copysign(y, es)
 
 
-"""Layer of reinforcement bars"""
-
-
 @dataclass
 class RebarLayer:
+    """Class to represent a layer of reinforcement bars.
+
+    Attributes:
+        rebar (Rebar): The type of reinforcement bar used in this layer
+        dia (List[float]): List of diameters of the bars in this layer
+        _dc (float): Distance from the compression edge to the centroid of the layer
+    """
+
     rebar: Rebar
     dia: List[float] = field(default_factory=list)
     _dc: float = 0.0
@@ -172,14 +224,17 @@ class RebarLayer:
 
     @property
     def max_dia(self) -> float:
+        """Return the maximum diameter of the bars in this layer."""
         return max(self.dia)
 
     @property
     def area(self) -> float:
+        """Calculate the total cross-sectional area of the bars in this layer."""
         return sum([d**2 for d in self.dia]) * pi / 4
 
     @property
     def dc(self) -> float:
+        """Return the distance from the compression edge to the centroid of the layer."""
         return self._dc
 
     @dc.setter
@@ -190,6 +245,7 @@ class RebarLayer:
 
     @property
     def xc(self) -> float:
+        """Return the distance from the compression edge to the centroid of the layer."""
         return self._xc
 
     @xc.setter
@@ -201,6 +257,13 @@ class RebarLayer:
         return self._xc
 
     def stress_type(self, xu: float) -> StressType:
+        """Determine the type of stress in this layer based on the distance from the compression edge to the neutral axis.
+
+        Args:
+            xu (float): Distance from the compression edge to the neutral axis
+        Returns:
+            StressType: The type of stress in this layer (STRESS_NEUTRAL, STRESS_COMPRESSION, or STRESS_TENSION)
+        """
         if isclose(self._xc, xu):
             self._stress_type = StressType.STRESS_NEUTRAL
         elif self._xc < xu:
@@ -210,6 +273,13 @@ class RebarLayer:
         return self._stress_type
 
     def x(self, xu: float) -> float:
+        """Calculate the distance from the compression edge to the centroid of the layer based on the distance from the compression edge to the neutral axis.
+
+        Args:
+            xu (float): Distance from the compression edge to the neutral axis
+        Returns:
+            float: The distance from the compression edge to the centroid of the layer
+        """
         return xu - self._xc
 
     def __repr__(self) -> str:
@@ -222,9 +292,25 @@ class RebarLayer:
         return s
 
     def es(self, xu: float, ecmax: float = ecu) -> float:
+        """Calculate the strain in the reinforcement bar based on the distance from the compression edge to the neutral axis.
+
+        Args:
+            xu (float): Distance from the compression edge to the neutral axis
+            ecmax (float): Maximum strain in the concrete (default: ecu)
+        Returns:
+            float: The strain in the reinforcement bar
+        """
         return ecmax / xu * self.x(xu)
 
     def fs(self, xu: float, ecmax: float = ecu) -> float:
+        """Calculate the stress in the reinforcement bar based on the distance from the compression edge to the neutral axis.
+
+        Args:
+            xu (float): Distance from the compression edge to the neutral axis
+            ecmax (float): Maximum strain in the concrete (default: ecu)
+        Returns:
+            float: The stress in the reinforcement bar
+        """
         return self.rebar.fs(self.es(xu, ecmax))
 
     def force_compression(
@@ -234,6 +320,17 @@ class RebarLayer:
         conc: Concrete,
         ecmax: float = ecu,
     ) -> Tuple[float, float, Dict]:
+        """Calculate the force and moment in the compression reinforcement.
+
+        Args:
+            xu (float): Distance from the compression edge to the neutral axis
+            csb (LSMStressBlock): Concrete stress block
+            conc (Concrete): Concrete properties
+            ecmax (float): Maximum strain in the concrete (default: ecu)
+        Returns:
+            Tuple[float, float, Dict]: A tuple containing the force in the compression reinforcement,
+            the moment about the neutral axis, and a dictionary with detailed results.
+        """
         x = self.x(xu)
         esc = self.es(xu, ecmax)
         fsc = self.rebar.fs(esc)  # Stress in compression steel
@@ -244,6 +341,15 @@ class RebarLayer:
         return _f, _m, result
 
     def force_tension(self, xu: float, ecmax: float = ecu) -> Tuple[float, float, Dict]:
+        """Calculate the force and moment in the tension reinforcement.
+
+        Args:
+            xu (float): Distance from the compression edge to the neutral axis
+            ecmax (float): Maximum strain in the concrete (default: ecu)
+        Returns:
+            Tuple[float, float, Dict]: A tuple containing the force in the tension reinforcement,
+            the moment about the neutral axis, and a dictionary with detailed results.
+        """
         x = abs(self.x(xu))
         est = ecmax / xu * x
         fst = self.rebar.fs(est)
@@ -261,6 +367,17 @@ class RebarLayer:
         rebar: Rebar,
         ecmax: float = ecu,
     ) -> Dict[str, Any]:  # pragma: no cover
+        """Generate a report for the reinforcement layer.
+
+        Args:
+            xu (float): Distance from the compression edge to the neutral axis
+            csb (LSMStressBlock): Concrete stress block
+            conc (Concrete): Concrete properties
+            rebar (Rebar): The type of reinforcement bar used in this layer
+            ecmax (float): Maximum strain in the concrete (default: ecu)
+        Returns:
+            Dict[str, Any]: A dictionary containing detailed results of the reinforcement layer
+        """
         x = self.x(xu)
 
         if x >= 0:  # Compression
@@ -304,6 +421,13 @@ class RebarLayer:
         return d
 
     def bar_list(self, sep=";") -> str:
+        """Generate a string representation of the bars in this layer.
+
+        Args:
+            sep (str): Separator to use between different bar diameters (default: ";")
+        Returns:
+            str: A string representation of the bars in this layer, showing the count and diameter.
+        """
         from collections import Counter
 
         d = Counter(self.dia)
@@ -332,11 +456,27 @@ class RebarLayer:
         return self._xc >= b._xc
 
     def spacing(self, b: float, clear_cover: float) -> float:
+        """Calculate the spacing between the bars in this layer based on the total width and clear cover.
+
+        Args:
+            b (float): Total width available for the bars in this layer
+            clear_cover (float): Clear cover distance from the edge of the concrete to the nearest bar
+        Returns:
+            float: The spacing between the bars in this layer
+        """
         return (b - (2 * clear_cover) - sum(self.dia)) / (len(self.dia) - 1)
 
-    def asdict(
-        self, xu: float, sb: LSMStressBlock, conc: Concrete, ecmax: float = ecu
-    ) -> dict:  # pragma: no cover
+    def asdict(self, xu: float, sb: LSMStressBlock, conc: Concrete, ecmax: float = ecu) -> dict:  # pragma: no cover
+        """Generate a dictionary representation of the reinforcement layer.
+
+        Args:
+            xu (float): Distance from the compression edge to the neutral axis
+            sb (LSMStressBlock): Concrete stress block
+            conc (Concrete): Concrete properties
+            ecmax (float): Maximum strain in the concrete (default: ecu)
+        Returns:
+            dict: A dictionary containing detailed results of the reinforcement layer
+        """
         x = self.x(xu)
         es = ecmax / xu * x
         fsc = self.rebar.fs(es)
@@ -356,25 +496,43 @@ class RebarLayer:
         return d
 
 
-"""Group of reinforcement bars"""
-
-
 @dataclass
 class RebarGroup:
+    """Class to represent a group of reinforcement layers.
+
+    Attributes:
+        layers (List[RebarLayer]): List of layers of bars, in no particular order, of distance from compression edge
+    """
+
     layers: List[RebarLayer] = field(
         default_factory=list
     )  # List of layers of bars, in no particular order, of distance from compression edge
 
     @property
     def area(self) -> float:
+        """Calculate the total cross-sectional area of all layers in the group."""
         return sum([L.area for L in self.layers])
 
     def calc_xc(self, D: float) -> None:
+        """Calculate the distance from the compression edge to the centroid of each layer in the group.
+
+        Args:
+            D (float): Total depth of the section from the compression edge to the centroid of the reinforcement
+        Returns:
+            None: This method modifies the xc attribute of each layer in the group.
+        """
         for L in self.layers:
             L.xc = D
         return None
 
     def centroid(self, xu: float) -> Tuple[float, float]:
+        """Calculate the centroids of the compression and tension reinforcement layers.
+
+        Args:
+            xu (float): Distance from the compression edge to the neutral axis
+        Returns:
+            Tuple[float, float]: A tuple containing the centroid of the compression reinforcement and the centroid of the tension reinforcement
+        """
         a1 = m1 = a2 = m2 = 0.0
 
         for L in self.layers:
@@ -392,12 +550,26 @@ class RebarGroup:
         return x1, x2
 
     def has_comp_steel(self, xu: float) -> bool:
+        """Check if there is any compression reinforcement in the group.
+
+        Args:
+            xu (float): Distance from the compression edge to the neutral axis
+        Returns:
+            bool: True if there is compression reinforcement in the group, False otherwise
+        """
         for L in self.layers:
             if L._xc < xu:
                 return True
         return False
 
     def Asc(self, xu: float) -> float:
+        """Calculate the total cross-sectional area of compression reinforcement layers.
+
+        Args:
+            xu (float): Distance from the compression edge to the neutral axis
+        Returns:
+            float: The total cross-sectional area of compression reinforcement layers
+        """
         a = 0.0
         for L in self.layers:
             if L._xc < xu:
@@ -405,6 +577,13 @@ class RebarGroup:
         return a
 
     def Ast(self, xu: float) -> float:
+        """Calculate the total cross-sectional area of tension reinforcement layers.
+
+        Args:
+            xu (float): Distance from the compression edge to the neutral axis
+        Returns:
+            float: The total cross-sectional area of tension reinforcement layers
+        """
         a = 0.0
         for L in self.layers:
             if L._xc > xu:
@@ -412,6 +591,13 @@ class RebarGroup:
         return a
 
     def get_stress_type(self, xu: float) -> None:
+        """Set the stress type for each layer based on the distance from the compression edge to the neutral axis.
+
+        Args:
+            xu (float): Distance from the compression edge to the neutral axis
+        Returns:
+            None: This method modifies the _stress_type attribute of each layer in the group.
+        """
         for L in self.layers:
             L.stress_type(xu)
 
@@ -422,11 +608,30 @@ class RebarGroup:
         conc: Concrete,
         ecmax: float = ecu,
     ) -> Tuple[float, float, float, float]:
+        """Calculate the forces and moments in the reinforcement layers.
+
+        Args:
+            xu (float): Distance from the compression edge to the neutral axis
+            csb (LSMStressBlock): Concrete stress block
+            conc (Concrete): Concrete properties
+            ecmax (float): Maximum strain in the concrete (default: ecu)
+        Returns:
+            Tuple[float, float, float, float]: A tuple containing the force and moment in compression reinforcement,
+            the force and moment in tension reinforcement
+        """
         fc, mc = self.force_compression(xu, csb, conc, ecmax)
         ft, mt = self.force_tension(xu, ecmax)
         return fc, mc, ft, mt
 
     def force_tension(self, xu: float, ecmax: float = ecu) -> Tuple[float, float]:
+        """Calculate the force and moment in the tension reinforcement layers.
+
+        Args:
+            xu (float): Distance from the compression edge to the neutral axis
+            ecmax (float): Maximum strain in the concrete (default: ecu)
+        Returns:
+            Tuple[float, float]: A tuple containing the total force and moment in the tension reinforcement layers
+        """
         f = m = 0.0
         for L in self.layers:
             if L._xc > xu:
@@ -443,6 +648,16 @@ class RebarGroup:
         conc: Concrete,
         ecmax: float = ecu,
     ) -> Tuple[float, float]:
+        """Calculate the force and moment in the compression reinforcement layers.
+
+        Args:
+            xu (float): Distance from the compression edge to the neutral axis
+            csb (LSMStressBlock): Concrete stress block
+            conc (Concrete): Concrete properties
+            ecmax (float): Maximum strain in the concrete (default: ecu)
+        Returns:
+            Tuple[float, float]: A tuple containing the total force and moment in the compression reinforcement layers
+        """
         _f = _m = 0.0
         for L in self.layers:
             if L._xc < xu:
@@ -468,17 +683,32 @@ class RebarGroup:
         conc: Concrete,
         ecmax: float,
     ) -> List[Dict[str, Union[str, int, float]]]:  # pragma: no cover
+        """Generate a report for the reinforcement group.
+
+        Args:
+            xu (float): Distance from the compression edge to the neutral axis
+            csb (LSMStressBlock): Concrete stress block
+            conc (Concrete): Concrete properties
+            ecmax (float): Maximum strain in the concrete (default: ecu)
+        Returns:
+            List[Dict[str, Union[str, int, float]]]: A list of dictionaries containing detailed results for each layer in the group
+        """
         result = []
         for L in sorted(self.layers):
             result.append(L.report(xu, csb, conc, L.rebar, ecmax))
         return result
 
 
-"""Shear reinforcement"""
-
-
 @dataclass
 class ShearReinforcement(ABC):  # pragma: no cover
+    """Base class for shear reinforcement.
+
+    Attributes:
+        rebar (Rebar): The type of reinforcement bar used for shear reinforcement
+        _Asv_ (float): Area of shear reinforcement per unit length
+        _sv (float): Spacing of shear reinforcement
+    """
+
     rebar: Rebar
 
     def __post_init__(self):
@@ -502,10 +732,19 @@ class ShearReinforcement(ABC):  # pragma: no cover
         pass
 
 
-"""Vertical or inclined stirrups as shear reinforcement"""
-
-
 class Stirrups(ShearReinforcement):
+    """Class to represent vertical or inclined stirrups as shear reinforcement.
+    This class is used to calculate the area of shear reinforcement, spacing, and shear capacity.
+    It can handle both vertical and inclined stirrups with specified number of legs and bar diameter.
+
+    Attributes:
+        rebar (Rebar): The type of reinforcement bar used for stirrups
+        _nlegs (int): Number of legs in the stirrup
+        _bar_dia (float): Diameter of the stirrup bar
+        _sv (float): Spacing of the stirrup
+        _alpha_deg (float): Angle of inclination of the stirrup in degrees (default: 90 for vertical stirrups)
+    """
+
     def __init__(
         self,
         rebar: Rebar,
@@ -524,14 +763,18 @@ class Stirrups(ShearReinforcement):
         self._sv = _sv
 
     def _Asv(self) -> float:
+        """Calculate the area of shear reinforcement per unit length."""
+
         return self.nlegs * pi * self.bar_dia**2 / 4
 
     @property
     def Asv(self):
+        """Return the area of shear reinforcement per unit length."""
         return self.nlegs * pi * self.bar_dia**2 / 4
 
     @property
     def nlegs(self) -> int:
+        """Return the number of legs in the stirrup."""
         return self._nlegs
 
     @nlegs.setter
@@ -541,6 +784,7 @@ class Stirrups(ShearReinforcement):
 
     @property
     def bar_dia(self) -> float:
+        """Return the diameter of the stirrup bar."""
         return self._bar_dia
 
     @bar_dia.setter
@@ -550,6 +794,7 @@ class Stirrups(ShearReinforcement):
 
     @property
     def sv(self) -> float:
+        """Return the spacing of the stirrup."""
         return self._sv
 
     @sv.setter
@@ -558,6 +803,14 @@ class Stirrups(ShearReinforcement):
         return self._sv
 
     def calc_sv(self, Vus: float, d: float) -> Optional[float]:
+        """Calculate the spacing of the stirrup based on the shear force and effective depth.
+
+        Args:
+            Vus (float): Shear force to be resisted by the stirrup
+            d (float): Effective depth of the section
+        Returns:
+            Optional[float]: The calculated spacing of the stirrup, or None if the spacing is not set
+        """
         sind = sin(deg2rad(self._alpha_deg))
         cosd = cos(deg2rad(self._alpha_deg))
         self._sv = self.rebar.fd * self.Asv * d / Vus * (sind + cosd)
@@ -573,6 +826,13 @@ class Stirrups(ShearReinforcement):
         return s
 
     def Vus(self, d: float) -> float:
+        """Calculate the shear capacity provided by the stirrup based on the effective depth.
+
+        Args:
+            d (float): Effective depth of the section
+        Returns:
+            float: The shear capacity provided by the stirrup
+        """
         alpha_rad = deg2rad(self._alpha_deg)
         sind = sin(alpha_rad)
         cosd = cos(alpha_rad)
@@ -580,12 +840,20 @@ class Stirrups(ShearReinforcement):
         return V_us
 
     def get_type(self) -> int:
+        """Return the type of shear reinforcement based on the angle of inclination."""
         if self._alpha_deg == 90:
             return ShearRebarType.SHEAR_REBAR_VERTICAL_STIRRUP
         else:
             return ShearRebarType.SHEAR_REBAR_INCLINED_STIRRUP
 
     def report(self, d: float) -> dict:
+        """Generate a report for the stirrup reinforcement.
+
+        Args:
+            d (float): Effective depth of the section
+        Returns:
+            dict: A dictionary containing detailed results of the stirrup reinforcement
+        """
         data = {
             "sh_type": self.get_type(),
             "label": "Stirrups",
@@ -601,13 +869,20 @@ class Stirrups(ShearReinforcement):
         return data
 
 
-"""Single group (sv == 0) or a series of parallel (sv != 0) bent-up bars as shear reinforcement"""
-
-
 class BentupBars(ShearReinforcement):
-    def __init__(
-        self, rebar: Rebar, bars: List[int], _alpha_deg: float = 45, _sv: float = 0.0
-    ):
+    """Class to represent a single group of bent-up bars as shear reinforcement.
+
+    This class is used to calculate the area of shear reinforcement, spacing, and shear capacity for bent-up bars.
+    It can handle both single groups of parallel bars and series of bars bent-up at different sections.
+
+    Attributes:
+        rebar (Rebar): The type of reinforcement bar used for bent-up bars
+        bars (List[int]): List of diameters of the bent-up bars
+        _alpha_deg (float): Angle of inclination of the bent-up bars in degrees (default: 45)
+        _sv (float): Spacing of the bent-up bars (default: 0.0, indicating a single group of parallel bars)
+    """
+
+    def __init__(self, rebar: Rebar, bars: List[int], _alpha_deg: float = 45, _sv: float = 0.0):
         super().__init__(rebar)
         self.bars = bars
         self._alpha_deg = _alpha_deg
@@ -615,6 +890,7 @@ class BentupBars(ShearReinforcement):
         self._sv = _sv
 
     def _Asv(self) -> float:
+        """Calculate the area of shear reinforcement per unit length for bent-up bars."""
         area = 0.0
         for bar_dia in self.bars:
             area += bar_dia**2
@@ -623,9 +899,17 @@ class BentupBars(ShearReinforcement):
 
     @property
     def Asv(self) -> float:
+        """Return the area of shear reinforcement per unit length for bent-up bars."""
         return self._Asv()
 
     def Vus(self, d: float = 0.0) -> float:
+        """Calculate the shear capacity provided by the bent-up bars based on the effective depth.
+
+        Args:
+            d (float): Effective depth of the section (default: 0.0)
+        Returns:
+            float: The shear capacity provided by the bent-up bars
+        """
         V_us = self.rebar.fd * self.Asv
         alpha_rad = deg2rad(self._alpha_deg)
         if self._sv == 0:  # Single group of parallel bars
@@ -635,6 +919,7 @@ class BentupBars(ShearReinforcement):
         return V_us
 
     def get_type(self) -> int:
+        """Return the type of shear reinforcement based on the spacing of the bent-up bars."""
         if self._sv == 0:
             return ShearRebarType.SHEAR_REBAR_BENTUP_SINGLE
         else:
@@ -651,6 +936,13 @@ class BentupBars(ShearReinforcement):
         return s
 
     def report(self, d: float) -> dict:
+        """Generate a report for the bent-up bars reinforcement.
+
+        Args:
+            d (float): Effective depth of the section
+        Returns:
+            dict: A dictionary containing detailed results of the bent-up bars reinforcement
+        """
         if self._sv == 0:
             bupbar_type = "Single group"
         else:
@@ -670,10 +962,24 @@ class BentupBars(ShearReinforcement):
 
 
 class ShearRebarGroup:
+    """Class to represent a group of shear reinforcement.
+
+    This class is used to manage multiple shear reinforcement elements, such as stirrups and bent-up bars.
+    It provides methods to calculate the total area of shear reinforcement, shear capacity, and check the type of reinforcement.
+
+    Attributes:
+        shear_reinforcement (List[ShearReinforcement]): List of shear reinforcement elements (stirrups, bent-up bars, etc.)
+    """
+
     def __init__(self, shear_reinforcement: List[ShearReinforcement]):
         self.shear_reinforcement = shear_reinforcement.copy()
 
     def _Asv(self) -> List[float]:
+        """Calculate the area of shear reinforcement for each element in the group.
+
+        Returns:
+            List[float]: A list containing the area of shear reinforcement for each element in the group
+        """
         asv = []
         for reinf in self.shear_reinforcement:
             asv.append(reinf._Asv())
@@ -681,15 +987,28 @@ class ShearRebarGroup:
 
     @property
     def Asv(self) -> List[float]:
+        """Return the area of shear reinforcement for each element in the group."""
         return self._Asv()
 
     def Vus(self, d: float) -> List[float]:
+        """Calculate the shear capacity provided by each element in the group based on the effective depth.
+
+        Args:
+            d (float): Effective depth of the section
+        Returns:
+            List[float]: A list containing the shear capacity provided by each element in the group
+        """
         vus = []
         for reinf in self.shear_reinforcement:
             vus.append(reinf.Vus(d))
         return vus
 
     def get_type(self) -> Dict[ShearRebarType, int]:
+        """Get the count of each type of shear reinforcement in the group.
+
+        Returns:
+            Dict[ShearRebarType, int]: A dictionary with the count of each type of shear reinforcement
+        """
         d = {
             ShearRebarType.SHEAR_REBAR_VERTICAL_STIRRUP: 0,
             ShearRebarType.SHEAR_REBAR_INCLINED_STIRRUP: 0,
@@ -708,12 +1027,19 @@ class ShearRebarGroup:
         return d
 
     def check(self) -> bool:
+        """Check if the shear reinforcement is sufficient based on the type and count of reinforcement.
+
+        Returns:
+            bool: True if the shear reinforcement is sufficient, False otherwise
+        """
         d = self.get_type()
-        print('***', d)
-        if (d[ShearRebarType.SHEAR_REBAR_VERTICAL_STIRRUP] < 2) and  \
-           (d[ShearRebarType.SHEAR_REBAR_INCLINED_STIRRUP] < 2) and \
-           (d[ShearRebarType.SHEAR_REBAR_BENTUP_SINGLE] < 2) and \
-           (d[ShearRebarType.SHEAR_REBAR_BENTUP_SERIES] < 2):
+        print("***", d)
+        if (
+            (d[ShearRebarType.SHEAR_REBAR_VERTICAL_STIRRUP] < 2)
+            and (d[ShearRebarType.SHEAR_REBAR_INCLINED_STIRRUP] < 2)
+            and (d[ShearRebarType.SHEAR_REBAR_BENTUP_SINGLE] < 2)
+            and (d[ShearRebarType.SHEAR_REBAR_BENTUP_SERIES] < 2)
+        ):
             return True
         else:
             return False
@@ -727,6 +1053,14 @@ class ShearRebarGroup:
 
 @dataclass
 class LateralTie:
+    """Class to represent lateral ties in reinforced concrete columns.
+
+    Attributes:
+        rebar (Rebar): The type of reinforcement bar used for the lateral ties
+        bar_dia (int): Diameter of the lateral tie bar
+        spacing (float): Spacing between the lateral ties
+    """
+
     rebar: Rebar
     bar_dia: int
     spacing: float
