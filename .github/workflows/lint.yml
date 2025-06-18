@@ -4,10 +4,10 @@ name: Ruff Lint
 on:
   push:
     branches:
-      - 'origin/master'
+      - master
   pull_request:
     branches:
-      - 'origin/master'
+      - master
 
 jobs:
   lint:
