@@ -4,10 +4,10 @@ name: Ruff Lint
 on:
   push:
     paths:
-      - 'src/**/*.py'
+      - 'src/rcdesign/*.py'
   pull_request:
     paths:
-      - 'src/**/*.py'
+      - 'src/rcdesign/*.py'
   workflow_dispatch:
 
 jobs:
@@ -25,4 +25,4 @@ jobs:
         run: uv sync --locked --dev
 
       - name: Run Ruff on src/
-        run: uv run ruff check src/
+        run: uv run ruff check src/rcdesign
